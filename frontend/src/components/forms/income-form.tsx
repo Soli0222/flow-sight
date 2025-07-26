@@ -37,7 +37,35 @@ const formSchema = z.object({
   base_amount: z.string().min(1, '金額は必須です'),
   bank_account: z.string().min(1, '銀行口座を選択してください'),
   is_active: z.string(),
-  scheduled_year_month: z.string().optional(),
+  payment_day: z.string().optional(),
+  scheduled_date: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.income_type === 'monthly_fixed') {
+    if (!data.payment_day || data.payment_day === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '月額固定収入の場合、支払日は必須です',
+        path: ['payment_day'],
+      });
+    } else {
+      const day = parseInt(data.payment_day);
+      if (isNaN(day) || day < 1 || day > 31) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: '支払日は1〜31の数値で入力してください',
+          path: ['payment_day'],
+        });
+      }
+    }
+  } else if (data.income_type === 'one_time') {
+    if (!data.scheduled_date || data.scheduled_date === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '一時的収入の場合、予定日は必須です',
+        path: ['scheduled_date'],
+      });
+    }
+  }
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -68,7 +96,8 @@ export function IncomeForm({
       base_amount: '',
       bank_account: '',
       is_active: 'true',
-      scheduled_year_month: '',
+      payment_day: '25',
+      scheduled_date: '',
     },
   });
 
@@ -82,7 +111,8 @@ export function IncomeForm({
         base_amount: (income.base_amount / 100).toString(),
         bank_account: income.bank_account,
         is_active: income.is_active ? 'true' : 'false',
-        scheduled_year_month: income.scheduled_year_month || '',
+        payment_day: income.payment_day?.toString() || '25',
+        scheduled_date: income.scheduled_date ? income.scheduled_date.split('T')[0] : '',
       });
     } else {
       form.reset({
@@ -91,7 +121,8 @@ export function IncomeForm({
         base_amount: '',
         bank_account: '',
         is_active: 'true',
-        scheduled_year_month: '',
+        payment_day: '25',
+        scheduled_date: '',
       });
     }
   }, [income, form]);
@@ -108,7 +139,8 @@ export function IncomeForm({
         base_amount: baseAmountInCents,
         bank_account: data.bank_account,
         is_active: data.is_active === 'true',
-        scheduled_year_month: data.scheduled_year_month || undefined,
+        payment_day: data.income_type === 'monthly_fixed' && data.payment_day ? parseInt(data.payment_day) : undefined,
+        scheduled_date: data.income_type === 'one_time' && data.scheduled_date ? data.scheduled_date : undefined,
       };
 
       if (income) {
@@ -254,13 +286,35 @@ export function IncomeForm({
             {incomeType === 'one_time' && (
               <FormField
                 control={form.control}
-                name="scheduled_year_month"
+                name="scheduled_date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>予定年月</FormLabel>
+                    <FormLabel>予定日</FormLabel>
                     <FormControl>
                       <Input
-                        type="month"
+                        type="date"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {incomeType === 'monthly_fixed' && (
+              <FormField
+                control={form.control}
+                name="payment_day"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>支払日</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="31"
+                        placeholder="25"
                         {...field}
                       />
                     </FormControl>

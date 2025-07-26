@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   CreditCard, 
@@ -12,19 +13,24 @@ import {
   BarChart3,
   Settings,
   Menu,
-  X
+  X,
+  LogOut,
+  User,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/providers/theme-toggle';
+import { useAuth } from '@/components/providers/auth-provider';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 const navigation = [
-  { name: 'ダッシュボード', href: '/', icon: LayoutDashboard },
+  { name: 'ダッシュボード', href: '/dashboard', icon: LayoutDashboard },
   { name: '銀行口座', href: '/bank-accounts', icon: Landmark },
-  { name: '資産管理', href: '/assets', icon: CreditCard },
-  { name: '収入管理', href: '/income', icon: TrendingUp },
+  { name: 'クレジットカード管理', href: '/credit-cards', icon: CreditCard },
+  { name: 'カード月次利用額', href: '/card-monthly-totals', icon: Calendar },
   { name: '定期支払い', href: '/recurring-payments', icon: Repeat },
+  { name: '収入管理', href: '/income', icon: TrendingUp },
   { name: 'キャッシュフロー', href: '/cashflow', icon: BarChart3 },
   { name: '設定', href: '/settings', icon: Settings },
 ];
@@ -35,7 +41,14 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,7 +92,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Desktop sidebar */}
       <nav className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-1 bg-card border-r">
+        <div className="flex flex-col flex-1 min-h-screen bg-card border-r">
           <div className="flex items-center h-16 px-4">
             <h1 className="text-xl font-bold">Flow Sight</h1>
           </div>
@@ -119,13 +132,37 @@ export function MainLayout({ children }: MainLayoutProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4 ml-auto">
+            {user && (
+              <div className="flex items-center gap-2">
+                {user.picture ? (
+                  <Image
+                    src={user.picture}
+                    alt={user.name}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <User className="h-8 w-8" />
+                )}
+                <span className="text-sm">{user.name}</span>
+              </div>
+            )}
             <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              title="ログアウト"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="p-6">
+        <main className="p-6 min-h-screen bg-background">
           {children}
         </main>
       </div>

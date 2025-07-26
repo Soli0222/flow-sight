@@ -24,23 +24,23 @@ func NewBankAccountHandler(bankAccountService *services.BankAccountService) *Ban
 // @Tags bank-accounts
 // @Accept json
 // @Produce json
-// @Param user_id query string true "User ID"
+// @Security BearerAuth
 // @Success 200 {array} models.BankAccount
 // @Router /bank-accounts [get]
 func (h *BankAccountHandler) GetBankAccounts(c *gin.Context) {
-	userIDStr := c.Query("user_id")
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
 	}
 
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+	userUUID, ok := userID.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
-	accounts, err := h.bankAccountService.GetBankAccounts(userID)
+	accounts, err := h.bankAccountService.GetBankAccounts(userUUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -79,15 +79,31 @@ func (h *BankAccountHandler) GetBankAccount(c *gin.Context) {
 // @Tags bank-accounts
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param account body models.BankAccount true "Bank Account data"
 // @Success 201 {object} models.BankAccount
 // @Router /bank-accounts [post]
 func (h *BankAccountHandler) CreateBankAccount(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	userUUID, ok := userID.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
+		return
+	}
+
 	var account models.BankAccount
 	if err := c.ShouldBindJSON(&account); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Set the user_id from the authenticated user
+	account.UserID = userUUID
 
 	if err := h.bankAccountService.CreateBankAccount(&account); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

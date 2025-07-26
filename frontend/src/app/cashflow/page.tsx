@@ -9,17 +9,28 @@ import { useApi } from '@/components/providers/api-provider';
 import { CashflowProjection } from '@/types/api';
 import { formatCurrency, formatDate } from '@/lib/utils-extended';
 import { toast } from 'sonner';
+import { CashflowTrendChart } from '@/components/cashflow/cashflow-trend-chart';
+
+const PERIOD_OPTIONS = [
+  { label: '当月から6ヶ月', value: 6 },
+  { label: '当月から1年', value: 12 },
+  { label: '当月から2年', value: 24 },
+  { label: '当月から3年', value: 36 },
+  { label: '当月から5年', value: 60 },
+  { label: '当月から10年', value: 120 },
+];
 
 export default function CashflowPage() {
   const apiClient = useApi();
   const [projections, setProjections] = useState<CashflowProjection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [projectionMonths, setProjectionMonths] = useState(6);
+  const [projectionMonths, setProjectionMonths] = useState(36); // デフォルトを3年に変更
+  const [showOnlyChanges, setShowOnlyChanges] = useState(true);
 
   const loadProjections = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await apiClient.getCashflowProjection(projectionMonths);
+      const data = await apiClient.getCashflowProjection(projectionMonths, showOnlyChanges);
       setProjections(data);
     } catch (error) {
       toast.error('キャッシュフロー予測の取得に失敗しました');
@@ -27,7 +38,7 @@ export default function CashflowPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [apiClient, projectionMonths]);
+  }, [apiClient, projectionMonths, showOnlyChanges]);
 
   useEffect(() => {
     loadProjections();
@@ -84,15 +95,29 @@ export default function CashflowPage() {
               将来の収支を予測し、資金計画を立てることができます。
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="onlyChanges" className="text-sm font-medium">
+                変動のある日のみ表示
+              </label>
+              <input
+                id="onlyChanges"
+                type="checkbox"
+                checked={showOnlyChanges}
+                onChange={(e) => setShowOnlyChanges(e.target.checked)}
+                className="h-4 w-4"
+              />
+            </div>
             <select
               value={projectionMonths}
               onChange={(e) => setProjectionMonths(Number(e.target.value))}
               className="px-3 py-2 border border-input rounded-md"
             >
-              <option value={3}>3ヶ月</option>
-              <option value={6}>6ヶ月</option>
-              <option value={12}>12ヶ月</option>
+              {PERIOD_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
             <Button onClick={handleExportCSV}>
               <Download className="h-4 w-4 mr-2" />
@@ -112,7 +137,10 @@ export default function CashflowPage() {
                 {formatCurrency(totalProjectedIncome)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {projectionMonths}ヶ月間の合計
+                {projectionMonths >= 12 
+                  ? `${Math.floor(projectionMonths / 12)}年${projectionMonths % 12 > 0 ? `${projectionMonths % 12}ヶ月` : ''}間の合計`
+                  : `${projectionMonths}ヶ月間の合計`
+                }
               </p>
             </CardContent>
           </Card>
@@ -127,7 +155,10 @@ export default function CashflowPage() {
                 {formatCurrency(totalProjectedExpense)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {projectionMonths}ヶ月間の合計
+                {projectionMonths >= 12 
+                  ? `${Math.floor(projectionMonths / 12)}年${projectionMonths % 12 > 0 ? `${projectionMonths % 12}ヶ月` : ''}間の合計`
+                  : `${projectionMonths}ヶ月間の合計`
+                }
               </p>
             </CardContent>
           </Card>
@@ -148,9 +179,14 @@ export default function CashflowPage() {
           </Card>
         </div>
 
+        <CashflowTrendChart projections={projections} projectionMonths={projectionMonths} />
+
         <Card>
           <CardHeader>
-            <CardTitle>月別キャッシュフロー予測</CardTitle>
+            <CardTitle>
+              キャッシュフロー予測詳細
+              {showOnlyChanges && <span className="text-sm font-normal text-muted-foreground ml-2">（変動のある日のみ）</span>}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {projections.length === 0 ? (

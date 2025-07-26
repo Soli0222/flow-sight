@@ -4,7 +4,10 @@
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    picture TEXT, -- Changed from VARCHAR(500) to TEXT to allow longer URLs
+    google_id VARCHAR(255) UNIQUE,
+    password VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -19,13 +22,12 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Assets table (credit cards and loans)
-CREATE TABLE IF NOT EXISTS assets (
+-- Credit cards table
+CREATE TABLE IF NOT EXISTS credit_cards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    asset_type VARCHAR(50) NOT NULL CHECK (asset_type IN ('card', 'loan')),
-    closing_day INTEGER, -- For credit cards (1-31)
+    closing_day INTEGER, -- Closing day of the month (1-31)
     payment_day INTEGER NOT NULL, -- Payment day (1-31)
     bank_account UUID NOT NULL REFERENCES bank_accounts(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -44,9 +46,13 @@ CREATE TABLE IF NOT EXISTS income_sources (
     base_amount BIGINT NOT NULL, -- Amount in cents
     bank_account UUID NOT NULL REFERENCES bank_accounts(id),
     scheduled_year_month VARCHAR(7), -- Format: "2024-01" for one-time income
+    payment_day INTEGER, -- Payment day for monthly_fixed income (1-31)
+    scheduled_date DATE, -- Scheduled date for one_time income
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT check_payment_day CHECK (payment_day IS NULL OR (payment_day >= 1 AND payment_day <= 31))
 );
 
 -- Monthly income records table
@@ -87,14 +93,14 @@ CREATE TABLE IF NOT EXISTS recurring_payments (
 -- Card monthly totals table
 CREATE TABLE IF NOT EXISTS card_monthly_totals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    asset_id UUID NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+    credit_card_id UUID NOT NULL REFERENCES credit_cards(id) ON DELETE CASCADE,
     year_month VARCHAR(7) NOT NULL, -- Format: "2024-01"
     total_amount BIGINT NOT NULL, -- Amount in cents
     is_confirmed BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
-    UNIQUE(asset_id, year_month)
+    UNIQUE(credit_card_id, year_month)
 );
 
 -- App settings table
@@ -111,15 +117,14 @@ CREATE TABLE IF NOT EXISTS app_settings (
 
 -- Indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_bank_accounts_user_id ON bank_accounts(user_id);
-CREATE INDEX IF NOT EXISTS idx_assets_user_id ON assets(user_id);
-CREATE INDEX IF NOT EXISTS idx_assets_type ON assets(asset_type);
+CREATE INDEX IF NOT EXISTS idx_credit_cards_user_id ON credit_cards(user_id);
 CREATE INDEX IF NOT EXISTS idx_income_sources_user_id ON income_sources(user_id);
 CREATE INDEX IF NOT EXISTS idx_income_sources_active ON income_sources(is_active);
 CREATE INDEX IF NOT EXISTS idx_monthly_income_records_income_source_id ON monthly_income_records(income_source_id);
 CREATE INDEX IF NOT EXISTS idx_monthly_income_records_year_month ON monthly_income_records(year_month);
 CREATE INDEX IF NOT EXISTS idx_recurring_payments_user_id ON recurring_payments(user_id);
 CREATE INDEX IF NOT EXISTS idx_recurring_payments_active ON recurring_payments(is_active);
-CREATE INDEX IF NOT EXISTS idx_card_monthly_totals_asset_id ON card_monthly_totals(asset_id);
+CREATE INDEX IF NOT EXISTS idx_card_monthly_totals_credit_card_id ON card_monthly_totals(credit_card_id);
 CREATE INDEX IF NOT EXISTS idx_card_monthly_totals_year_month ON card_monthly_totals(year_month);
 CREATE INDEX IF NOT EXISTS idx_app_settings_user_id ON app_settings(user_id);
 
@@ -138,7 +143,7 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
 CREATE TRIGGER update_bank_accounts_updated_at BEFORE UPDATE ON bank_accounts
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_assets_updated_at BEFORE UPDATE ON assets
+CREATE TRIGGER update_credit_cards_updated_at BEFORE UPDATE ON credit_cards
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_income_sources_updated_at BEFORE UPDATE ON income_sources

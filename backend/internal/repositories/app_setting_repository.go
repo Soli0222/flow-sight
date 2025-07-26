@@ -25,11 +25,11 @@ func (r *AppSettingRepository) GetByUserID(userID uuid.UUID) ([]models.AppSettin
 
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
-		return nil, err
+		return []models.AppSetting{}, err
 	}
 	defer rows.Close()
 
-	var settings []models.AppSetting
+	settings := make([]models.AppSetting, 0)
 	for rows.Next() {
 		var setting models.AppSetting
 		err := rows.Scan(
@@ -37,7 +37,7 @@ func (r *AppSettingRepository) GetByUserID(userID uuid.UUID) ([]models.AppSettin
 			&setting.CreatedAt, &setting.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return []models.AppSetting{}, err
 		}
 		settings = append(settings, setting)
 	}

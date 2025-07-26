@@ -15,29 +15,29 @@ func NewCardMonthlyTotalRepository(db *sql.DB) *CardMonthlyTotalRepository {
 	return &CardMonthlyTotalRepository{db: db}
 }
 
-func (r *CardMonthlyTotalRepository) GetByAssetID(assetID uuid.UUID) ([]models.CardMonthlyTotal, error) {
+func (r *CardMonthlyTotalRepository) GetByCreditCardID(creditCardID uuid.UUID) ([]models.CardMonthlyTotal, error) {
 	query := `
-		SELECT id, asset_id, year_month, total_amount, is_confirmed, created_at, updated_at
+		SELECT id, credit_card_id, year_month, total_amount, is_confirmed, created_at, updated_at
 		FROM card_monthly_totals 
-		WHERE asset_id = $1
+		WHERE credit_card_id = $1
 		ORDER BY year_month DESC
 	`
 
-	rows, err := r.db.Query(query, assetID)
+	rows, err := r.db.Query(query, creditCardID)
 	if err != nil {
-		return nil, err
+		return []models.CardMonthlyTotal{}, err
 	}
 	defer rows.Close()
 
-	var totals []models.CardMonthlyTotal
+	totals := make([]models.CardMonthlyTotal, 0)
 	for rows.Next() {
 		var total models.CardMonthlyTotal
 		err := rows.Scan(
-			&total.ID, &total.AssetID, &total.YearMonth, &total.TotalAmount,
+			&total.ID, &total.CreditCardID, &total.YearMonth, &total.TotalAmount,
 			&total.IsConfirmed, &total.CreatedAt, &total.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return []models.CardMonthlyTotal{}, err
 		}
 		totals = append(totals, total)
 	}
@@ -47,7 +47,7 @@ func (r *CardMonthlyTotalRepository) GetByAssetID(assetID uuid.UUID) ([]models.C
 
 func (r *CardMonthlyTotalRepository) GetByYearMonth(yearMonth string) ([]models.CardMonthlyTotal, error) {
 	query := `
-		SELECT id, asset_id, year_month, total_amount, is_confirmed, created_at, updated_at
+		SELECT id, credit_card_id, year_month, total_amount, is_confirmed, created_at, updated_at
 		FROM card_monthly_totals 
 		WHERE year_month = $1
 		ORDER BY created_at DESC
@@ -55,19 +55,19 @@ func (r *CardMonthlyTotalRepository) GetByYearMonth(yearMonth string) ([]models.
 
 	rows, err := r.db.Query(query, yearMonth)
 	if err != nil {
-		return nil, err
+		return []models.CardMonthlyTotal{}, err
 	}
 	defer rows.Close()
 
-	var totals []models.CardMonthlyTotal
+	totals := make([]models.CardMonthlyTotal, 0)
 	for rows.Next() {
 		var total models.CardMonthlyTotal
 		err := rows.Scan(
-			&total.ID, &total.AssetID, &total.YearMonth, &total.TotalAmount,
+			&total.ID, &total.CreditCardID, &total.YearMonth, &total.TotalAmount,
 			&total.IsConfirmed, &total.CreatedAt, &total.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return []models.CardMonthlyTotal{}, err
 		}
 		totals = append(totals, total)
 	}
@@ -77,14 +77,14 @@ func (r *CardMonthlyTotalRepository) GetByYearMonth(yearMonth string) ([]models.
 
 func (r *CardMonthlyTotalRepository) GetByID(id uuid.UUID) (*models.CardMonthlyTotal, error) {
 	query := `
-		SELECT id, asset_id, year_month, total_amount, is_confirmed, created_at, updated_at
+		SELECT id, credit_card_id, year_month, total_amount, is_confirmed, created_at, updated_at
 		FROM card_monthly_totals 
 		WHERE id = $1
 	`
 
 	var total models.CardMonthlyTotal
 	err := r.db.QueryRow(query, id).Scan(
-		&total.ID, &total.AssetID, &total.YearMonth, &total.TotalAmount,
+		&total.ID, &total.CreditCardID, &total.YearMonth, &total.TotalAmount,
 		&total.IsConfirmed, &total.CreatedAt, &total.UpdatedAt,
 	)
 
@@ -97,13 +97,13 @@ func (r *CardMonthlyTotalRepository) GetByID(id uuid.UUID) (*models.CardMonthlyT
 
 func (r *CardMonthlyTotalRepository) Create(total *models.CardMonthlyTotal) error {
 	query := `
-		INSERT INTO card_monthly_totals (id, asset_id, year_month, total_amount, 
+		INSERT INTO card_monthly_totals (id, credit_card_id, year_month, total_amount, 
 		                                is_confirmed, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
 	_, err := r.db.Exec(query,
-		total.ID, total.AssetID, total.YearMonth, total.TotalAmount,
+		total.ID, total.CreditCardID, total.YearMonth, total.TotalAmount,
 		total.IsConfirmed, total.CreatedAt, total.UpdatedAt,
 	)
 

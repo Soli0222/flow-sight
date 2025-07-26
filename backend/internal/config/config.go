@@ -6,6 +6,7 @@ type Config struct {
 	Port     string
 	Database DatabaseConfig
 	JWT      JWTConfig
+	OAuth    OAuthConfig
 	Env      string
 }
 
@@ -22,6 +23,12 @@ type JWTConfig struct {
 	Secret string
 }
 
+type OAuthConfig struct {
+	GoogleClientID     string
+	GoogleClientSecret string
+	RedirectURL        string
+}
+
 func Load() *Config {
 	return &Config{
 		Port: getEnv("PORT", "8080"),
@@ -35,6 +42,11 @@ func Load() *Config {
 		},
 		JWT: JWTConfig{
 			Secret: getEnv("JWT_SECRET", "your-jwt-secret-key"),
+		},
+		OAuth: OAuthConfig{
+			GoogleClientID:     getEnv("GOOGLE_CLIENT_ID", ""),
+			GoogleClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
+			RedirectURL:        getEnv("GOOGLE_REDIRECT_URL", "http://localhost:8080/api/v1/auth/google/callback"),
 		},
 		Env: getEnv("ENV", "development"),
 	}

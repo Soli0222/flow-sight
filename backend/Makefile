@@ -4,6 +4,10 @@
 build:
 	go build -o bin/main cmd/main.go
 
+# Build for production
+build-prod:
+	CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o bin/main cmd/main.go
+
 # Run the application
 run:
 	go run cmd/main.go

@@ -20,27 +20,27 @@ func NewCardMonthlyTotalHandler(cardMonthlyTotalService *services.CardMonthlyTot
 }
 
 // @Summary Get card monthly totals
-// @Description Get card monthly totals for a specific asset
+// @Description Get card monthly totals for a specific credit card
 // @Tags card-monthly-totals
 // @Accept json
 // @Produce json
-// @Param asset_id query string true "Asset ID"
+// @Param credit_card_id query string true "Credit Card ID"
 // @Success 200 {array} models.CardMonthlyTotal
 // @Router /card-monthly-totals [get]
 func (h *CardMonthlyTotalHandler) GetCardMonthlyTotals(c *gin.Context) {
-	assetIDStr := c.Query("asset_id")
-	if assetIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "asset_id is required"})
+	creditCardIDStr := c.Query("credit_card_id")
+	if creditCardIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "credit_card_id is required"})
 		return
 	}
 
-	assetID, err := uuid.Parse(assetIDStr)
+	creditCardID, err := uuid.Parse(creditCardIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid asset_id format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid credit_card_id format"})
 		return
 	}
 
-	totals, err := h.cardMonthlyTotalService.GetCardMonthlyTotals(assetID)
+	totals, err := h.cardMonthlyTotalService.GetCardMonthlyTotals(creditCardID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -52,6 +52,39 @@ DB_PASSWORD=password
 DB_NAME=flowsight_db
 DB_SSLMODE=disable
 JWT_SECRET=your-jwt-secret-key
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URL=http://localhost:8080/api/v1/auth/google/callback
+ENV=development
+```
+
+### Google OAuth設定
+
+1. [Google Cloud Console](https://console.cloud.google.com/)でプロジェクトを作成
+2. OAuth 2.0認証情報を作成:
+   - 承認済みのリダイレクトURI: `http://localhost:4000/api/v1/auth/google/callback`
+   - 承認済みのJavaScript生成元: `http://localhost:4000`
+3. クライアントIDとクライアントシークレットを環境変数に設定
+
+### Docker統合環境での起動
+
+プロジェクトルートから：
+
+```bash
+# 初期セットアップ
+make setup
+
+# 統合環境起動（フロント・バック・DB全て）
+make up
+
+# アクセス: http://localhost:4000
+```
+
+詳細な統合環境の使い方は、プロジェクトルートの`README.md`を参照してください。
+DB_PASSWORD=password
+DB_NAME=flowsight_db
+DB_SSLMODE=disable
+JWT_SECRET=your-jwt-secret-key
 ENV=development
 ```
 
@@ -83,12 +116,12 @@ make run
 
 ## API エンドポイント
 
-### 資産管理
-- `GET /api/v1/assets` - 資産一覧取得
-- `POST /api/v1/assets` - 資産登録
-- `GET /api/v1/assets/{id}` - 資産詳細取得
-- `PUT /api/v1/assets/{id}` - 資産更新
-- `DELETE /api/v1/assets/{id}` - 資産削除
+### クレジットカード管理
+- `GET /api/v1/credit-cards` - クレジットカード一覧取得
+- `POST /api/v1/credit-cards` - クレジットカード登録
+- `GET /api/v1/credit-cards/{id}` - クレジットカード詳細取得
+- `PUT /api/v1/credit-cards/{id}` - クレジットカード更新
+- `DELETE /api/v1/credit-cards/{id}` - クレジットカード削除
 
 ### 銀行口座管理
 - `GET /api/v1/bank-accounts` - 口座一覧取得

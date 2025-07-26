@@ -23,23 +23,23 @@ func NewAppSettingHandler(appSettingService *services.AppSettingService) *AppSet
 // @Tags settings
 // @Accept json
 // @Produce json
-// @Param user_id query string true "User ID"
+// @Security BearerAuth
 // @Success 200 {array} models.AppSetting
 // @Router /settings [get]
 func (h *AppSettingHandler) GetSettings(c *gin.Context) {
-	userIDStr := c.Query("user_id")
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
 	}
 
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+	userUUID, ok := userID.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
-	settings, err := h.appSettingService.GetSettings(userID)
+	settings, err := h.appSettingService.GetSettings(userUUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -57,20 +57,20 @@ type UpdateSettingsRequest struct {
 // @Tags settings
 // @Accept json
 // @Produce json
-// @Param user_id query string true "User ID"
+// @Security BearerAuth
 // @Param settings body UpdateSettingsRequest true "Settings data"
 // @Success 200 {object} map[string]string
 // @Router /settings [put]
 func (h *AppSettingHandler) UpdateSettings(c *gin.Context) {
-	userIDStr := c.Query("user_id")
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
 	}
 
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+	userUUID, ok := userID.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
@@ -81,7 +81,7 @@ func (h *AppSettingHandler) UpdateSettings(c *gin.Context) {
 	}
 
 	for key, value := range req.Settings {
-		if err := h.appSettingService.UpdateSetting(userID, key, value); err != nil {
+		if err := h.appSettingService.UpdateSetting(userUUID, key, value); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

@@ -27,11 +27,11 @@ func (r *RecurringPaymentRepository) GetAll(userID uuid.UUID) ([]models.Recurrin
 
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
-		return nil, err
+		return []models.RecurringPayment{}, err
 	}
 	defer rows.Close()
 
-	var payments []models.RecurringPayment
+	payments := make([]models.RecurringPayment, 0)
 	for rows.Next() {
 		var payment models.RecurringPayment
 		err := rows.Scan(
@@ -41,7 +41,7 @@ func (r *RecurringPaymentRepository) GetAll(userID uuid.UUID) ([]models.Recurrin
 			&payment.Note, &payment.CreatedAt, &payment.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return []models.RecurringPayment{}, err
 		}
 		payments = append(payments, payment)
 	}

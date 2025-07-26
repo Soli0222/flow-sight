@@ -25,11 +25,11 @@ func (r *BankAccountRepository) GetAll(userID uuid.UUID) ([]models.BankAccount, 
 
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
-		return nil, err
+		return []models.BankAccount{}, err
 	}
 	defer rows.Close()
 
-	var accounts []models.BankAccount
+	accounts := make([]models.BankAccount, 0)
 	for rows.Next() {
 		var account models.BankAccount
 		err := rows.Scan(
@@ -37,7 +37,7 @@ func (r *BankAccountRepository) GetAll(userID uuid.UUID) ([]models.BankAccount, 
 			&account.CreatedAt, &account.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return []models.BankAccount{}, err
 		}
 		accounts = append(accounts, account)
 	}

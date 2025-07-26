@@ -181,10 +181,17 @@ export default function IncomePage() {
                     <p className="font-medium">{getBankAccountName(income.bank_account)}</p>
                   </div>
                   
-                  {income.scheduled_year_month && (
+                  {income.income_type === 'monthly_fixed' && income.payment_day && (
                     <div>
-                      <p className="text-sm text-muted-foreground">予定年月</p>
-                      <p className="font-medium">{income.scheduled_year_month}</p>
+                      <p className="text-sm text-muted-foreground">支払日</p>
+                      <p className="font-medium">毎月{income.payment_day}日</p>
+                    </div>
+                  )}
+                  
+                  {income.income_type === 'one_time' && income.scheduled_date && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">予定日</p>
+                      <p className="font-medium">{new Date(income.scheduled_date).toLocaleDateString('ja-JP')}</p>
                     </div>
                   )}
                   

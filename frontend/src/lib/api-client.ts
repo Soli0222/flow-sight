@@ -1,22 +1,31 @@
 import {
-  Asset,
+  CreditCard,
   BankAccount,
   CardMonthlyTotal,
   IncomeSource,
   MonthlyIncomeRecord,
   RecurringPayment,
   CashflowProjection,
+  DashboardSummary,
   AppSetting,
   UpdateSettingsRequest,
+  VersionInfo,
+  UserInfo,
 } from '@/types/api';
+import Cookies from 'js-cookie';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 class ApiClient {
   private baseURL: string;
 
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = `${baseURL}/api/v1`;
+  }
+
+  private getAuthHeaders(): Record<string, string> {
+    const token = Cookies.get('auth_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
   private async request<T>(
@@ -26,6 +35,7 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      ...this.getAuthHeaders(),
       ...options.headers as Record<string, string>,
     };
 
@@ -38,7 +48,18 @@ class ApiClient {
       const response = await fetch(url, config);
       
       if (!response.ok) {
+        if (response.status === 401) {
+          // Unauthorized - redirect to login
+          Cookies.remove('auth_token');
+          window.location.href = '/login';
+          return Promise.reject(new Error('Unauthorized'));
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Handle No Content responses (204)
+      if (response.status === 204) {
+        return undefined as T;
       }
 
       const data = await response.json();
@@ -49,31 +70,31 @@ class ApiClient {
     }
   }
 
-  // Assets API
-  async getAssets(): Promise<Asset[]> {
-    return this.request<Asset[]>('/assets');
+  // Credit Cards API
+  async getCreditCards(): Promise<CreditCard[]> {
+    return this.request<CreditCard[]>('/credit-cards');
   }
 
-  async getAsset(id: string): Promise<Asset> {
-    return this.request<Asset>(`/assets/${id}`);
+  async getCreditCard(id: string): Promise<CreditCard> {
+    return this.request<CreditCard>(`/credit-cards/${id}`);
   }
 
-  async createAsset(asset: Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<Asset> {
-    return this.request<Asset>('/assets', {
+  async createCreditCard(creditCard: Omit<CreditCard, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<CreditCard> {
+    return this.request<CreditCard>('/credit-cards', {
       method: 'POST',
-      body: JSON.stringify(asset),
+      body: JSON.stringify(creditCard),
     });
   }
 
-  async updateAsset(id: string, asset: Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<Asset> {
-    return this.request<Asset>(`/assets/${id}`, {
+  async updateCreditCard(id: string, creditCard: Omit<CreditCard, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<CreditCard> {
+    return this.request<CreditCard>(`/credit-cards/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(asset),
+      body: JSON.stringify(creditCard),
     });
   }
 
-  async deleteAsset(id: string): Promise<void> {
-    await this.request<void>(`/assets/${id}`, {
+  async deleteCreditCard(id: string): Promise<void> {
+    await this.request<void>(`/credit-cards/${id}`, {
       method: 'DELETE',
     });
   }
@@ -108,8 +129,8 @@ class ApiClient {
   }
 
   // Card Monthly Totals API
-  async getCardMonthlyTotals(assetId: string): Promise<CardMonthlyTotal[]> {
-    return this.request<CardMonthlyTotal[]>(`/card-monthly-totals?asset_id=${assetId}`);
+  async getCardMonthlyTotals(creditCardId: string): Promise<CardMonthlyTotal[]> {
+    return this.request<CardMonthlyTotal[]>(`/card-monthly-totals?credit_card_id=${creditCardId}`);
   }
 
   async getCardMonthlyTotal(id: string): Promise<CardMonthlyTotal> {
@@ -224,8 +245,13 @@ class ApiClient {
   }
 
   // Cashflow Projection API
-  async getCashflowProjection(months: number = 6): Promise<CashflowProjection[]> {
-    return this.request<CashflowProjection[]>(`/cashflow-projection?months=${months}`);
+  async getCashflowProjection(months: number = 36, onlyChanges: boolean = true): Promise<CashflowProjection[]> {
+    return this.request<CashflowProjection[]>(`/cashflow-projection?months=${months}&onlyChanges=${onlyChanges}`);
+  }
+
+  // Dashboard API
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    return this.request<DashboardSummary>('/dashboard/summary');
   }
 
   // Settings API
@@ -238,6 +264,16 @@ class ApiClient {
       method: 'PUT',
       body: JSON.stringify(settings),
     });
+  }
+
+  // Version API
+  async getVersion(): Promise<VersionInfo> {
+    return this.request<VersionInfo>('/version');
+  }
+
+  // User API
+  async getCurrentUser(): Promise<UserInfo> {
+    return this.request<UserInfo>('/auth/me');
   }
 }
 

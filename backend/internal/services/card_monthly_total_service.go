@@ -18,8 +18,8 @@ func NewCardMonthlyTotalService(cardMonthlyTotalRepo *repositories.CardMonthlyTo
 	}
 }
 
-func (s *CardMonthlyTotalService) GetCardMonthlyTotals(assetID uuid.UUID) ([]models.CardMonthlyTotal, error) {
-	return s.cardMonthlyTotalRepo.GetByAssetID(assetID)
+func (s *CardMonthlyTotalService) GetCardMonthlyTotals(creditCardID uuid.UUID) ([]models.CardMonthlyTotal, error) {
+	return s.cardMonthlyTotalRepo.GetByCreditCardID(creditCardID)
 }
 
 func (s *CardMonthlyTotalService) GetCardMonthlyTotal(id uuid.UUID) (*models.CardMonthlyTotal, error) {

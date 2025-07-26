@@ -28,12 +28,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useApi } from '@/components/providers/api-provider';
-import { Asset, BankAccount } from '@/types/api';
+import { CreditCard, BankAccount } from '@/types/api';
 import { toast } from 'sonner';
 
 const formSchema = z.object({
-  name: z.string().min(1, '資産名は必須です'),
-  asset_type: z.enum(['card', 'loan'], { message: '資産タイプを選択してください' }),
+  name: z.string().min(1, 'クレジットカード名は必須です'),
   bank_account: z.string().min(1, '銀行口座を選択してください'),
   closing_day: z.string().optional(),
   payment_day: z.string().min(1, '支払日は必須です'),
@@ -41,21 +40,21 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface AssetFormProps {
+interface CreditCardFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  asset?: Asset | null;
+  creditCard?: CreditCard | null;
   bankAccounts: BankAccount[];
   onSuccess: () => void;
 }
 
-export function AssetForm({
+export function CreditCardForm({
   open,
   onOpenChange,
-  asset,
+  creditCard,
   bankAccounts,
   onSuccess,
-}: AssetFormProps) {
+}: CreditCardFormProps) {
   const apiClient = useApi();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,59 +62,53 @@ export function AssetForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      asset_type: 'card',
       bank_account: '',
       closing_day: '',
       payment_day: '',
     },
   });
 
-  const assetType = form.watch('asset_type');
-
   useEffect(() => {
-    if (asset) {
+    if (creditCard) {
       form.reset({
-        name: asset.name,
-        asset_type: asset.asset_type,
-        bank_account: asset.bank_account,
-        closing_day: asset.closing_day?.toString() || '',
-        payment_day: asset.payment_day.toString(),
+        name: creditCard.name,
+        bank_account: creditCard.bank_account,
+        closing_day: creditCard.closing_day?.toString() || '',
+        payment_day: creditCard.payment_day.toString(),
       });
     } else {
       form.reset({
         name: '',
-        asset_type: 'card',
         bank_account: '',
         closing_day: '',
         payment_day: '',
       });
     }
-  }, [asset, form]);
+  }, [creditCard, form]);
 
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
       
-      const assetData = {
+      const creditCardData = {
         name: data.name,
-        asset_type: data.asset_type,
         bank_account: data.bank_account,
         closing_day: data.closing_day ? parseInt(data.closing_day) : undefined,
         payment_day: parseInt(data.payment_day),
       };
 
-      if (asset) {
-        await apiClient.updateAsset(asset.id, assetData);
-        toast.success('資産を更新しました');
+      if (creditCard) {
+        await apiClient.updateCreditCard(creditCard.id, creditCardData);
+        toast.success('クレジットカードを更新しました');
       } else {
-        await apiClient.createAsset(assetData);
-        toast.success('資産を作成しました');
+        await apiClient.createCreditCard(creditCardData);
+        toast.success('クレジットカードを作成しました');
       }
 
       onSuccess();
     } catch (error) {
-      toast.error(asset ? '資産の更新に失敗しました' : '資産の作成に失敗しました');
-      console.error('Failed to save asset:', error);
+      toast.error(creditCard ? 'クレジットカードの更新に失敗しました' : 'クレジットカードの作成に失敗しました');
+      console.error('Failed to save credit card:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +126,7 @@ export function AssetForm({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {asset ? '資産を編集' : '資産を追加'}
+            {creditCard ? 'クレジットカードを編集' : 'クレジットカードを追加'}
           </DialogTitle>
         </DialogHeader>
         
@@ -144,35 +137,13 @@ export function AssetForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>資産名</FormLabel>
+                  <FormLabel>クレジットカード名</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="例: 楽天カード"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="asset_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>資産タイプ</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="資産タイプを選択" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="card">クレジットカード</SelectItem>
-                      <SelectItem value="loan">ローン</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -203,27 +174,25 @@ export function AssetForm({
               )}
             />
 
-            {assetType === 'card' && (
-              <FormField
-                control={form.control}
-                name="closing_day"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>締め日</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        max="31"
-                        placeholder="例: 15"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <FormField
+              control={form.control}
+              name="closing_day"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>締め日</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="31"
+                      placeholder="例: 15"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -255,7 +224,7 @@ export function AssetForm({
                 キャンセル
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? '保存中...' : asset ? '更新' : '作成'}
+                {isSubmitting ? '保存中...' : creditCard ? '更新' : '作成'}
               </Button>
             </div>
           </form>

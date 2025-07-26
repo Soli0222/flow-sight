@@ -38,8 +38,6 @@ const formSchema = z.object({
   payment_day: z.string().min(1, '支払日は必須です'),
   bank_account: z.string().min(1, '銀行口座を選択してください'),
   start_year_month: z.string().min(1, '開始年月は必須です'),
-  total_payments: z.string().optional(),
-  remaining_payments: z.string().optional(),
   is_active: z.string(),
   note: z.string().optional(),
 });
@@ -72,8 +70,6 @@ export function RecurringPaymentForm({
       payment_day: '',
       bank_account: '',
       start_year_month: '',
-      total_payments: '',
-      remaining_payments: '',
       is_active: 'true',
       note: '',
     },
@@ -87,8 +83,6 @@ export function RecurringPaymentForm({
         payment_day: payment.payment_day.toString(),
         bank_account: payment.bank_account,
         start_year_month: payment.start_year_month,
-        total_payments: payment.total_payments?.toString() || '',
-        remaining_payments: payment.remaining_payments?.toString() || '',
         is_active: payment.is_active ? 'true' : 'false',
         note: payment.note || '',
       });
@@ -99,8 +93,6 @@ export function RecurringPaymentForm({
         payment_day: '',
         bank_account: '',
         start_year_month: '',
-        total_payments: '',
-        remaining_payments: '',
         is_active: 'true',
         note: '',
       });
@@ -119,8 +111,6 @@ export function RecurringPaymentForm({
         payment_day: parseInt(data.payment_day),
         bank_account: data.bank_account,
         start_year_month: data.start_year_month,
-        total_payments: data.total_payments ? parseInt(data.total_payments) : undefined,
-        remaining_payments: data.remaining_payments ? parseInt(data.remaining_payments) : undefined,
         is_active: data.is_active === 'true',
         note: data.note || undefined,
       };
@@ -257,47 +247,6 @@ export function RecurringPaymentForm({
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="total_payments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>総支払回数</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="例: 12"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="remaining_payments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>残り回数</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        placeholder="例: 8"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <FormField
               control={form.control}
               name="is_active"

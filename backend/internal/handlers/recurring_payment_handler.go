@@ -24,23 +24,23 @@ func NewRecurringPaymentHandler(recurringPaymentService *services.RecurringPayme
 // @Tags recurring-payments
 // @Accept json
 // @Produce json
-// @Param user_id query string true "User ID"
+// @Security BearerAuth
 // @Success 200 {array} models.RecurringPayment
 // @Router /recurring-payments [get]
 func (h *RecurringPaymentHandler) GetRecurringPayments(c *gin.Context) {
-	userIDStr := c.Query("user_id")
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
 	}
 
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+	userUUID, ok := userID.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
-	payments, err := h.recurringPaymentService.GetRecurringPayments(userID)
+	payments, err := h.recurringPaymentService.GetRecurringPayments(userUUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -79,15 +79,31 @@ func (h *RecurringPaymentHandler) GetRecurringPayment(c *gin.Context) {
 // @Tags recurring-payments
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param payment body models.RecurringPayment true "Recurring Payment data"
 // @Success 201 {object} models.RecurringPayment
 // @Router /recurring-payments [post]
 func (h *RecurringPaymentHandler) CreateRecurringPayment(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	userUUID, ok := userID.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
+		return
+	}
+
 	var payment models.RecurringPayment
 	if err := c.ShouldBindJSON(&payment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Set the user_id from the authenticated user
+	payment.UserID = userUUID
 
 	if err := h.recurringPaymentService.CreateRecurringPayment(&payment); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

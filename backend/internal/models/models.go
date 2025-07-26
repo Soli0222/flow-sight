@@ -6,13 +6,12 @@ import (
 	"github.com/google/uuid"
 )
 
-// Asset represents a financial asset (credit card or loan)
-type Asset struct {
+// CreditCard represents a credit card
+type CreditCard struct {
 	ID          uuid.UUID `json:"id" db:"id"`
 	UserID      uuid.UUID `json:"user_id" db:"user_id"`
 	Name        string    `json:"name" db:"name"`
-	AssetType   string    `json:"asset_type" db:"asset_type"`             // "card" or "loan"
-	ClosingDay  *int      `json:"closing_day,omitempty" db:"closing_day"` // For credit cards
+	ClosingDay  *int      `json:"closing_day,omitempty" db:"closing_day"` // Closing day of the month
 	PaymentDay  int       `json:"payment_day" db:"payment_day"`
 	BankAccount uuid.UUID `json:"bank_account" db:"bank_account"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
@@ -37,7 +36,9 @@ type IncomeSource struct {
 	IncomeType         string    `json:"income_type" db:"income_type"` // "monthly_fixed" or "one_time"
 	BaseAmount         int64     `json:"base_amount" db:"base_amount"` // Amount in cents
 	BankAccount        uuid.UUID `json:"bank_account" db:"bank_account"`
-	ScheduledYearMonth *string   `json:"scheduled_year_month,omitempty" db:"scheduled_year_month"` // For one-time income
+	PaymentDay         *int      `json:"payment_day,omitempty" db:"payment_day"`                   // For monthly_fixed income (1-31)
+	ScheduledDate      *string   `json:"scheduled_date,omitempty" db:"scheduled_date"`             // For one_time income (YYYY-MM-DD format)
+	ScheduledYearMonth *string   `json:"scheduled_year_month,omitempty" db:"scheduled_year_month"` // For one-time income (backward compatibility)
 	IsActive           bool      `json:"is_active" db:"is_active"`
 	CreatedAt          time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt          time.Time `json:"updated_at" db:"updated_at"`
@@ -74,13 +75,13 @@ type RecurringPayment struct {
 
 // CardMonthlyTotal represents monthly credit card usage
 type CardMonthlyTotal struct {
-	ID          uuid.UUID `json:"id" db:"id"`
-	AssetID     uuid.UUID `json:"asset_id" db:"asset_id"`
-	YearMonth   string    `json:"year_month" db:"year_month"`     // Format: "2024-01"
-	TotalAmount int64     `json:"total_amount" db:"total_amount"` // Amount in cents
-	IsConfirmed bool      `json:"is_confirmed" db:"is_confirmed"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	ID           uuid.UUID `json:"id" db:"id"`
+	CreditCardID uuid.UUID `json:"credit_card_id" db:"credit_card_id"`
+	YearMonth    string    `json:"year_month" db:"year_month"`     // Format: "2024-01"
+	TotalAmount  int64     `json:"total_amount" db:"total_amount"` // Amount in cents
+	IsConfirmed  bool      `json:"is_confirmed" db:"is_confirmed"`
+	CreatedAt    time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // AppSetting represents application settings
@@ -109,10 +110,22 @@ type CashflowProjectionDetail struct {
 	Amount      int64  `json:"amount"`
 }
 
-// User represents a user (for future authentication)
+// DashboardSummary represents dashboard summary data
+type DashboardSummary struct {
+	TotalBalance     int64                `json:"total_balance"`
+	MonthlyIncome    int64                `json:"monthly_income"`
+	MonthlyExpense   int64                `json:"monthly_expense"`
+	TotalAssets      int                  `json:"total_assets"`
+	RecentActivities []CashflowProjection `json:"recent_activities"`
+}
+
+// User represents a user
 type User struct {
 	ID        uuid.UUID `json:"id" db:"id"`
 	Email     string    `json:"email" db:"email"`
+	Name      string    `json:"name" db:"name"`
+	Picture   string    `json:"picture" db:"picture"`
+	GoogleID  string    `json:"google_id" db:"google_id"`
 	Password  string    `json:"-" db:"password"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`

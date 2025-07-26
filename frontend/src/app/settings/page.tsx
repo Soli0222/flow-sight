@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Save } from 'lucide-react';
+import { Save, User, Info } from 'lucide-react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { MainLayout } from '@/components/layout/main-layout';
 import { useApi } from '@/components/providers/api-provider';
 import { toast } from 'sonner';
+import { VersionInfo, UserInfo } from '@/types/api';
+import { FRONTEND_VERSION } from '@/lib/version';
 
 export default function SettingsPage() {
   const apiClient = useApi();
@@ -17,23 +20,55 @@ export default function SettingsPage() {
     notification_enabled: 'true',
     theme: 'light',
   });
+  const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   const loadSettings = React.useCallback(async () => {
     try {
       setIsLoading(true);
+      
+      // Load settings
       const settingsData = await apiClient.getSettings();
+      
+      // データの安全性チェック
+      if (!Array.isArray(settingsData)) {
+        console.error('Invalid settings data received:', settingsData);
+        toast.error('設定データの形式が正しくありません');
+        return;
+      }
+      
       const settingsMap = settingsData.reduce((acc, setting) => {
-        acc[setting.key] = setting.value;
+        if (setting && setting.key && setting.value !== undefined) {
+          acc[setting.key] = setting.value;
+        }
         return acc;
       }, {} as Record<string, string>);
       
       setSettings({
-        minimum_monthly_expense: settingsMap.minimum_monthly_expense || '0',
+        minimum_monthly_expense: settingsMap.minimum_monthly_expense 
+          ? String(Math.round(Number(settingsMap.minimum_monthly_expense) / 100))
+          : '0', // Convert cents to yen for display
         notification_enabled: settingsMap.notification_enabled || 'true',
         theme: settingsMap.theme || 'light',
       });
+
+      // Load version info
+      try {
+        const version = await apiClient.getVersion();
+        setVersionInfo(version);
+      } catch (error) {
+        console.error('Failed to load version info:', error);
+      }
+
+      // Load user info
+      try {
+        const user = await apiClient.getCurrentUser();
+        setUserInfo(user);
+      } catch (error) {
+        console.error('Failed to load user info:', error);
+      }
     } catch (error) {
       toast.error('設定の取得に失敗しました');
       console.error('Failed to load settings:', error);
@@ -49,7 +84,12 @@ export default function SettingsPage() {
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      await apiClient.updateSettings({ settings });
+      // Convert yen to cents before saving
+      const settingsToSave = {
+        ...settings,
+        minimum_monthly_expense: String(Number(settings.minimum_monthly_expense) * 100)
+      };
+      await apiClient.updateSettings({ settings: settingsToSave });
       toast.success('設定を保存しました');
     } catch (error) {
       toast.error('設定の保存に失敗しました');
@@ -139,22 +179,84 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-1 lg:col-span-2">
+          <Card>
             <CardHeader>
-              <CardTitle>開発情報</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                アプリケーション情報
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>API URL</Label>
+                <Label>フロントエンドバージョン</Label>
                 <Input
-                  value={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}
+                  value={FRONTEND_VERSION}
                   readOnly
                   className="bg-muted"
                 />
-                <p className="text-sm text-muted-foreground">
-                  現在接続中のAPIサーバーのURL
-                </p>
               </div>
+              {versionInfo && (
+                <div className="space-y-2">
+                  <Label>バックエンドバージョン</Label>
+                  <Input
+                    value={versionInfo.version}
+                    readOnly
+                    className="bg-muted"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                アカウント情報
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {userInfo && (
+                <>
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src={userInfo.picture || '/default-avatar.png'}
+                      alt={userInfo.name || 'User'}
+                      width={64}
+                      height={64}
+                      className="rounded-full"
+                    />
+                    <div>
+                      <h3 className="font-semibold">{userInfo.name || 'Unknown'}</h3>
+                      <p className="text-sm text-muted-foreground">{userInfo.email || 'No email'}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>ユーザーID</Label>
+                    <Input
+                      value={userInfo.id || ''}
+                      readOnly
+                      className="bg-muted font-mono text-xs"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Google ID</Label>
+                    <Input
+                      value={userInfo.google_id || ''}
+                      readOnly
+                      className="bg-muted font-mono text-xs"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>登録日時</Label>
+                    <Input
+                      value={userInfo.created_at ? new Date(userInfo.created_at).toLocaleString('ja-JP') : ''}
+                      readOnly
+                      className="bg-muted"
+                    />
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

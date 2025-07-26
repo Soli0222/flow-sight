@@ -105,7 +105,7 @@ export default function RecurringPaymentsPage() {
           <div>
             <h1 className="text-3xl font-bold">定期支払い</h1>
             <p className="text-muted-foreground">
-              月次の定期支払いやローンを管理できます。
+              月次の定期支払いを管理できます。
             </p>
           </div>
           <Button onClick={handleCreatePayment}>
@@ -177,15 +177,6 @@ export default function RecurringPaymentsPage() {
                     <p className="text-sm text-muted-foreground">開始年月</p>
                     <p className="font-medium">{payment.start_year_month}</p>
                   </div>
-                  
-                  {payment.total_payments && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">残り回数</p>
-                      <p className="font-medium">
-                        {payment.remaining_payments || 0} / {payment.total_payments} 回
-                      </p>
-                    </div>
-                  )}
                   
                   {payment.note && (
                     <div>

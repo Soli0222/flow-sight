@@ -4,9 +4,12 @@ import (
 	"database/sql"
 	"flow-sight-backend/internal/config"
 	"flow-sight-backend/internal/handlers"
+	"flow-sight-backend/internal/middleware"
 	"flow-sight-backend/internal/repositories"
 	"flow-sight-backend/internal/services"
+	"flow-sight-backend/internal/version"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -27,18 +30,12 @@ func NewServer(db *sql.DB, cfg *config.Config) *Server {
 	router := gin.Default()
 
 	// Add CORS middleware
-	router.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	})
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:4000"}
+	corsConfig.AllowCredentials = true
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	router.Use(cors.New(corsConfig))
 
 	server := &Server{
 		router: router,
@@ -52,7 +49,8 @@ func NewServer(db *sql.DB, cfg *config.Config) *Server {
 
 func (s *Server) setupRoutes() {
 	// Initialize repositories
-	assetRepo := repositories.NewAssetRepository(s.db)
+	userRepo := repositories.NewUserRepository(s.db)
+	creditCardRepo := repositories.NewCreditCardRepository(s.db)
 	bankAccountRepo := repositories.NewBankAccountRepository(s.db)
 	incomeSourceRepo := repositories.NewIncomeSourceRepository(s.db)
 	monthlyIncomeRepo := repositories.NewMonthlyIncomeRepository(s.db)
@@ -61,77 +59,101 @@ func (s *Server) setupRoutes() {
 	appSettingRepo := repositories.NewAppSettingRepository(s.db)
 
 	// Initialize services
-	assetService := services.NewAssetService(assetRepo)
+	authService := services.NewAuthService(userRepo, s.config)
+	creditCardService := services.NewCreditCardService(creditCardRepo)
 	bankAccountService := services.NewBankAccountService(bankAccountRepo)
 	incomeService := services.NewIncomeService(incomeSourceRepo, monthlyIncomeRepo)
 	recurringPaymentService := services.NewRecurringPaymentService(recurringPaymentRepo)
 	cardMonthlyTotalService := services.NewCardMonthlyTotalService(cardMonthlyTotalRepo)
 	appSettingService := services.NewAppSettingService(appSettingRepo)
-	cashflowService := services.NewCashflowService(bankAccountRepo, incomeSourceRepo, monthlyIncomeRepo, recurringPaymentRepo, cardMonthlyTotalRepo, assetRepo)
+	cashflowService := services.NewCashflowService(bankAccountRepo, incomeSourceRepo, monthlyIncomeRepo, recurringPaymentRepo, cardMonthlyTotalRepo, creditCardRepo, appSettingRepo)
+	dashboardService := services.NewDashboardService(bankAccountRepo, creditCardRepo, incomeSourceRepo, monthlyIncomeRepo, recurringPaymentRepo, cashflowService)
 
 	// Initialize handlers
-	assetHandler := handlers.NewAssetHandler(assetService)
+	authHandler := handlers.NewAuthHandler(authService)
+	creditCardHandler := handlers.NewCreditCardHandler(creditCardService)
 	bankAccountHandler := handlers.NewBankAccountHandler(bankAccountService)
 	incomeHandler := handlers.NewIncomeHandler(incomeService)
 	recurringPaymentHandler := handlers.NewRecurringPaymentHandler(recurringPaymentService)
 	cardMonthlyTotalHandler := handlers.NewCardMonthlyTotalHandler(cardMonthlyTotalService)
 	appSettingHandler := handlers.NewAppSettingHandler(appSettingService)
 	cashflowHandler := handlers.NewCashflowHandler(cashflowService)
+	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 
-	// API routes
+	// Public routes (no authentication required)
 	api := s.router.Group("/api/v1")
 
-	// Asset routes
-	api.GET("/assets", assetHandler.GetAssets)
-	api.POST("/assets", assetHandler.CreateAsset)
-	api.GET("/assets/:id", assetHandler.GetAsset)
-	api.PUT("/assets/:id", assetHandler.UpdateAsset)
-	api.DELETE("/assets/:id", assetHandler.DeleteAsset)
+	// Auth routes
+	api.GET("/auth/google", authHandler.GoogleLogin)
+	api.GET("/auth/google/callback", authHandler.GoogleCallback)
+
+	// Protected routes (authentication required)
+	protected := api.Group("")
+	protected.Use(middleware.AuthMiddleware(authService))
+
+	// User info
+	protected.GET("/auth/me", authHandler.GetMe)
+
+	// Credit Card routes
+	protected.GET("/credit-cards", creditCardHandler.GetCreditCards)
+	protected.POST("/credit-cards", creditCardHandler.CreateCreditCard)
+	protected.GET("/credit-cards/:id", creditCardHandler.GetCreditCard)
+	protected.PUT("/credit-cards/:id", creditCardHandler.UpdateCreditCard)
+	protected.DELETE("/credit-cards/:id", creditCardHandler.DeleteCreditCard)
 
 	// Bank Account routes
-	api.GET("/bank-accounts", bankAccountHandler.GetBankAccounts)
-	api.POST("/bank-accounts", bankAccountHandler.CreateBankAccount)
-	api.GET("/bank-accounts/:id", bankAccountHandler.GetBankAccount)
-	api.PUT("/bank-accounts/:id", bankAccountHandler.UpdateBankAccount)
-	api.DELETE("/bank-accounts/:id", bankAccountHandler.DeleteBankAccount)
+	protected.GET("/bank-accounts", bankAccountHandler.GetBankAccounts)
+	protected.POST("/bank-accounts", bankAccountHandler.CreateBankAccount)
+	protected.GET("/bank-accounts/:id", bankAccountHandler.GetBankAccount)
+	protected.PUT("/bank-accounts/:id", bankAccountHandler.UpdateBankAccount)
+	protected.DELETE("/bank-accounts/:id", bankAccountHandler.DeleteBankAccount)
 
 	// Income routes
-	api.GET("/income-sources", incomeHandler.GetIncomeSources)
-	api.POST("/income-sources", incomeHandler.CreateIncomeSource)
-	api.GET("/income-sources/:id", incomeHandler.GetIncomeSource)
-	api.PUT("/income-sources/:id", incomeHandler.UpdateIncomeSource)
-	api.DELETE("/income-sources/:id", incomeHandler.DeleteIncomeSource)
+	protected.GET("/income-sources", incomeHandler.GetIncomeSources)
+	protected.POST("/income-sources", incomeHandler.CreateIncomeSource)
+	protected.GET("/income-sources/:id", incomeHandler.GetIncomeSource)
+	protected.PUT("/income-sources/:id", incomeHandler.UpdateIncomeSource)
+	protected.DELETE("/income-sources/:id", incomeHandler.DeleteIncomeSource)
 
-	api.GET("/monthly-income-records", incomeHandler.GetMonthlyIncomeRecords)
-	api.POST("/monthly-income-records", incomeHandler.CreateMonthlyIncomeRecord)
-	api.GET("/monthly-income-records/:id", incomeHandler.GetMonthlyIncomeRecord)
-	api.PUT("/monthly-income-records/:id", incomeHandler.UpdateMonthlyIncomeRecord)
-	api.DELETE("/monthly-income-records/:id", incomeHandler.DeleteMonthlyIncomeRecord)
+	protected.GET("/monthly-income-records", incomeHandler.GetMonthlyIncomeRecords)
+	protected.POST("/monthly-income-records", incomeHandler.CreateMonthlyIncomeRecord)
+	protected.GET("/monthly-income-records/:id", incomeHandler.GetMonthlyIncomeRecord)
+	protected.PUT("/monthly-income-records/:id", incomeHandler.UpdateMonthlyIncomeRecord)
+	protected.DELETE("/monthly-income-records/:id", incomeHandler.DeleteMonthlyIncomeRecord)
 
 	// Recurring Payment routes
-	api.GET("/recurring-payments", recurringPaymentHandler.GetRecurringPayments)
-	api.POST("/recurring-payments", recurringPaymentHandler.CreateRecurringPayment)
-	api.GET("/recurring-payments/:id", recurringPaymentHandler.GetRecurringPayment)
-	api.PUT("/recurring-payments/:id", recurringPaymentHandler.UpdateRecurringPayment)
-	api.DELETE("/recurring-payments/:id", recurringPaymentHandler.DeleteRecurringPayment)
+	protected.GET("/recurring-payments", recurringPaymentHandler.GetRecurringPayments)
+	protected.POST("/recurring-payments", recurringPaymentHandler.CreateRecurringPayment)
+	protected.GET("/recurring-payments/:id", recurringPaymentHandler.GetRecurringPayment)
+	protected.PUT("/recurring-payments/:id", recurringPaymentHandler.UpdateRecurringPayment)
+	protected.DELETE("/recurring-payments/:id", recurringPaymentHandler.DeleteRecurringPayment)
 
 	// Card Monthly Total routes
-	api.GET("/card-monthly-totals", cardMonthlyTotalHandler.GetCardMonthlyTotals)
-	api.POST("/card-monthly-totals", cardMonthlyTotalHandler.CreateCardMonthlyTotal)
-	api.GET("/card-monthly-totals/:id", cardMonthlyTotalHandler.GetCardMonthlyTotal)
-	api.PUT("/card-monthly-totals/:id", cardMonthlyTotalHandler.UpdateCardMonthlyTotal)
-	api.DELETE("/card-monthly-totals/:id", cardMonthlyTotalHandler.DeleteCardMonthlyTotal)
+	protected.GET("/card-monthly-totals", cardMonthlyTotalHandler.GetCardMonthlyTotals)
+	protected.POST("/card-monthly-totals", cardMonthlyTotalHandler.CreateCardMonthlyTotal)
+	protected.GET("/card-monthly-totals/:id", cardMonthlyTotalHandler.GetCardMonthlyTotal)
+	protected.PUT("/card-monthly-totals/:id", cardMonthlyTotalHandler.UpdateCardMonthlyTotal)
+	protected.DELETE("/card-monthly-totals/:id", cardMonthlyTotalHandler.DeleteCardMonthlyTotal)
 
 	// App Setting routes
-	api.GET("/settings", appSettingHandler.GetSettings)
-	api.PUT("/settings", appSettingHandler.UpdateSettings)
+	protected.GET("/settings", appSettingHandler.GetSettings)
+	protected.PUT("/settings", appSettingHandler.UpdateSettings)
 
 	// Cashflow Projection routes
-	api.GET("/cashflow-projection", cashflowHandler.GetCashflowProjection)
+	protected.GET("/cashflow-projection", cashflowHandler.GetCashflowProjection)
+
+	// Dashboard routes
+	protected.GET("/dashboard/summary", dashboardHandler.GetDashboardSummary)
 
 	// Health check
 	api.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
+	})
+
+	// Version info
+	api.GET("/version", func(c *gin.Context) {
+		buildInfo := version.GetBuildInfo()
+		c.JSON(200, buildInfo)
 	})
 
 	// Swagger documentation
