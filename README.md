@@ -1,5 +1,8 @@
 # Flow Sight
 
+[![Backend Tests](https://github.com/Soli0222/flow-sight/workflows/Backend%20Tests/badge.svg)](https://github.com/Soli0222/flow-sight/actions/workflows/backend-test.yml)
+[![Frontend Tests](https://github.com/Soli0222/flow-sight/workflows/Frontend%20Tests/badge.svg)](https://github.com/Soli0222/flow-sight/actions/workflows/frontend-test.yml)
+
 Flow Sightは個人の金融管理を行うためのWebアプリケーションです。クレジットカードやローンの支払い管理、月次キャッシュフロー予測、収入・支出の管理を通じて、健全な資金管理をサポートします。
 
 ## 技術スタック
