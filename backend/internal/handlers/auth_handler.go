@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"flow-sight-backend/internal/services"
 	"fmt"
 	"net/http"
@@ -29,12 +31,31 @@ func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 // @Success 200 {object} map[string]string
 // @Router /auth/google [get]
 func (h *AuthHandler) GoogleLogin(c *gin.Context) {
-	state := "random-state-string" // In production, use a secure random state
+	state := generateState()
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "oauthstate",
+		Value:    state,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		// Optionally set MaxAge or Expires
+	})
 	url := h.authService.GetGoogleAuthURL(state)
 
 	c.JSON(http.StatusOK, gin.H{
 		"url": url,
 	})
+}
+
+// generateState creates a cryptographically secure random string for OAuth2 state
+func generateState() string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		// fallback: use uuid if crypto/rand fails
+		return uuid.New().String()
+	}
+	return base64.URLEncoding.EncodeToString(b)
 }
 
 // GoogleCallback godoc
