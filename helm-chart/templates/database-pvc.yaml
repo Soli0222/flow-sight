@@ -1,0 +1,18 @@
+{{- if and .Values.database.enabled .Values.database.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "flow-sight.fullname" . }}-db-pvc
+  labels:
+    {{- include "flow-sight.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.database.persistence.size }}
+  {{- if .Values.database.persistence.storageClass }}
+  storageClassName: {{ .Values.database.persistence.storageClass }}
+  {{- end }}
+{{- end }}

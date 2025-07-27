@@ -1,0 +1,67 @@
+{{- if .Values.database.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "flow-sight.fullname" . }}-db
+  labels:
+    {{- include "flow-sight.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "flow-sight.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: database
+  template:
+    metadata:
+      labels:
+        {{- include "flow-sight.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: database
+    spec:
+      containers:
+      - name: postgres
+        image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+        imagePullPolicy: {{ .Values.database.image.pullPolicy }}
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          value: {{ .Values.backend.database.name }}
+        - name: POSTGRES_USER
+          value: {{ .Values.backend.database.user }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ if .Values.backend.secrets.externalName }}{{ .Values.backend.secrets.externalName }}{{ else }}{{ include "flow-sight.fullname" . }}-backend-secrets{{ end }}
+              key: DB_PASSWORD
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        {{- if .Values.database.persistence.enabled }}
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        {{- end }}
+      {{- if .Values.database.persistence.enabled }}
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: {{ include "flow-sight.fullname" . }}-db-pvc
+      {{- end }}
+{{- end }}
