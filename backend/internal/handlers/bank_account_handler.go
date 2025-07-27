@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"flow-sight-backend/internal/middleware"
 	"flow-sight-backend/internal/models"
 	"flow-sight-backend/internal/services"
 	"net/http"
@@ -84,20 +86,31 @@ func (h *BankAccountHandler) GetBankAccount(c *gin.Context) {
 // @Success 201 {object} models.BankAccount
 // @Router /bank-accounts [post]
 func (h *BankAccountHandler) CreateBankAccount(c *gin.Context) {
+	logger := middleware.GetLogger(c)
+	ctx := context.Background()
+
 	userID, exists := c.Get("user_id")
 	if !exists {
+		logger.WarnContext(ctx, "Bank account creation attempted without authentication")
 		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
 		return
 	}
 
 	userUUID, ok := userID.(uuid.UUID)
 	if !ok {
+		logger.ErrorContext(ctx, "Invalid user_id format in context",
+			"user_id", userID,
+		)
 		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
 	var account models.BankAccount
 	if err := c.ShouldBindJSON(&account); err != nil {
+		logger.WarnContext(ctx, "Invalid request body for bank account creation",
+			"user_id", userUUID.String(),
+			"error", err.Error(),
+		)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -106,9 +119,20 @@ func (h *BankAccountHandler) CreateBankAccount(c *gin.Context) {
 	account.UserID = userUUID
 
 	if err := h.bankAccountService.CreateBankAccount(&account); err != nil {
+		logger.ErrorContext(ctx, "Failed to create bank account",
+			"user_id", userUUID.String(),
+			"account_name", account.Name,
+			"error", err.Error(),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	logger.BusinessOperation(ctx, "bank_account_created", userUUID.String(), map[string]interface{}{
+		"account_id":   account.ID.String(),
+		"account_name": account.Name,
+		"balance":      account.Balance,
+	})
 
 	c.JSON(http.StatusCreated, account)
 }

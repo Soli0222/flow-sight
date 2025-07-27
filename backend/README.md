@@ -10,6 +10,7 @@ Flow Sightは個人の金融管理を行うためのWebアプリケーション�
 - **ORM**: database/sql (標準ライブラリ)
 - **マイグレーション**: golang-migrate
 - **ドキュメント**: Swagger/OpenAPI
+- **ログ**: slog (構造化ログ)
 - **コンテナ**: Docker & Docker Compose
 
 ## API機能
@@ -30,6 +31,65 @@ Flow Sightは個人の金融管理を行うためのWebアプリケーション�
 - 複数銀行口座の残高統合
 - 最大36ヶ月先までの予測
 - 日次残高推移の詳細計算
+
+## ログ
+
+### ログ設計
+
+アプリケーションは構造化ログ（slog）を使用し、環境に応じて適切な形式で出力します。
+
+**development環境**:
+- 出力形式: テキスト（人間が読みやすい）
+- ログレベル: DEBUG以上
+- スタックトレース: 有効
+
+**production環境**:
+- 出力形式: JSON（ログ収集ツール用）
+- ログレベル: INFO以上
+- セキュリティ情報のマスキング: 有効
+
+### ログレベル
+
+- **DEBUG**: 開発時の詳細情報
+- **INFO**: 通常の操作情報（リクエスト、ビジネス操作）
+- **WARN**: 警告（認証失敗など）
+- **ERROR**: エラー情報（システムエラー）
+
+### ログ構造
+
+```json
+{
+  "time": "2025-07-27T02:30:04Z",
+  "level": "INFO",
+  "msg": "HTTP request",
+  "service": "flow-sight-backend",
+  "version": "1.0.0",
+  "environment": "production",
+  "request_id": "abc123def456",
+  "method": "POST",
+  "path": "/api/v1/bank-accounts",
+  "status_code": 201,
+  "duration": "15ms",
+  "user_id": "user-uuid"
+}
+```
+
+### セキュリティログ
+
+認証関連のイベントは自動的にログに記録されます：
+
+- ログイン成功/失敗
+- 認証トークンの検証
+- 不正なアクセス試行
+
+### ビジネスログ
+
+重要なビジネス操作も自動的にログに記録されます：
+
+- 口座作成/更新/削除
+- 収入源の管理
+- 支出の記録
+- 設定変更
 
 ## セットアップ
 
@@ -172,9 +232,12 @@ backend/
 │   ├── config/            # 設定管理
 │   ├── database/          # データベース接続
 │   ├── handlers/          # HTTPハンドラー
+│   ├── logger/            # 構造化ログ
+│   ├── middleware/        # ミドルウェア
 │   ├── models/            # データモデル
 │   ├── repositories/      # データリポジトリ層
-│   └── services/          # ビジネスロジック層
+│   ├── services/          # ビジネスロジック層
+│   └── version/           # バージョン情報
 ├── migrations/            # データベースマイグレーション
 ├── docker-compose.yml     # Docker Compose設定
 ├── Dockerfile            # Docker設定

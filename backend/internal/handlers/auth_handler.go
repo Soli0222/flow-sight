@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"flow-sight-backend/internal/middleware"
 	"flow-sight-backend/internal/services"
 	"fmt"
 	"net/http"
@@ -31,6 +33,9 @@ func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 // @Success 200 {object} map[string]string
 // @Router /auth/google [get]
 func (h *AuthHandler) GoogleLogin(c *gin.Context) {
+	logger := middleware.GetLogger(c)
+	ctx := context.Background()
+
 	state := generateState()
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "oauthstate",
@@ -42,6 +47,11 @@ func (h *AuthHandler) GoogleLogin(c *gin.Context) {
 		// Optionally set MaxAge or Expires
 	})
 	url := h.authService.GetGoogleAuthURL(state)
+
+	logger.InfoContext(ctx, "Google OAuth login initiated",
+		"ip_address", c.ClientIP(),
+		"user_agent", c.Request.UserAgent(),
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"url": url,
@@ -71,8 +81,14 @@ func generateState() string {
 // @Failure 500 {object} map[string]string
 // @Router /auth/google/callback [get]
 func (h *AuthHandler) GoogleCallback(c *gin.Context) {
+	logger := middleware.GetLogger(c)
+	ctx := context.Background()
+
 	code := c.Query("code")
 	if code == "" {
+		logger.WarnContext(ctx, "OAuth callback missing code parameter",
+			"ip_address", c.ClientIP(),
+		)
 		// エラー時はフロントエンドのログインページにリダイレクト
 		c.Redirect(http.StatusFound, "http://localhost:4000/login?error=no_code")
 		return
@@ -80,10 +96,20 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 
 	user, token, err := h.authService.HandleGoogleCallback(code)
 	if err != nil {
+		logger.ErrorContext(ctx, "OAuth callback failed",
+			"error", err.Error(),
+			"ip_address", c.ClientIP(),
+		)
 		// エラー時はフロントエンドのログインページにリダイレクト
 		c.Redirect(http.StatusFound, "http://localhost:4000/login?error=callback_failed")
 		return
 	}
+
+	logger.BusinessOperation(ctx, "user_login", user.ID.String(), map[string]interface{}{
+		"email":      user.Email,
+		"login_type": "google_oauth",
+		"ip_address": c.ClientIP(),
+	})
 
 	// 成功時はフロントエンドのコールバックページにトークンとユーザー情報を渡してリダイレクト
 	// 本来はより安全な方法（HTTPOnly cookieなど）を使うべきですが、

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flow-sight-backend/internal/config"
 	"flow-sight-backend/internal/handlers"
+	"flow-sight-backend/internal/logger"
 	"flow-sight-backend/internal/middleware"
 	"flow-sight-backend/internal/repositories"
 	"flow-sight-backend/internal/services"
@@ -19,15 +20,19 @@ type Server struct {
 	router *gin.Engine
 	db     *sql.DB
 	config *config.Config
+	logger *logger.Logger
 }
 
-func NewServer(db *sql.DB, cfg *config.Config) *Server {
+func NewServer(db *sql.DB, cfg *config.Config, appLogger *logger.Logger) *Server {
 	// Set Gin mode based on environment
 	if cfg.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	router := gin.Default()
+	router := gin.New() // Use gin.New() instead of gin.Default() to avoid default middleware
+
+	// Add custom request logging middleware
+	router.Use(middleware.RequestLogger(appLogger))
 
 	// Add CORS middleware
 	corsConfig := cors.DefaultConfig()
@@ -41,6 +46,7 @@ func NewServer(db *sql.DB, cfg *config.Config) *Server {
 		router: router,
 		db:     db,
 		config: cfg,
+		logger: appLogger,
 	}
 
 	server.setupRoutes()
