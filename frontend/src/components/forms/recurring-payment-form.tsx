@@ -267,13 +267,13 @@ export function RecurringPaymentForm({
                   <FormControl>
                     <Input
                       type="number"
-                      min="0"
-                      placeholder="0 (0の場合はずっと継続)"
+                      min="1"
+                      placeholder="何も入力しなかったらずっと継続"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    0を指定するとずっと継続されます。回数を指定するとその回数分のみ支払われます。
+                    何も入力しなかったらずっと継続されます。回数を指定するとその回数分のみ支払われます。
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
