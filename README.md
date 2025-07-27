@@ -1,254 +1,307 @@
 # Flow Sight
 
-[![Backend Tests](https://github.com/Soli0222/flow-sight/workflows/Backend%20Tests/badge.svg)](https://github.com/Soli0222/flow-sight/actions/workflows/backend-test.yml)
-[![Frontend Tests](https://github.com/Soli0222/flow-sight/workflows/Frontend%20Tests/badge.svg)](https://github.com/Soli0222/flow-sight/actions/workflows/frontend-test.yml)
+[![License: Private](https://img.shields.io/badge/License-Private-red.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/Go-1.24.5-blue.svg)](https://golang.org/)
+[![Next.js Version](https://img.shields.io/badge/Next.js-15.4.4-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.5-blue.svg)](https://postgresql.org/)
 
-Flow Sightは個人の金融管理を行うためのWebアプリケーションです。クレジットカードやローンの支払い管理、月次キャッシュフロー予測、収入・支出の管理を通じて、健全な資金管理をサポートします。
+**Flow Sight**は、個人の金融管理を行うためのモダンなWebアプリケーションです。クレジットカードや銀行口座の管理、収入・支出の追跡、キャッシュフロー予測など、健全な資金管理をサポートします。
 
-## 技術スタック
+## ✨ 主要機能
 
-### フロントエンド
-- **フレームワーク**: Next.js 15.4 (React 19)
-- **言語**: TypeScript
-- **スタイル**: Tailwind CSS
-- **UI**: Radix UI + shadcn/ui
-- **状態管理**: React Hooks + Context API
-- **認証**: Google OAuth 2.0 + JWT
+### 💰 金融データ管理
+- **銀行口座管理** - 複数口座の残高管理
+- **クレジットカード管理** - 締め日・支払日を考慮した管理
+- **収入管理** - 月額固定・一時的収入の管理
+- **固定支出管理** - 家賃、保険料などの定期支払い管理
+- **月次利用額管理** - クレジットカードの月次総額管理
+
+### 📊 予測・分析機能
+- **キャッシュフロー予測** - 最大36ヶ月先までの資金残高推移予測
+- **締め日・支払日考慮** - 正確な支払いスケジュール計算
+- **日次残高推移** - 詳細な資金動向の可視化
+
+### 🛡️ セキュリティ・認証
+- **Google OAuth認証** - 安全なユーザー認証
+- **JWT トークン管理** - セキュアなAPI認証
+- **構造化ログ** - セキュリティイベントの追跡
+
+## 🏗️ 技術スタック
 
 ### バックエンド
-- **言語**: Go 1.21
-- **フレームワーク**: Gin
-- **データベース**: PostgreSQL 15
-- **認証**: JWT + Google OAuth 2.0
-- **API仕様**: OpenAPI/Swagger
+- **言語**: Go 1.24.5
+- **フレームワーク**: Gin (HTTP Web Framework)
+- **データベース**: PostgreSQL 17.5
+- **ORM**: database/sql (標準ライブラリ)
+- **マイグレーション**: golang-migrate
+- **ドキュメント**: Swagger/OpenAPI
+- **ログ**: slog (構造化ログ)
 
-### インフラ
+### フロントエンド
+- **フレームワーク**: Next.js 15.4.4 (App Router)
+- **言語**: TypeScript
+- **UIライブラリ**: shadcn/ui (Radix UI + Tailwind CSS)
+- **フォーム**: React Hook Form + Zod
+- **通知**: Sonner
+- **アイコン**: Lucide React
+- **パッケージマネージャー**: pnpm
+
+### インフラ・DevOps
 - **コンテナ**: Docker & Docker Compose
-- **リバースプロキシ**: Nginx
-- **統合ポート**: localhost:4000
+- **オーケストレーション**: Kubernetes & Helm
+- **プロキシ**: Nginx
+- **環境管理**: .env ファイル
 
-## クイックスタート
+## 🚀 クイックスタート
 
 ### 前提条件
 - Docker & Docker Compose
-- Google Cloud Console アカウント
+- Git
+- (任意) Go 1.24.5, Node.js 18+, pnpm
 
-### 1. リポジトリのクローン
+### 1. プロジェクトクローン
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Soli0222/flow-sight.git
 cd flow-sight
 ```
 
-### 2. Google OAuth設定
-
-1. [Google Cloud Console](https://console.cloud.google.com/)でプロジェクトを作成
-2. OAuth 2.0認証情報を作成:
-   - **承認済みのJavaScript生成元**: `http://localhost:4000`
-   - **承認済みのリダイレクトURI**: `http://localhost:4000/api/v1/auth/google/callback`
-3. クライアントIDとクライアントシークレットを取得
-
-### 3. 環境変数の設定
+### 2. 環境設定
 
 ```bash
-# 環境変数ファイルの作成
+# 環境変数ファイルのセットアップ
 make setup
-
-# .envファイルを編集してGoogle OAuth情報を設定
-GOOGLE_CLIENT_ID=your-google-client-id-here
-GOOGLE_CLIENT_SECRET=your-google-client-secret-here
 ```
 
-### 4. アプリケーションの起動
+`.env`ファイルを編集してGoogle OAuth情報を設定してください：
 
 ```bash
-# 本番と同じ構成で起動（推奨）
-make build
+# Google OAuth設定
+GOOGLE_CLIENT_ID=your-google-client-id-here
+GOOGLE_CLIENT_SECRET=your-google-client-secret-here
 
-# または通常起動
+# 開発環境設定
+NODE_ENV=development
+```
+
+### 3. アプリケーション起動
+
+```bash
+# 全サービス（DB、バックエンド、フロントエンド、Nginx）を起動
 make up
 
-# 開発時のログ表示
+# 開発モード（ログ表示あり）
 make dev
 ```
 
-### 5. アクセス
+### 4. アクセス
 
-ブラウザで http://localhost:4000 にアクセスしてください。
-
-- **フロントエンド**: http://localhost:4000
-- **API**: http://localhost:4000/api/v1
+- **アプリケーション**: http://localhost:4000
 - **API ドキュメント**: http://localhost:4000/swagger/index.html
+- **バックエンド API**: http://localhost:4000/api/v1
+- **フロントエンド**: http://localhost:4000 (Nginx経由)
 
-## Docker構成の特徴
-
-- **統一された構成**: 開発・本番で同じDockerfileとdocker-compose.ymlを使用
-- **マルチステージビルド**: 最適化されたフロントエンドビルド
-- **Node.js Standalone**: Next.js 15の最適化されたスタンドアロン出力
-- **セキュリティ**: 非rootユーザーでの実行
-- **効率的なレイヤーキャッシュ**: 依存関係とソースコードの分離
-
-## 主要機能
-
-### 金融管理機能
-1. **銀行口座管理** - 複数の銀行口座の残高管理
-2. **資産管理** - クレジットカードやローンの管理
-3. **収入管理** - 給与や副収入の管理
-4. **定期支払い管理** - 家賃、保険料などの固定費管理
-5. **カード利用額管理** - 月次クレジットカード利用額の記録
-6. **キャッシュフロー予測** - 最大36ヶ月先までの資金推移予測
-
-### システム機能
-- **Google OAuth認証** - 簡単ログイン
-- **レスポンシブデザイン** - PC・モバイル対応
-- **ダークモード** - テーマ切り替え
-- **リアルタイム同期** - データの自動更新
-
-## 開発用コマンド
-
-```bash
-# アプリケーション管理
-make up          # 起動
-make down        # 停止
-make restart     # 再起動
-make build       # ビルドして起動
-make dev         # 開発時（ログ表示あり）
-make clean       # 全て削除
-make clean       # 全て削除
-
-# ログ確認
-make logs        # 全サービス
-make logs-backend   # バックエンド
-make logs-frontend  # フロントエンド
-make logs-nginx     # Nginx
-
-# デバッグ
-make backend-shell  # バックエンドコンテナに接続
-make frontend-shell # フロントエンドコンテナに接続
-make db-shell       # データベースに接続
-```
-
-## アーキテクチャ
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    localhost:4000                          │
-├─────────────────────────────────────────────────────────────┤
-│                     Nginx                                   │
-│  ┌─────────────────┬─────────────────────────────────────┐  │
-│  │   Frontend      │          Backend API                │  │
-│  │  (Next.js)      │           (Go/Gin)                  │  │
-│  │     :3000       │            :8080                    │  │
-│  └─────────────────┴─────────────────────────────────────┘  │
-│                           │                                 │
-│                    ┌─────────────┐                         │
-│                    │ PostgreSQL  │                         │
-│                    │    :5432    │                         │
-│                    └─────────────┘                         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### ルーティング設定
-
-- `/` → フロントエンド (Next.js)
-- `/api/*` → バックエンド API (Go)
-- `/swagger/*` → API ドキュメント
-
-## プロジェクト構成
+## 📁 プロジェクト構成
 
 ```
 flow-sight/
-├── frontend/              # Next.js フロントエンド
-│   ├── src/
-│   │   ├── app/          # App Router
-│   │   ├── components/   # React コンポーネント
-│   │   ├── lib/         # ユーティリティ
-│   │   └── types/       # TypeScript 型定義
-│   └── Dockerfile.dev   # 開発用 Dockerfile
-│
-├── backend/              # Go バックエンド
-│   ├── cmd/             # エントリーポイント
-│   ├── internal/        # アプリケーションコード
-│   ├── migrations/      # DB マイグレーション
-│   └── Dockerfile       # Dockerfile
-│
-├── docker-compose.yml   # Docker Compose 設定
-├── nginx.conf          # Nginx 設定
-├── Makefile           # 開発用コマンド
-└── README.md          # このファイル
+├── backend/                    # Go APIサーバー
+│   ├── cmd/                    # アプリケーションエントリーポイント
+│   ├── internal/               # 内部パッケージ
+│   │   ├── api/               # APIサーバー設定
+│   │   ├── handlers/          # HTTPハンドラー
+│   │   ├── models/            # データモデル
+│   │   ├── repositories/      # データリポジトリ層
+│   │   └── services/          # ビジネスロジック層
+│   ├── migrations/            # データベースマイグレーション
+│   └── docs/                  # Swagger生成ファイル
+├── frontend/                  # Next.js フロントエンド
+│   ├── src/                   # ソースコード
+│   │   ├── app/              # App Router
+│   │   ├── components/       # Reactコンポーネント
+│   │   ├── lib/              # ユーティリティ
+│   │   └── types/            # TypeScript型定義
+│   └── public/               # 静的ファイル
+├── helm-chart/               # Kubernetes Helmチャート
+│   ├── templates/            # Kubernetesマニフェスト
+│   └── values.yaml          # Helm設定値
+├── documents/               # プロジェクトドキュメント
+│   ├── api_specification.md # API仕様書
+│   └── fromtend.md         # フロントエンド仕様書
+├── docker-compose.yml      # Docker Compose設定
+├── nginx.conf              # Nginx設定
+└── Makefile               # 開発用コマンド
 ```
 
-## Google OAuth設定詳細
+## 🛠️ 開発コマンド
 
-### 承認済みドメイン設定
-
-Google Cloud Consoleで以下の設定を行ってください：
-
-1. **OAuth同意画面**:
-   - アプリケーション名: Flow Sight
-   - 承認済みドメイン: localhost
-
-2. **OAuth 2.0 クライアントID**:
-   - アプリケーションの種類: ウェブアプリケーション
-   - 承認済みのJavaScript生成元:
-     - `http://localhost:4000`
-   - 承認済みのリダイレクトURI:
-     - `http://localhost:4000/api/v1/auth/google/callback`
-
-### 本番環境での設定
-
-本番環境では以下のドメインを設定してください：
-- JavaScript生成元: `https://yourdomain.com`
-- リダイレクトURI: `https://yourdomain.com/api/v1/auth/google/callback`
-
-## トラブルシューティング
-
-### よくある問題
-
-**1. OAuth認証エラー**
-```
-error: redirect_uri_mismatch
-```
-→ Google Cloud ConsoleのリダイレクトURIを確認してください
-
-**2. API接続エラー**
-```
-fetch failed
-```
-→ バックエンドサービスが起動していることを確認してください
-
-**3. データベース接続エラー**
-```
-connection refused
-```
-→ データベースサービスが起動していることを確認してください
-
-### ログの確認
+### 基本操作
 
 ```bash
-# 全サービスのログ
+# ヘルプ表示
+make help
+
+# アプリケーション起動
+make up
+
+# アプリケーション停止
+make down
+
+# ログ表示
 make logs
 
-# 特定のサービス
+# 全サービス再起動
+make restart
+
+# 環境クリーンアップ
+make clean
+```
+
+### サービス別ログ
+
+```bash
+# バックエンドログ
 make logs-backend
+
+# フロントエンドログ
 make logs-frontend
+
+# Nginxログ
 make logs-nginx
 ```
 
-### データベースのリセット
+### 開発用シェル
 
 ```bash
-# データベースを含めて全て削除
-make clean
+# バックエンドコンテナにアクセス
+make backend-shell
 
-# 再起動
-make build
+# フロントエンドコンテナにアクセス
+make frontend-shell
 ```
 
-## ライセンス
+## 🧪 テスト
+
+### バックエンドテスト
+
+```bash
+cd backend
+go test -v ./...
+
+# カバレッジレポート付き
+go test -v -cover ./...
+```
+
+### フロントエンドテスト
+
+```bash
+cd frontend
+pnpm test
+
+# ウォッチモード
+pnpm test:watch
+
+# カバレッジレポート
+pnpm test:coverage
+```
+
+## 📖 API ドキュメント
+
+アプリケーション起動後、Swagger UIで詳細なAPI仕様を確認できます：
+
+- **Swagger UI**: http://localhost:4000/swagger/index.html
+
+### 主要APIエンドポイント
+
+- **認証**: `/api/v1/auth/*`
+- **銀行口座**: `/api/v1/bank-accounts`
+- **クレジットカード**: `/api/v1/credit-cards`
+- **収入管理**: `/api/v1/income-sources`
+- **固定支出**: `/api/v1/recurring-payments`
+- **キャッシュフロー予測**: `/api/v1/cashflow-projection`
+
+## 🚢 デプロイメント
+
+### Kubernetesデプロイメント
+
+```bash
+# Helmチャートでデプロイ
+cd helm-chart
+helm install flow-sight .
+
+# アップグレード
+helm upgrade flow-sight .
+
+# アンインストール
+helm uninstall flow-sight
+```
+
+### 環境変数設定
+
+本番環境では以下の環境変数を適切に設定してください：
+
+```bash
+# セキュリティ
+JWT_SECRET=強力なランダム文字列
+ENV=production
+
+# データベース
+DB_HOST=本番データベースホスト
+DB_PASSWORD=強力なパスワード
+DB_SSLMODE=require
+
+# OAuth
+GOOGLE_CLIENT_ID=本番用クライアントID
+GOOGLE_CLIENT_SECRET=本番用クライアントシークレット
+```
+
+## 🎯 パフォーマンス
+
+### 要件
+- **一般的なCRUD操作**: 500ms以内
+- **キャッシュフロー予測計算**: 2秒以内
+- **36ヶ月分の予測**: 高速計算対応
+
+### 特徴
+- 構造化ログによる監視
+- ヘルスチェックエンドポイント
+- レスポンシブデザイン対応
+
+## 🔒 セキュリティ
+
+- **JWT認証**: セキュアなAPI認証
+- **Google OAuth**: 外部認証連携
+- **HTTPS推奨**: 本番環境での暗号化通信
+- **環境変数管理**: 機密情報の適切な管理
+- **構造化ログ**: セキュリティイベントの記録
+
+## 🗺️ 今後の拡張予定
+
+1. **支出詳細管理** - 個別支出記録の管理
+2. **予算管理機能** - 月次・年次予算設定
+3. **レポート機能** - 分析とトレンド表示
+4. **外部連携** - 銀行API、カード明細自動取得
+5. **通知システム** - 支払い期限アラート
+6. **モバイルアプリ** - React Native対応
+
+## 📄 ライセンス
 
 このプロジェクトはプライベートプロジェクトです。
 
-## サポート
+## 🤝 貢献
 
-質問や問題がある場合は、プロジェクトのIssueページでお知らせください。
+プルリクエストやイシューの報告は歓迎します。以下のガイドラインに従ってください：
+
+1. フォークしてブランチを作成
+2. 変更を実装しテストを追加
+3. コードスタイルガイドラインに準拠
+4. プルリクエストを作成
+
+## 📞 サポート
+
+質問や問題がある場合は、GitHubのIssueページでお知らせください。
+
+---
+
+**Flow Sight** - 健全な資金管理をサポートする個人金融管理アプリケーション
