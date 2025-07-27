@@ -64,6 +64,8 @@ export interface RecurringPayment {
   payment_day: number;
   bank_account: string;
   start_year_month: string; // Format: "2024-01"
+  total_payments?: number; // For loans, undefined means infinite payments
+  remaining_payments?: number;
   is_active: boolean;
   note?: string;
   created_at: string;

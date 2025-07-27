@@ -107,6 +107,7 @@ func (s *CashflowService) GetCashflowProjection(userID uuid.UUID, months int, on
 					}
 
 					if day == paymentDay {
+
 						// Check if there's a specific record for this month
 						records, err := s.monthlyIncomeRepo.GetByUserIDAndYearMonth(userID, yearMonth)
 						if err == nil {
@@ -192,8 +193,10 @@ func (s *CashflowService) GetCashflowProjection(userID uuid.UUID, months int, on
 			// Calculate recurring payments for this day
 			for _, payment := range recurringPayments {
 				if payment.PaymentDay == day {
-					// Check if this payment is still active (for loans with remaining payments)
-					if payment.RemainingPayments == nil || *payment.RemainingPayments > 0 {
+					// Check if this payment should be applied in this month
+					shouldApplyPayment := s.shouldApplyRecurringPayment(payment, yearMonth)
+
+					if shouldApplyPayment {
 						dayExpense += payment.Amount
 						monthlyExpenseTotal += payment.Amount
 						details = append(details, models.CashflowProjectionDetail{
@@ -323,4 +326,62 @@ func (s *CashflowService) calculateCardPayment(creditCard models.CreditCard, cur
 	}
 
 	return 0
+}
+
+// shouldApplyRecurringPayment determines if a recurring payment should be applied in the given month
+func (s *CashflowService) shouldApplyRecurringPayment(payment models.RecurringPayment, targetYearMonth string) bool {
+	// If payment is not active, don't apply
+	if !payment.IsActive {
+		return false
+	}
+
+	// Parse start year-month and target year-month
+	startYear, startMonth, err := parseYearMonth(payment.StartYearMonth)
+	if err != nil {
+		return false
+	}
+
+	targetYear, targetMonth, err := parseYearMonth(targetYearMonth)
+	if err != nil {
+		return false
+	}
+
+	// Calculate months elapsed since start
+	monthsElapsed := (targetYear-startYear)*12 + (targetMonth - startMonth)
+
+	// If target month is before start month, don't apply
+	if monthsElapsed < 0 {
+		return false
+	}
+
+	// If no total payments specified (infinite payments), apply if active
+	if payment.TotalPayments == nil || *payment.TotalPayments == 0 {
+		return true
+	}
+
+	// Calculate current payment number (1-based)
+	currentPaymentNumber := monthsElapsed + 1
+
+	// Check if we haven't exceeded the total payment count
+	return currentPaymentNumber <= *payment.TotalPayments
+}
+
+// parseYearMonth parses a year-month string like "2024-01" into year and month integers
+func parseYearMonth(yearMonth string) (int, int, error) {
+	parts := strings.Split(yearMonth, "-")
+	if len(parts) != 2 {
+		return 0, 0, fmt.Errorf("invalid year-month format: %s", yearMonth)
+	}
+
+	year, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid year in year-month: %s", yearMonth)
+	}
+
+	month, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid month in year-month: %s", yearMonth)
+	}
+
+	return year, month, nil
 }

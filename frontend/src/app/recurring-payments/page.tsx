@@ -178,6 +178,16 @@ export default function RecurringPaymentsPage() {
                     <p className="font-medium">{payment.start_year_month}</p>
                   </div>
                   
+                  <div>
+                    <p className="text-sm text-muted-foreground">支払い回数</p>
+                    <p className="font-medium">
+                      {payment.total_payments === undefined || payment.total_payments === 0 
+                        ? 'ずっと' 
+                        : `${payment.remaining_payments || payment.total_payments}/${payment.total_payments}回`
+                      }
+                    </p>
+                  </div>
+                  
                   {payment.note && (
                     <div>
                       <p className="text-sm text-muted-foreground">備考</p>

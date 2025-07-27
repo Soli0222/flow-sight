@@ -17,6 +17,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import {
   Select,
@@ -38,6 +39,7 @@ const formSchema = z.object({
   payment_day: z.string().min(1, '支払日は必須です'),
   bank_account: z.string().min(1, '銀行口座を選択してください'),
   start_year_month: z.string().min(1, '開始年月は必須です'),
+  total_payments: z.string().optional(),
   is_active: z.string(),
   note: z.string().optional(),
 });
@@ -70,6 +72,7 @@ export function RecurringPaymentForm({
       payment_day: '',
       bank_account: '',
       start_year_month: '',
+      total_payments: '',
       is_active: 'true',
       note: '',
     },
@@ -83,6 +86,7 @@ export function RecurringPaymentForm({
         payment_day: payment.payment_day.toString(),
         bank_account: payment.bank_account,
         start_year_month: payment.start_year_month,
+        total_payments: payment.total_payments ? payment.total_payments.toString() : '',
         is_active: payment.is_active ? 'true' : 'false',
         note: payment.note || '',
       });
@@ -93,6 +97,7 @@ export function RecurringPaymentForm({
         payment_day: '',
         bank_account: '',
         start_year_month: '',
+        total_payments: '',
         is_active: 'true',
         note: '',
       });
@@ -104,6 +109,9 @@ export function RecurringPaymentForm({
       setIsSubmitting(true);
       
       const amountInCents = Math.round(parseFloat(data.amount) * 100);
+      const totalPayments = data.total_payments && data.total_payments.trim() !== '' 
+        ? parseInt(data.total_payments) 
+        : undefined;
       
       const paymentData = {
         name: data.name,
@@ -111,6 +119,8 @@ export function RecurringPaymentForm({
         payment_day: parseInt(data.payment_day),
         bank_account: data.bank_account,
         start_year_month: data.start_year_month,
+        total_payments: totalPayments,
+        remaining_payments: payment ? payment.remaining_payments : totalPayments, // Preserve existing remaining for updates
         is_active: data.is_active === 'true',
         note: data.note || undefined,
       };
@@ -247,6 +257,29 @@ export function RecurringPaymentForm({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="total_payments"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>支払い回数</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      placeholder="0 (0の場合はずっと継続)"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    0を指定するとずっと継続されます。回数を指定するとその回数分のみ支払われます。
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="is_active"
