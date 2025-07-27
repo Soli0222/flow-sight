@@ -76,15 +76,15 @@ ingress:
         - path: /api
           pathType: Prefix
           backend:
-            service: flow-sight-backend
+            service: backend
         - path: /swagger
           pathType: Prefix
           backend:
-            service: flow-sight-backend
+            service: backend
         - path: /
           pathType: Prefix
           backend:
-            service: flow-sight-frontend
+            service: frontend
   tls:
    - secretName: flow-sight.tailscale.oky.pke.str08.net-dns01
      hosts:
