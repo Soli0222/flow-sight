@@ -27,6 +27,15 @@ func NewAuthHandler(authService AuthServiceInterface, cfg *config.Config) *AuthH
 	}
 }
 
+// normalizeHost removes trailing slash from host if present
+func (h *AuthHandler) normalizeHost() string {
+	host := h.config.Host
+	if len(host) > 0 && host[len(host)-1] == '/' {
+		return host[:len(host)-1]
+	}
+	return host
+}
+
 // GoogleLogin godoc
 // @Summary Start Google OAuth login
 // @Description Redirect to Google OAuth login page
@@ -93,7 +102,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 			"ip_address", c.ClientIP(),
 		)
 		// エラー時はフロントエンドのログインページにリダイレクト
-		c.Redirect(http.StatusFound, fmt.Sprintf("%s/login?error=no_code", h.config.Host))
+		c.Redirect(http.StatusFound, fmt.Sprintf("%s/login?error=no_code", h.normalizeHost()))
 		return
 	}
 
@@ -104,7 +113,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 			"ip_address", c.ClientIP(),
 		)
 		// エラー時はフロントエンドのログインページにリダイレクト
-		c.Redirect(http.StatusFound, fmt.Sprintf("%s/login?error=callback_failed", h.config.Host))
+		c.Redirect(http.StatusFound, fmt.Sprintf("%s/login?error=callback_failed", h.normalizeHost()))
 		return
 	}
 
@@ -122,7 +131,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	encodedUser := url.QueryEscape(userJSON)
 
 	redirectURL := fmt.Sprintf("%s/auth/callback?token=%s&user=%s",
-		h.config.Host, token, encodedUser)
+		h.normalizeHost(), token, encodedUser)
 
 	c.Redirect(http.StatusFound, redirectURL)
 }
