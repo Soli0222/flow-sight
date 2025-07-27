@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback((authToken: string, userData: User) => {
     setToken(authToken)
     setUser(userData)
-    Cookies.set('auth_token', authToken, { expires: 7 }) // 7 days
+    Cookies.set('auth_token', authToken, { expires: 1/24 }) // 1 hour (1/24 days)
     localStorage.setItem('user_data', JSON.stringify(userData))
   }, [])
 
