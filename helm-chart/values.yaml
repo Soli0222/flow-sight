@@ -19,8 +19,8 @@ database:
 backend:
   replicaCount: 1
   image:
-    repository: flow-sight/backend
-    tag: "latest"
+    repository: ghcr.io/soli0222/flow-sight-backend
+    tag: "1.0.1"
     pullPolicy: IfNotPresent
   environment:
     HOST: "http://localhost:8080"
@@ -53,8 +53,8 @@ backend:
 frontend:
   replicaCount: 1
   image:
-    repository: flow-sight/frontend
-    tag: "latest"
+    repository: ghcr.io/soli0222/flow-sight-frontend
+    tag: "1.0.1"
     pullPolicy: IfNotPresent
   environment:
     NEXT_PUBLIC_API_URL: ""
