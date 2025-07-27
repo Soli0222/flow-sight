@@ -19,19 +19,8 @@ services:
   # Backend API
   backend:
     build: ./backend
-    environment:
-      HOST: http://localhost:4000
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: password
-      DB_NAME: flowsight_db
-      DB_SSLMODE: disable
-      JWT_SECRET: your-super-secret-jwt-key-for-development
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      GOOGLE_REDIRECT_URL: http://localhost:4000/api/v1/auth/google/callback
-      ENV: development
+    env_file:
+      - ./backend/.env
     depends_on:
       db:
         condition: service_healthy
@@ -53,7 +42,7 @@ services:
 
   # Nginx reverse proxy
   nginx:
-    image: 1.29.0-alpine3.22
+    image: nginx:1.29.0-alpine3.22
     ports:
       - "4000:80"
     volumes:
