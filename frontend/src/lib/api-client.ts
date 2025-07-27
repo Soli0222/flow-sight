@@ -14,7 +14,8 @@ import {
 } from '@/types/api';
 import Cookies from 'js-cookie';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+// 同じドメインを使用するため、環境変数が設定されていない場合は空文字（相対パス）を使用
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 class ApiClient {
   private baseURL: string;

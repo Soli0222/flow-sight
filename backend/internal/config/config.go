@@ -4,6 +4,7 @@ import "os"
 
 type Config struct {
 	Port     string
+	Host     string
 	Database DatabaseConfig
 	JWT      JWTConfig
 	OAuth    OAuthConfig
@@ -32,6 +33,7 @@ type OAuthConfig struct {
 func Load() *Config {
 	return &Config{
 		Port: getEnv("PORT", "8080"),
+		Host: getEnv("HOST", "http://localhost:4000"),
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnv("DB_PORT", "5432"),

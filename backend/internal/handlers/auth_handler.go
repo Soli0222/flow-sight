@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"flow-sight-backend/internal/config"
 	"flow-sight-backend/internal/middleware"
 	"flow-sight-backend/internal/services"
 	"fmt"
@@ -16,11 +17,13 @@ import (
 
 type AuthHandler struct {
 	authService *services.AuthService
+	config      *config.Config
 }
 
-func NewAuthHandler(authService *services.AuthService) *AuthHandler {
+func NewAuthHandler(authService *services.AuthService, cfg *config.Config) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
+		config:      cfg,
 	}
 }
 
@@ -90,7 +93,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 			"ip_address", c.ClientIP(),
 		)
 		// エラー時はフロントエンドのログインページにリダイレクト
-		c.Redirect(http.StatusFound, "http://localhost:4000/login?error=no_code")
+		c.Redirect(http.StatusFound, fmt.Sprintf("%s/login?error=no_code", h.config.Host))
 		return
 	}
 
@@ -101,7 +104,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 			"ip_address", c.ClientIP(),
 		)
 		// エラー時はフロントエンドのログインページにリダイレクト
-		c.Redirect(http.StatusFound, "http://localhost:4000/login?error=callback_failed")
+		c.Redirect(http.StatusFound, fmt.Sprintf("%s/login?error=callback_failed", h.config.Host))
 		return
 	}
 
@@ -118,8 +121,8 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		user.ID, user.Email, user.Name, user.Picture)
 	encodedUser := url.QueryEscape(userJSON)
 
-	redirectURL := fmt.Sprintf("http://localhost:4000/auth/callback?token=%s&user=%s",
-		token, encodedUser)
+	redirectURL := fmt.Sprintf("%s/auth/callback?token=%s&user=%s",
+		h.config.Host, token, encodedUser)
 
 	c.Redirect(http.StatusFound, redirectURL)
 }

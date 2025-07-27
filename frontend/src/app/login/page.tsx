@@ -18,7 +18,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
       const response = await fetch(`${apiUrl}/api/v1/auth/google`)
       const data = await response.json()
       

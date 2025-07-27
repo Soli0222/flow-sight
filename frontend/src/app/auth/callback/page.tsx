@@ -53,7 +53,7 @@ function AuthCallbackContent() {
       try {
         // 上記で処理できない場合は、直接バックエンドのコールバックURLにリダイレクト
         console.log('Redirecting to backend callback with code:', code.substring(0, 20) + '...')
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
         window.location.href = `${apiUrl}/api/v1/auth/google/callback?code=${code}`
       } catch (error) {
         console.error('Failed to complete OAuth flow:', error)

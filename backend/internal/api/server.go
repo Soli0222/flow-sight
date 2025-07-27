@@ -36,7 +36,7 @@ func NewServer(db *sql.DB, cfg *config.Config, appLogger *logger.Logger) *Server
 
 	// Add CORS middleware
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:4000"}
+	corsConfig.AllowOrigins = []string{cfg.Host}
 	corsConfig.AllowCredentials = true
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
@@ -76,7 +76,7 @@ func (s *Server) setupRoutes() {
 	dashboardService := services.NewDashboardService(bankAccountRepo, creditCardRepo, incomeSourceRepo, monthlyIncomeRepo, recurringPaymentRepo, cashflowService)
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, s.config)
 	creditCardHandler := handlers.NewCreditCardHandler(creditCardService)
 	bankAccountHandler := handlers.NewBankAccountHandler(bankAccountService)
 	incomeHandler := handlers.NewIncomeHandler(incomeService)
