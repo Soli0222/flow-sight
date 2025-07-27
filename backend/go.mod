@@ -1,4 +1,4 @@
-module flow-sight-backend
+module github.com/Soli0222/flow-sight/backend
 
 go 1.24.5
 

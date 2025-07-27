@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"flow-sight-backend/internal/logger"
+	"github.com/Soli0222/flow-sight/backend/internal/logger"
 
 	"github.com/gin-gonic/gin"
 )

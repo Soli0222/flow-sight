@@ -4,11 +4,12 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"flow-sight-backend/internal/config"
-	"flow-sight-backend/internal/middleware"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/Soli0222/flow-sight/backend/internal/config"
+	"github.com/Soli0222/flow-sight/backend/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"flow-sight-backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"

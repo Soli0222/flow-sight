@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"flow-sight-backend/internal/services"
+	"github.com/Soli0222/flow-sight/backend/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

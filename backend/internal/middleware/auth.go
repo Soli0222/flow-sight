@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"flow-sight-backend/internal/services"
+	"github.com/Soli0222/flow-sight/backend/internal/services"
 	"net/http"
 	"strings"
 

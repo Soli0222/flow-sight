@@ -2,8 +2,9 @@ package database
 
 import (
 	"database/sql"
-	"flow-sight-backend/internal/config"
 	"fmt"
+
+	"github.com/Soli0222/flow-sight/backend/internal/config"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"

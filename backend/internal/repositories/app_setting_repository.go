@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"database/sql"
-	"flow-sight-backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
 )

@@ -1,8 +1,8 @@
 package services
 
 import (
-	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/repositories"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/internal/repositories"
 	"time"
 
 	"github.com/google/uuid"

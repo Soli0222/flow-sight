@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"flow-sight-backend/internal/middleware"
-	"flow-sight-backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/internal/middleware"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

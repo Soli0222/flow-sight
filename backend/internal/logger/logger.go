@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"flow-sight-backend/internal/config"
+	"github.com/Soli0222/flow-sight/backend/internal/config"
 )
 
 // Logger wraps slog.Logger with additional functionality
@@ -28,7 +28,7 @@ type LogConfig struct {
 func New(cfg *config.Config, version string) *Logger {
 	logConfig := &LogConfig{
 		Environment: cfg.Env,
-		Service:     "flow-sight-backend",
+		Service:     "github.com/Soli0222/flow-sight/backend",
 		Version:     version,
 		Output:      os.Stdout,
 	}

@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"flow-sight-backend/internal/config"
-	"flow-sight-backend/internal/models"
 	"fmt"
 	"time"
+
+	"github.com/Soli0222/flow-sight/backend/internal/config"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

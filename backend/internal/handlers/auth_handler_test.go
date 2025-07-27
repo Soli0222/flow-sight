@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"flow-sight-backend/internal/config"
-	"flow-sight-backend/internal/models"
-	"flow-sight-backend/test/helpers"
+	"github.com/Soli0222/flow-sight/backend/internal/config"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/test/helpers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

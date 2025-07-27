@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	_ "flow-sight-backend/docs"
-	"flow-sight-backend/internal/api"
-	"flow-sight-backend/internal/config"
-	"flow-sight-backend/internal/database"
-	"flow-sight-backend/internal/logger"
-	"flow-sight-backend/internal/version"
+
+	_ "github.com/Soli0222/flow-sight/backend/docs"
+	"github.com/Soli0222/flow-sight/backend/internal/api"
+	"github.com/Soli0222/flow-sight/backend/internal/config"
+	"github.com/Soli0222/flow-sight/backend/internal/database"
+	"github.com/Soli0222/flow-sight/backend/internal/logger"
+	"github.com/Soli0222/flow-sight/backend/internal/version"
 
 	"github.com/joho/godotenv"
 )

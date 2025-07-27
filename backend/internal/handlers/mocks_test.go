@@ -5,8 +5,8 @@
 package handlers
 
 import (
-	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/services"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/internal/services"
 
 	"github.com/google/uuid"
 	mock "github.com/stretchr/testify/mock"

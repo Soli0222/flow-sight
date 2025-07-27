@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"flow-sight-backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"time"
 
 	"github.com/google/uuid"

@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"database/sql"
-	"flow-sight-backend/internal/models"
-	"flow-sight-backend/test/helpers"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/test/helpers"
 	"testing"
 	"time"
 

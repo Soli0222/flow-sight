@@ -2,13 +2,13 @@ package api
 
 import (
 	"database/sql"
-	"flow-sight-backend/internal/config"
-	"flow-sight-backend/internal/handlers"
-	"flow-sight-backend/internal/logger"
-	"flow-sight-backend/internal/middleware"
-	"flow-sight-backend/internal/repositories"
-	"flow-sight-backend/internal/services"
-	"flow-sight-backend/internal/version"
+	"github.com/Soli0222/flow-sight/backend/internal/config"
+	"github.com/Soli0222/flow-sight/backend/internal/handlers"
+	"github.com/Soli0222/flow-sight/backend/internal/logger"
+	"github.com/Soli0222/flow-sight/backend/internal/middleware"
+	"github.com/Soli0222/flow-sight/backend/internal/repositories"
+	"github.com/Soli0222/flow-sight/backend/internal/services"
+	"github.com/Soli0222/flow-sight/backend/internal/version"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

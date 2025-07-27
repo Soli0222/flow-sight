@@ -1,9 +1,9 @@
 package services
 
 import (
-	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/services/mocks"
-	"flow-sight-backend/test/helpers"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/internal/services/mocks"
+	"github.com/Soli0222/flow-sight/backend/test/helpers"
 	"testing"
 
 	"github.com/google/uuid"
