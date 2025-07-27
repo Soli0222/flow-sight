@@ -7,7 +7,6 @@ import (
 	"errors"
 	"flow-sight-backend/internal/config"
 	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/repositories"
 	"fmt"
 	"time"
 
@@ -18,7 +17,7 @@ import (
 )
 
 type AuthService struct {
-	userRepo    *repositories.UserRepository
+	userRepo    UserRepositoryInterface
 	config      *config.Config
 	oauthConfig *oauth2.Config
 }
@@ -36,7 +35,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func NewAuthService(userRepo *repositories.UserRepository, cfg *config.Config) *AuthService {
+func NewAuthService(userRepo UserRepositoryInterface, cfg *config.Config) *AuthService {
 	oauthConfig := &oauth2.Config{
 		ClientID:     cfg.OAuth.GoogleClientID,
 		ClientSecret: cfg.OAuth.GoogleClientSecret,

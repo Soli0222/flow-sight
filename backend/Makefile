@@ -16,6 +16,27 @@ run:
 test:
 	go test -v ./...
 
+# Run tests with coverage
+test-coverage:
+	go test -v -cover ./...
+
+# Run tests with detailed coverage report
+test-coverage-detail:
+	go test -v -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+
+# Run only unit tests (exclude integration tests)
+test-unit:
+	go test -v -short ./internal/...
+
+# Run specific test package
+test-repositories:
+	go test -v ./internal/repositories/...
+
+# Run specific test package
+test-services:
+	go test -v ./internal/services/...
+
 # Clean build artifacts
 clean:
 	rm -rf bin/

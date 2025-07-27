@@ -2,17 +2,16 @@ package services
 
 import (
 	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/repositories"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type CreditCardService struct {
-	creditCardRepo *repositories.CreditCardRepository
+	creditCardRepo CreditCardRepositoryInterface
 }
 
-func NewCreditCardService(creditCardRepo *repositories.CreditCardRepository) *CreditCardService {
+func NewCreditCardService(creditCardRepo CreditCardRepositoryInterface) *CreditCardService {
 	return &CreditCardService{
 		creditCardRepo: creditCardRepo,
 	}

@@ -2,17 +2,16 @@ package services
 
 import (
 	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/repositories"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type BankAccountService struct {
-	bankAccountRepo *repositories.BankAccountRepository
+	bankAccountRepo BankAccountRepositoryInterface
 }
 
-func NewBankAccountService(bankAccountRepo *repositories.BankAccountRepository) *BankAccountService {
+func NewBankAccountService(bankAccountRepo BankAccountRepositoryInterface) *BankAccountService {
 	return &BankAccountService{
 		bankAccountRepo: bankAccountRepo,
 	}

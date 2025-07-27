@@ -2,17 +2,16 @@ package services
 
 import (
 	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/repositories"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type RecurringPaymentService struct {
-	recurringPaymentRepo *repositories.RecurringPaymentRepository
+	recurringPaymentRepo RecurringPaymentRepositoryInterface
 }
 
-func NewRecurringPaymentService(recurringPaymentRepo *repositories.RecurringPaymentRepository) *RecurringPaymentService {
+func NewRecurringPaymentService(recurringPaymentRepo RecurringPaymentRepositoryInterface) *RecurringPaymentService {
 	return &RecurringPaymentService{
 		recurringPaymentRepo: recurringPaymentRepo,
 	}

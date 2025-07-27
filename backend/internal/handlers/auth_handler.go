@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"flow-sight-backend/internal/config"
 	"flow-sight-backend/internal/middleware"
-	"flow-sight-backend/internal/services"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -16,11 +15,11 @@ import (
 )
 
 type AuthHandler struct {
-	authService *services.AuthService
+	authService AuthServiceInterface
 	config      *config.Config
 }
 
-func NewAuthHandler(authService *services.AuthService, cfg *config.Config) *AuthHandler {
+func NewAuthHandler(authService AuthServiceInterface, cfg *config.Config) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
 		config:      cfg,

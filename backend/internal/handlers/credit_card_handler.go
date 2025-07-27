@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,10 +9,10 @@ import (
 )
 
 type CreditCardHandler struct {
-	creditCardService *services.CreditCardService
+	creditCardService CreditCardServiceInterface
 }
 
-func NewCreditCardHandler(creditCardService *services.CreditCardService) *CreditCardHandler {
+func NewCreditCardHandler(creditCardService CreditCardServiceInterface) *CreditCardHandler {
 	return &CreditCardHandler{
 		creditCardService: creditCardService,
 	}
@@ -30,13 +29,13 @@ func NewCreditCardHandler(creditCardService *services.CreditCardService) *Credit
 func (h *CreditCardHandler) GetCreditCards(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
 		return
 	}
 
 	userUUID, ok := userID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
@@ -86,13 +85,13 @@ func (h *CreditCardHandler) GetCreditCard(c *gin.Context) {
 func (h *CreditCardHandler) CreateCreditCard(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
 		return
 	}
 
 	userUUID, ok := userID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
@@ -166,5 +165,5 @@ func (h *CreditCardHandler) DeleteCreditCard(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, nil)
 }

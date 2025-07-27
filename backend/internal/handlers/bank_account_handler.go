@@ -4,7 +4,6 @@ import (
 	"context"
 	"flow-sight-backend/internal/middleware"
 	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,10 +11,10 @@ import (
 )
 
 type BankAccountHandler struct {
-	bankAccountService *services.BankAccountService
+	bankAccountService BankAccountServiceInterface
 }
 
-func NewBankAccountHandler(bankAccountService *services.BankAccountService) *BankAccountHandler {
+func NewBankAccountHandler(bankAccountService BankAccountServiceInterface) *BankAccountHandler {
 	return &BankAccountHandler{
 		bankAccountService: bankAccountService,
 	}
@@ -147,6 +146,13 @@ func (h *BankAccountHandler) CreateBankAccount(c *gin.Context) {
 // @Success 200 {object} models.BankAccount
 // @Router /bank-accounts/{id} [put]
 func (h *BankAccountHandler) UpdateBankAccount(c *gin.Context) {
+	// Check authentication
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -161,6 +167,7 @@ func (h *BankAccountHandler) UpdateBankAccount(c *gin.Context) {
 	}
 
 	account.ID = id
+	account.UserID = userID.(uuid.UUID)
 	if err := h.bankAccountService.UpdateBankAccount(&account); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -178,6 +185,13 @@ func (h *BankAccountHandler) UpdateBankAccount(c *gin.Context) {
 // @Success 204
 // @Router /bank-accounts/{id} [delete]
 func (h *BankAccountHandler) DeleteBankAccount(c *gin.Context) {
+	// Check authentication
+	_, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -190,5 +204,5 @@ func (h *BankAccountHandler) DeleteBankAccount(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, nil)
 }

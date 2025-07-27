@@ -79,29 +79,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    // Check for existing token and user data on app start
-    const savedToken = Cookies.get('auth_token')
-    const savedUser = localStorage.getItem('user_data')
-    
-    if (savedToken && savedUser) {
-      try {
-        const userData = JSON.parse(savedUser)
+    const initializeAuth = async () => {
+      // Check for existing token and user data on app start
+      const savedToken = Cookies.get('auth_token')
+      const savedUser = localStorage.getItem('user_data')
+      
+      if (savedToken && savedUser) {
+        try {
+          const userData = JSON.parse(savedUser)
+          setToken(savedToken)
+          setUser(userData)
+          setIsLoading(false)
+        } catch (error) {
+          console.error('Failed to parse saved user data:', error)
+          // If user data is corrupted, fetch from server
+          setToken(savedToken)
+          await fetchUserInfo(savedToken)
+        }
+      } else if (savedToken) {
         setToken(savedToken)
-        setUser(userData)
+        // Fetch user info if we have token but no user data
+        await fetchUserInfo(savedToken)
+      } else {
         setIsLoading(false)
-      } catch (error) {
-        console.error('Failed to parse saved user data:', error)
-        // If user data is corrupted, fetch from server
-        setToken(savedToken)
-        fetchUserInfo(savedToken)
       }
-    } else if (savedToken) {
-      setToken(savedToken)
-      // Fetch user info if we have token but no user data
-      fetchUserInfo(savedToken)
-    } else {
-      setIsLoading(false)
     }
+    
+    initializeAuth()
   }, [fetchUserInfo])
 
   const login = useCallback((authToken: string, userData: User) => {

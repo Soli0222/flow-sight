@@ -1,0 +1,8 @@
+packages:
+  flow-sight-backend/internal/handlers:
+    interfaces:
+      BankAccountServiceInterface:
+      CreditCardServiceInterface:
+      AuthServiceInterface:
+      RecurringPaymentServiceInterface:
+      IncomeServiceInterface:

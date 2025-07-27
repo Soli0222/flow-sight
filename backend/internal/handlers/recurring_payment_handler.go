@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,10 +9,10 @@ import (
 )
 
 type RecurringPaymentHandler struct {
-	recurringPaymentService *services.RecurringPaymentService
+	recurringPaymentService RecurringPaymentServiceInterface
 }
 
-func NewRecurringPaymentHandler(recurringPaymentService *services.RecurringPaymentService) *RecurringPaymentHandler {
+func NewRecurringPaymentHandler(recurringPaymentService RecurringPaymentServiceInterface) *RecurringPaymentHandler {
 	return &RecurringPaymentHandler{
 		recurringPaymentService: recurringPaymentService,
 	}
@@ -30,13 +29,13 @@ func NewRecurringPaymentHandler(recurringPaymentService *services.RecurringPayme
 func (h *RecurringPaymentHandler) GetRecurringPayments(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
 		return
 	}
 
 	userUUID, ok := userID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
@@ -86,13 +85,13 @@ func (h *RecurringPaymentHandler) GetRecurringPayment(c *gin.Context) {
 func (h *RecurringPaymentHandler) CreateRecurringPayment(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
 		return
 	}
 
 	userUUID, ok := userID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
@@ -166,5 +165,5 @@ func (h *RecurringPaymentHandler) DeleteRecurringPayment(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, nil)
 }

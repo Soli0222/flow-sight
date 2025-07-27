@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"flow-sight-backend/internal/models"
-	"flow-sight-backend/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,10 +9,10 @@ import (
 )
 
 type IncomeHandler struct {
-	incomeService *services.IncomeService
+	incomeService IncomeServiceInterface
 }
 
-func NewIncomeHandler(incomeService *services.IncomeService) *IncomeHandler {
+func NewIncomeHandler(incomeService IncomeServiceInterface) *IncomeHandler {
 	return &IncomeHandler{
 		incomeService: incomeService,
 	}
@@ -32,13 +31,13 @@ func NewIncomeHandler(incomeService *services.IncomeService) *IncomeHandler {
 func (h *IncomeHandler) GetIncomeSources(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
 		return
 	}
 
 	userUUID, ok := userID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
 		return
 	}
 
@@ -88,7 +87,7 @@ func (h *IncomeHandler) GetIncomeSource(c *gin.Context) {
 func (h *IncomeHandler) CreateIncomeSource(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
 		return
 	}
 
@@ -168,7 +167,7 @@ func (h *IncomeHandler) DeleteIncomeSource(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, nil)
 }
 
 // Monthly Income Record handlers
@@ -304,5 +303,5 @@ func (h *IncomeHandler) DeleteMonthlyIncomeRecord(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, nil)
 }
