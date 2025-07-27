@@ -2,7 +2,7 @@ package version
 
 var (
 	// Application version - update this manually
-	Version = "1.0.1"
+	Version = "1.1.0"
 )
 
 type BuildInfo struct {
