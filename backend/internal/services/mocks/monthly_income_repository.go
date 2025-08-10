@@ -17,13 +17,13 @@ func (m *MockMonthlyIncomeRepository) GetByIncomeSourceID(incomeSourceID uuid.UU
 	return args.Get(0).([]models.MonthlyIncomeRecord), args.Error(1)
 }
 
-func (m *MockMonthlyIncomeRepository) GetByYearMonth(userID uuid.UUID, yearMonth string) ([]models.MonthlyIncomeRecord, error) {
-	args := m.Called(userID, yearMonth)
+func (m *MockMonthlyIncomeRepository) GetByYearMonth(yearMonth string) ([]models.MonthlyIncomeRecord, error) {
+	args := m.Called(yearMonth)
 	return args.Get(0).([]models.MonthlyIncomeRecord), args.Error(1)
 }
 
-// Add convenience method used by services
-func (m *MockMonthlyIncomeRepository) GetByUserIDAndYearMonth(userID uuid.UUID, yearMonth string) ([]models.MonthlyIncomeRecord, error) {
-	args := m.Called(userID, yearMonth)
+// Deprecated helper retained for backward compatibility in tests (no-op userID)
+func (m *MockMonthlyIncomeRepository) GetByUserIDAndYearMonth(_ uuid.UUID, yearMonth string) ([]models.MonthlyIncomeRecord, error) {
+	args := m.Called(yearMonth)
 	return args.Get(0).([]models.MonthlyIncomeRecord), args.Error(1)
 }

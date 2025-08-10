@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
@@ -15,17 +16,16 @@ func NewRecurringPaymentRepository(db *sql.DB) *RecurringPaymentRepository {
 	return &RecurringPaymentRepository{db: db}
 }
 
-func (r *RecurringPaymentRepository) GetAll(userID uuid.UUID) ([]models.RecurringPayment, error) {
+func (r *RecurringPaymentRepository) GetAll() ([]models.RecurringPayment, error) {
 	query := `
-		SELECT id, user_id, name, amount, payment_day, start_year_month, 
+		SELECT id, name, amount, payment_day, start_year_month, 
 		       total_payments, remaining_payments, bank_account, is_active, 
 		       note, created_at, updated_at
 		FROM recurring_payments 
-		WHERE user_id = $1
 		ORDER BY created_at DESC
 	`
 
-	rows, err := r.db.Query(query, userID)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return []models.RecurringPayment{}, err
 	}
@@ -35,7 +35,7 @@ func (r *RecurringPaymentRepository) GetAll(userID uuid.UUID) ([]models.Recurrin
 	for rows.Next() {
 		var payment models.RecurringPayment
 		err := rows.Scan(
-			&payment.ID, &payment.UserID, &payment.Name, &payment.Amount,
+			&payment.ID, &payment.Name, &payment.Amount,
 			&payment.PaymentDay, &payment.StartYearMonth, &payment.TotalPayments,
 			&payment.RemainingPayments, &payment.BankAccount, &payment.IsActive,
 			&payment.Note, &payment.CreatedAt, &payment.UpdatedAt,
@@ -49,17 +49,17 @@ func (r *RecurringPaymentRepository) GetAll(userID uuid.UUID) ([]models.Recurrin
 	return payments, nil
 }
 
-func (r *RecurringPaymentRepository) GetActiveByUserID(userID uuid.UUID) ([]models.RecurringPayment, error) {
+func (r *RecurringPaymentRepository) GetActive() ([]models.RecurringPayment, error) {
 	query := `
-		SELECT id, user_id, name, amount, payment_day, start_year_month, 
+		SELECT id, name, amount, payment_day, start_year_month, 
 		       total_payments, remaining_payments, bank_account, is_active, 
 		       note, created_at, updated_at
 		FROM recurring_payments 
-		WHERE user_id = $1 AND is_active = true
+		WHERE is_active = true
 		ORDER BY payment_day ASC
 	`
 
-	rows, err := r.db.Query(query, userID)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (r *RecurringPaymentRepository) GetActiveByUserID(userID uuid.UUID) ([]mode
 	for rows.Next() {
 		var payment models.RecurringPayment
 		err := rows.Scan(
-			&payment.ID, &payment.UserID, &payment.Name, &payment.Amount,
+			&payment.ID, &payment.Name, &payment.Amount,
 			&payment.PaymentDay, &payment.StartYearMonth, &payment.TotalPayments,
 			&payment.RemainingPayments, &payment.BankAccount, &payment.IsActive,
 			&payment.Note, &payment.CreatedAt, &payment.UpdatedAt,
@@ -85,7 +85,7 @@ func (r *RecurringPaymentRepository) GetActiveByUserID(userID uuid.UUID) ([]mode
 
 func (r *RecurringPaymentRepository) GetByID(id uuid.UUID) (*models.RecurringPayment, error) {
 	query := `
-		SELECT id, user_id, name, amount, payment_day, start_year_month, 
+		SELECT id, name, amount, payment_day, start_year_month, 
 		       total_payments, remaining_payments, bank_account, is_active, 
 		       note, created_at, updated_at
 		FROM recurring_payments 
@@ -94,7 +94,7 @@ func (r *RecurringPaymentRepository) GetByID(id uuid.UUID) (*models.RecurringPay
 
 	var payment models.RecurringPayment
 	err := r.db.QueryRow(query, id).Scan(
-		&payment.ID, &payment.UserID, &payment.Name, &payment.Amount,
+		&payment.ID, &payment.Name, &payment.Amount,
 		&payment.PaymentDay, &payment.StartYearMonth, &payment.TotalPayments,
 		&payment.RemainingPayments, &payment.BankAccount, &payment.IsActive,
 		&payment.Note, &payment.CreatedAt, &payment.UpdatedAt,
@@ -109,14 +109,14 @@ func (r *RecurringPaymentRepository) GetByID(id uuid.UUID) (*models.RecurringPay
 
 func (r *RecurringPaymentRepository) Create(payment *models.RecurringPayment) error {
 	query := `
-		INSERT INTO recurring_payments (id, user_id, name, amount, payment_day, 
+		INSERT INTO recurring_payments (id, name, amount, payment_day, 
 		                               start_year_month, total_payments, remaining_payments, 
 		                               bank_account, is_active, note, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 	`
 
 	_, err := r.db.Exec(query,
-		payment.ID, payment.UserID, payment.Name, payment.Amount,
+		payment.ID, payment.Name, payment.Amount,
 		payment.PaymentDay, payment.StartYearMonth, payment.TotalPayments,
 		payment.RemainingPayments, payment.BankAccount, payment.IsActive,
 		payment.Note, payment.CreatedAt, payment.UpdatedAt,

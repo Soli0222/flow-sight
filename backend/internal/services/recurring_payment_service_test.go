@@ -1,10 +1,11 @@
 package services
 
 import (
+	"testing"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"github.com/Soli0222/flow-sight/backend/internal/services/mocks"
 	"github.com/Soli0222/flow-sight/backend/test/helpers"
-	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -14,43 +15,38 @@ import (
 func TestRecurringPaymentService_GetRecurringPayments(t *testing.T) {
 	mockRepo := &mocks.MockRecurringPaymentRepository{}
 	service := NewRecurringPaymentService(mockRepo)
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
 		name          string
-		userID        uuid.UUID
 		setupMock     func(*mocks.MockRecurringPaymentRepository)
 		expectedCount int
 		expectedError bool
 	}{
 		{
-			name:   "successful retrieval",
-			userID: userID,
+			name: "successful retrieval",
 			setupMock: func(m *mocks.MockRecurringPaymentRepository) {
 				payments := []models.RecurringPayment{
-					*helpers.CreateTestRecurringPayment(userID, bankAccountID),
-					*helpers.CreateTestRecurringPayment(userID, bankAccountID),
+					*helpers.CreateTestRecurringPayment(bankAccountID),
+					*helpers.CreateTestRecurringPayment(bankAccountID),
 				}
-				m.On("GetAll", userID).Return(payments, nil)
+				m.On("GetAll").Return(payments, nil)
 			},
 			expectedCount: 2,
 			expectedError: false,
 		},
 		{
-			name:   "empty result",
-			userID: userID,
+			name: "empty result",
 			setupMock: func(m *mocks.MockRecurringPaymentRepository) {
-				m.On("GetAll", userID).Return([]models.RecurringPayment{}, nil)
+				m.On("GetAll").Return([]models.RecurringPayment{}, nil)
 			},
 			expectedCount: 0,
 			expectedError: false,
 		},
 		{
-			name:   "repository error",
-			userID: userID,
+			name: "repository error",
 			setupMock: func(m *mocks.MockRecurringPaymentRepository) {
-				m.On("GetAll", userID).Return([]models.RecurringPayment{}, assert.AnError)
+				m.On("GetAll").Return([]models.RecurringPayment{}, assert.AnError)
 			},
 			expectedCount: 0,
 			expectedError: true,
@@ -62,7 +58,7 @@ func TestRecurringPaymentService_GetRecurringPayments(t *testing.T) {
 			mockRepo.ExpectedCalls = nil
 			tt.setupMock(mockRepo)
 
-			result, err := service.GetRecurringPayments(tt.userID)
+			result, err := service.GetRecurringPayments()
 
 			if tt.expectedError {
 				assert.Error(t, err)
@@ -79,7 +75,6 @@ func TestRecurringPaymentService_GetRecurringPayments(t *testing.T) {
 func TestRecurringPaymentService_CreateRecurringPayment(t *testing.T) {
 	mockRepo := &mocks.MockRecurringPaymentRepository{}
 	service := NewRecurringPaymentService(mockRepo)
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
@@ -90,17 +85,17 @@ func TestRecurringPaymentService_CreateRecurringPayment(t *testing.T) {
 	}{
 		{
 			name:    "successful creation",
-			payment: helpers.CreateTestRecurringPayment(userID, bankAccountID),
+			payment: helpers.CreateTestRecurringPayment(bankAccountID),
 			setupMock: func(m *mocks.MockRecurringPaymentRepository, rp *models.RecurringPayment) {
 				m.On("Create", mock.MatchedBy(func(payment *models.RecurringPayment) bool {
-					return payment.UserID == userID && payment.Name == rp.Name
+					return payment.Name == rp.Name
 				})).Return(nil)
 			},
 			expectedError: false,
 		},
 		{
 			name:    "repository error",
-			payment: helpers.CreateTestRecurringPayment(userID, bankAccountID),
+			payment: helpers.CreateTestRecurringPayment(bankAccountID),
 			setupMock: func(m *mocks.MockRecurringPaymentRepository, rp *models.RecurringPayment) {
 				m.On("Create", mock.AnythingOfType("*models.RecurringPayment")).Return(assert.AnError)
 			},

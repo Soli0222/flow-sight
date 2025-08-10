@@ -1,8 +1,6 @@
 'use client'
 
-import { useAuth } from '@/components/providers/auth-provider'
 import { MainLayout } from '@/components/layout/main-layout'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { useApi } from '@/components/providers/api-provider'
 import { DashboardSummary } from '@/types/api'
@@ -13,8 +11,6 @@ import { toast } from 'sonner'
 import { BalanceTrendChart } from '@/components/dashboard/balance-trend-chart'
 
 export default function DashboardPage() {
-  const { user, isLoading: authLoading } = useAuth()
-  const router = useRouter()
   const apiClient = useApi()
   
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null)
@@ -45,18 +41,10 @@ export default function DashboardPage() {
   }, [apiClient])
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login')
-    }
-  }, [user, authLoading, router])
+    loadDashboardData()
+  }, [loadDashboardData])
 
-  useEffect(() => {
-    if (user && !authLoading) {
-      loadDashboardData()
-    }
-  }, [user, authLoading, loadDashboardData])
-
-  if (authLoading || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>Loading...</div>
@@ -64,7 +52,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (!user || !dashboardData) {
+  if (!dashboardData) {
     return null
   }
 
@@ -74,7 +62,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold">ダッシュボード</h1>
           <p className="text-muted-foreground">
-            {user.name}さん、Flow Sightへようこそ。金融管理の概要をここで確認できます。
+            Flow Sightへようこそ。金融管理の概要をここで確認できます。
           </p>
         </div>
 

@@ -2,7 +2,6 @@
 
 export interface CreditCard {
   id: string;
-  user_id: string;
   name: string;
   bank_account: string;
   closing_day?: number; // Closing day of the month
@@ -13,7 +12,6 @@ export interface CreditCard {
 
 export interface BankAccount {
   id: string;
-  user_id: string;
   name: string;
   balance: number; // Amount in cents
   created_at: string;
@@ -32,7 +30,6 @@ export interface CardMonthlyTotal {
 
 export interface IncomeSource {
   id: string;
-  user_id: string;
   name: string;
   income_type: 'monthly_fixed' | 'one_time';
   base_amount: number; // Amount in cents
@@ -58,7 +55,6 @@ export interface MonthlyIncomeRecord {
 
 export interface RecurringPayment {
   id: string;
-  user_id: string;
   name: string;
   amount: number; // Amount in cents
   payment_day: number;
@@ -96,7 +92,6 @@ export interface DashboardSummary {
 
 export interface AppSetting {
   id: string;
-  user_id: string;
   key: string;
   value: string;
   created_at: string;
@@ -109,26 +104,4 @@ export interface UpdateSettingsRequest {
 
 export interface VersionInfo {
   version: string;
-}
-
-export interface UserInfo {
-  id: string;
-  email: string;
-  name: string;
-  picture: string;
-  google_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// API Error Response
-export interface ApiError {
-  message: string;
-  code?: string;
-}
-
-// Common API response wrapper
-export interface ApiResponse<T> {
-  data: T;
-  error?: ApiError;
 }

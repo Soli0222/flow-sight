@@ -7,7 +7,7 @@ help: ## このヘルプメッセージを表示
 setup: ## 初期セットアップ（.envファイルをコピー）
 	@if [ ! -f .env ]; then \
 		cp .env.example .env; \
-		echo "📝 .envファイルを作成しました。Google OAuth情報を設定してください。"; \
+		echo "📝 .envファイルを作成しました。必要に応じて値を調整してください。"; \
 	else \
 		echo "✅ .envファイルは既に存在します。"; \
 	fi

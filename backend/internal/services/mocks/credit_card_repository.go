@@ -12,8 +12,8 @@ type MockCreditCardRepository struct {
 	mock.Mock
 }
 
-func (m *MockCreditCardRepository) GetAll(userID uuid.UUID) ([]models.CreditCard, error) {
-	args := m.Called(userID)
+func (m *MockCreditCardRepository) GetAll() ([]models.CreditCard, error) {
+	args := m.Called()
 	return args.Get(0).([]models.CreditCard), args.Error(1)
 }
 

@@ -9,7 +9,6 @@ import (
 // CreditCard represents a credit card
 type CreditCard struct {
 	ID          uuid.UUID `json:"id" db:"id"`
-	UserID      uuid.UUID `json:"user_id" db:"user_id"`
 	Name        string    `json:"name" db:"name"`
 	ClosingDay  *int      `json:"closing_day,omitempty" db:"closing_day"` // Closing day of the month
 	PaymentDay  int       `json:"payment_day" db:"payment_day"`
@@ -21,7 +20,6 @@ type CreditCard struct {
 // BankAccount represents a user's bank account
 type BankAccount struct {
 	ID        uuid.UUID `json:"id" db:"id"`
-	UserID    uuid.UUID `json:"user_id" db:"user_id"`
 	Name      string    `json:"name" db:"name"`
 	Balance   int64     `json:"balance" db:"balance"` // Amount in cents
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
@@ -31,7 +29,6 @@ type BankAccount struct {
 // IncomeSource represents a source of income
 type IncomeSource struct {
 	ID                 uuid.UUID `json:"id" db:"id"`
-	UserID             uuid.UUID `json:"user_id" db:"user_id"`
 	Name               string    `json:"name" db:"name"`
 	IncomeType         string    `json:"income_type" db:"income_type"` // "monthly_fixed" or "one_time"
 	BaseAmount         int64     `json:"base_amount" db:"base_amount"` // Amount in cents
@@ -59,7 +56,6 @@ type MonthlyIncomeRecord struct {
 // RecurringPayment represents a fixed recurring payment
 type RecurringPayment struct {
 	ID                uuid.UUID `json:"id" db:"id"`
-	UserID            uuid.UUID `json:"user_id" db:"user_id"`
 	Name              string    `json:"name" db:"name"`
 	Amount            int64     `json:"amount" db:"amount"` // Amount in cents
 	PaymentDay        int       `json:"payment_day" db:"payment_day"`
@@ -87,7 +83,6 @@ type CardMonthlyTotal struct {
 // AppSetting represents application settings
 type AppSetting struct {
 	ID        uuid.UUID `json:"id" db:"id"`
-	UserID    uuid.UUID `json:"user_id" db:"user_id"`
 	Key       string    `json:"key" db:"key"`
 	Value     string    `json:"value" db:"value"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
@@ -117,16 +112,4 @@ type DashboardSummary struct {
 	MonthlyExpense   int64                `json:"monthly_expense"`
 	TotalAssets      int                  `json:"total_assets"`
 	RecentActivities []CashflowProjection `json:"recent_activities"`
-}
-
-// User represents a user
-type User struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	Email     string    `json:"email" db:"email"`
-	Name      string    `json:"name" db:"name"`
-	Picture   string    `json:"picture" db:"picture"`
-	GoogleID  string    `json:"google_id" db:"google_id"`
-	Password  string    `json:"-" db:"password"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
-	"github.com/Soli0222/flow-sight/backend/test/helpers"
 	"net/http"
 	"testing"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/test/helpers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,37 +17,37 @@ func TestBankAccountHandler_GetBankAccounts_New(t *testing.T) {
 	tests := []struct {
 		name           string
 		authenticated  bool
-		setupMock      func(*MockBankAccountServiceInterface, uuid.UUID)
+		setupMock      func(*MockBankAccountServiceInterface)
 		expectedStatus int
 		expectedCount  int
 	}{
 		{
 			name:          "successful retrieval",
 			authenticated: true,
-			setupMock: func(m *MockBankAccountServiceInterface, userID uuid.UUID) {
+			setupMock: func(m *MockBankAccountServiceInterface) {
 				accounts := []models.BankAccount{
-					*helpers.CreateTestBankAccount(userID),
-					*helpers.CreateTestBankAccount(userID),
+					*helpers.CreateTestBankAccount(),
+					*helpers.CreateTestBankAccount(),
 				}
-				m.On("GetBankAccounts", userID).Return(accounts, nil)
+				m.On("GetBankAccounts").Return(accounts, nil)
 			},
 			expectedStatus: http.StatusOK,
 			expectedCount:  2,
 		},
 		{
-			name:          "unauthenticated user",
+			name:          "unauthenticated user - still processes request",
 			authenticated: false,
-			setupMock: func(m *MockBankAccountServiceInterface, userID uuid.UUID) {
-				// No mock setup needed for unauthenticated request
+			setupMock: func(m *MockBankAccountServiceInterface) {
+				m.On("GetBankAccounts").Return([]models.BankAccount{}, nil)
 			},
-			expectedStatus: http.StatusUnauthorized,
+			expectedStatus: http.StatusOK,
 			expectedCount:  0,
 		},
 		{
 			name:          "service error",
 			authenticated: true,
-			setupMock: func(m *MockBankAccountServiceInterface, userID uuid.UUID) {
-				m.On("GetBankAccounts", userID).Return([]models.BankAccount{}, assert.AnError)
+			setupMock: func(m *MockBankAccountServiceInterface) {
+				m.On("GetBankAccounts").Return([]models.BankAccount{}, assert.AnError)
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedCount:  0,
@@ -61,12 +62,11 @@ func TestBankAccountHandler_GetBankAccounts_New(t *testing.T) {
 			// Create test context
 			c, w := helpers.CreateTestContext(t, "GET", "/bank-accounts", nil, tt.authenticated)
 
-			userID := uuid.New()
 			if tt.authenticated {
-				c.Set("user_id", userID)
+				c.Set("user_id", uuid.New())
 			}
 
-			tt.setupMock(mockService, userID)
+			tt.setupMock(mockService)
 
 			// Execute handler
 			handler.GetBankAccounts(c)
@@ -97,7 +97,7 @@ func TestBankAccountHandler_GetBankAccount_New(t *testing.T) {
 			authenticated: true,
 			setupMock: func(m *MockBankAccountServiceInterface, accountIDStr string) {
 				accountID, _ := uuid.Parse(accountIDStr)
-				testAccount := helpers.CreateTestBankAccount(uuid.New())
+				testAccount := helpers.CreateTestBankAccount()
 				m.On("GetBankAccount", accountID).Return(testAccount, nil)
 			},
 			expectedStatus: http.StatusOK,
@@ -168,16 +168,16 @@ func TestBankAccountHandler_CreateBankAccount_New(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 		},
 		{
-			name:          "unauthenticated user",
+			name:          "unauthenticated user - still processes request",
 			authenticated: false,
 			requestBody: map[string]interface{}{
 				"name":    "Test Bank Account",
 				"balance": int64(100000),
 			},
 			setupMock: func(m *MockBankAccountServiceInterface) {
-				// No mock setup needed for unauthenticated request
+				m.On("CreateBankAccount", mock.AnythingOfType("*models.BankAccount")).Return(nil)
 			},
-			expectedStatus: http.StatusForbidden,
+			expectedStatus: http.StatusCreated,
 		},
 		{
 			name:          "invalid JSON body",
@@ -248,7 +248,7 @@ func TestBankAccountHandler_UpdateBankAccount_New(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 		{
-			name:          "unauthenticated user",
+			name:          "unauthenticated user - still processes request",
 			accountID:     uuid.New().String(),
 			authenticated: false,
 			requestBody: map[string]interface{}{
@@ -256,9 +256,9 @@ func TestBankAccountHandler_UpdateBankAccount_New(t *testing.T) {
 				"balance": int64(200000),
 			},
 			setupMock: func(m *MockBankAccountServiceInterface) {
-				// No mock setup needed for unauthenticated request
+				m.On("UpdateBankAccount", mock.AnythingOfType("*models.BankAccount")).Return(nil)
 			},
-			expectedStatus: http.StatusUnauthorized,
+			expectedStatus: http.StatusOK,
 		},
 		{
 			name:          "invalid account ID",
@@ -331,13 +331,13 @@ func TestBankAccountHandler_DeleteBankAccount_New(t *testing.T) {
 			expectedStatus: http.StatusNoContent,
 		},
 		{
-			name:          "unauthenticated user",
+			name:          "unauthenticated user - still processes request (invalid UUID)",
 			accountID:     "unknown-uuid",
 			authenticated: false,
 			setupMock: func(m *MockBankAccountServiceInterface) {
-				// No mock setup needed for unauthenticated request
+				// invalid uuid; service won't be called
 			},
-			expectedStatus: http.StatusUnauthorized,
+			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:          "invalid account ID",

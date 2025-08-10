@@ -24,18 +24,6 @@ Flow-Sightアプリケーション用のHelmチャートです。
 - 内部データベース・外部データベース両方に対応
 - `backend.initContainer.enabled: false`で無効化可能
 
-### 外部Secret参照
-本番環境では事前に作成したSecretリソースを参照できます：
-
-```bash
-# 外部Secretの作成例
-kubectl create secret generic flow-sight-secrets \
-  --from-literal=DB_PASSWORD="secure-password" \
-  --from-literal=JWT_SECRET="secure-jwt-key" \
-  --from-literal=GOOGLE_CLIENT_ID="client-id" \
-  --from-literal=GOOGLE_CLIENT_SECRET="client-secret"
-```
-
 ## 前提条件
 
 - Kubernetes 1.16+
@@ -67,10 +55,7 @@ backend:
     port: 5432
   secrets:
     externalName: ""  # 外部Secretを使う場合はSecret名を指定
-    GOOGLE_CLIENT_ID: "your-google-client-id"
-    GOOGLE_CLIENT_SECRET: "your-google-client-secret"
     DB_PASSWORD: "your-secure-database-password"
-    JWT_SECRET: "your-super-secret-jwt-key"
 
 # 内部データベース（開発用、本番では通常無効）
 database:
@@ -118,9 +103,6 @@ helm install flow-sight .
 - `backend.initContainer.image.*`: initContainerで使用するPostgreSQLイメージ設定
 - `backend.secrets.externalName`: 外部Secretの名前（設定すると外部Secretを参照、内部Secret作成をスキップ）
 - `backend.secrets.DB_PASSWORD`: データベースパスワード（Secretで管理）
-- `backend.secrets.JWT_SECRET`: JWT署名用秘密鍵（Secretで管理）
-- `backend.secrets.GOOGLE_CLIENT_ID`: Google OAuthクライアントID（Secretで管理）
-- `backend.secrets.GOOGLE_CLIENT_SECRET`: Google OAuthクライアントシークレット（Secretで管理）
 
 ### Frontend設定
 - `frontend.replicaCount`: レプリカ数
@@ -149,7 +131,6 @@ backend:
     enabled: true  # DB起動待機を有効
   secrets:
     DB_PASSWORD: "development-password"
-    JWT_SECRET: "development-jwt-secret-key"
 ```
 
 ### 本番環境（外部データベース使用）
@@ -168,17 +149,13 @@ backend:
     enabled: true  # 外部DBでも起動待機を有効
   secrets:
     DB_PASSWORD: "secure-production-password"
-    JWT_SECRET: "secure-production-jwt-key"
 ```
 
 ### 外部Secret使用例（本番環境推奨）
 ```bash
 # 事前に外部Secretを作成
 kubectl create secret generic flow-sight-secrets \
-  --from-literal=DB_PASSWORD="secure-production-password" \
-  --from-literal=JWT_SECRET="secure-production-jwt-key" \
-  --from-literal=GOOGLE_CLIENT_ID="your-google-client-id" \
-  --from-literal=GOOGLE_CLIENT_SECRET="your-google-client-secret"
+  --from-literal=DB_PASSWORD="secure-production-password"
 
 # values.yaml
 backend:

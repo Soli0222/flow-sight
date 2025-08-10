@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
@@ -15,15 +16,14 @@ func NewCreditCardRepository(db *sql.DB) *CreditCardRepository {
 	return &CreditCardRepository{db: db}
 }
 
-func (r *CreditCardRepository) GetAll(userID uuid.UUID) ([]models.CreditCard, error) {
+func (r *CreditCardRepository) GetAll() ([]models.CreditCard, error) {
 	query := `
-		SELECT id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at
+		SELECT id, name, closing_day, payment_day, bank_account, created_at, updated_at
 		FROM credit_cards 
-		WHERE user_id = $1
 		ORDER BY created_at DESC
 	`
 
-	rows, err := r.db.Query(query, userID)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return []models.CreditCard{}, err
 	}
@@ -33,7 +33,7 @@ func (r *CreditCardRepository) GetAll(userID uuid.UUID) ([]models.CreditCard, er
 	for rows.Next() {
 		var creditCard models.CreditCard
 		err := rows.Scan(
-			&creditCard.ID, &creditCard.UserID, &creditCard.Name,
+			&creditCard.ID, &creditCard.Name,
 			&creditCard.ClosingDay, &creditCard.PaymentDay, &creditCard.BankAccount,
 			&creditCard.CreatedAt, &creditCard.UpdatedAt,
 		)
@@ -48,14 +48,14 @@ func (r *CreditCardRepository) GetAll(userID uuid.UUID) ([]models.CreditCard, er
 
 func (r *CreditCardRepository) GetByID(id uuid.UUID) (*models.CreditCard, error) {
 	query := `
-		SELECT id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at
+		SELECT id, name, closing_day, payment_day, bank_account, created_at, updated_at
 		FROM credit_cards 
 		WHERE id = $1
 	`
 
 	var creditCard models.CreditCard
 	err := r.db.QueryRow(query, id).Scan(
-		&creditCard.ID, &creditCard.UserID, &creditCard.Name,
+		&creditCard.ID, &creditCard.Name,
 		&creditCard.ClosingDay, &creditCard.PaymentDay, &creditCard.BankAccount,
 		&creditCard.CreatedAt, &creditCard.UpdatedAt,
 	)
@@ -69,12 +69,12 @@ func (r *CreditCardRepository) GetByID(id uuid.UUID) (*models.CreditCard, error)
 
 func (r *CreditCardRepository) Create(creditCard *models.CreditCard) error {
 	query := `
-		INSERT INTO credit_cards (id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO credit_cards (id, name, closing_day, payment_day, bank_account, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
 	_, err := r.db.Exec(query,
-		creditCard.ID, creditCard.UserID, creditCard.Name,
+		creditCard.ID, creditCard.Name,
 		creditCard.ClosingDay, creditCard.PaymentDay, creditCard.BankAccount,
 		creditCard.CreatedAt, creditCard.UpdatedAt,
 	)

@@ -10,9 +10,7 @@ import {
   AppSetting,
   UpdateSettingsRequest,
   VersionInfo,
-  UserInfo,
 } from '@/types/api';
-import Cookies from 'js-cookie';
 
 // 同じドメインを使用するため、環境変数が設定されていない場合は空文字（相対パス）を使用
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -24,11 +22,6 @@ class ApiClient {
     this.baseURL = `${baseURL}/api/v1`;
   }
 
-  private getAuthHeaders(): Record<string, string> {
-    const token = Cookies.get('auth_token');
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
-  }
-
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -36,8 +29,7 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...this.getAuthHeaders(),
-      ...options.headers as Record<string, string>,
+      ...(options.headers as Record<string, string>),
     };
 
     const config: RequestInit = {
@@ -49,12 +41,6 @@ class ApiClient {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        if (response.status === 401) {
-          // Unauthorized - redirect to login
-          Cookies.remove('auth_token');
-          window.location.href = '/login';
-          return Promise.reject(new Error('Unauthorized'));
-        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -80,14 +66,14 @@ class ApiClient {
     return this.request<CreditCard>(`/credit-cards/${id}`);
   }
 
-  async createCreditCard(creditCard: Omit<CreditCard, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<CreditCard> {
+  async createCreditCard(creditCard: Omit<CreditCard, 'id' | 'created_at' | 'updated_at'>): Promise<CreditCard> {
     return this.request<CreditCard>('/credit-cards', {
       method: 'POST',
       body: JSON.stringify(creditCard),
     });
   }
 
-  async updateCreditCard(id: string, creditCard: Omit<CreditCard, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<CreditCard> {
+  async updateCreditCard(id: string, creditCard: Omit<CreditCard, 'id' | 'created_at' | 'updated_at'>): Promise<CreditCard> {
     return this.request<CreditCard>(`/credit-cards/${id}`, {
       method: 'PUT',
       body: JSON.stringify(creditCard),
@@ -109,14 +95,14 @@ class ApiClient {
     return this.request<BankAccount>(`/bank-accounts/${id}`);
   }
 
-  async createBankAccount(account: Omit<BankAccount, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<BankAccount> {
+  async createBankAccount(account: Omit<BankAccount, 'id' | 'created_at' | 'updated_at'>): Promise<BankAccount> {
     return this.request<BankAccount>('/bank-accounts', {
       method: 'POST',
       body: JSON.stringify(account),
     });
   }
 
-  async updateBankAccount(id: string, account: Omit<BankAccount, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<BankAccount> {
+  async updateBankAccount(id: string, account: Omit<BankAccount, 'id' | 'created_at' | 'updated_at'>): Promise<BankAccount> {
     return this.request<BankAccount>(`/bank-accounts/${id}`, {
       method: 'PUT',
       body: JSON.stringify(account),
@@ -167,14 +153,14 @@ class ApiClient {
     return this.request<IncomeSource>(`/income-sources/${id}`);
   }
 
-  async createIncomeSource(source: Omit<IncomeSource, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<IncomeSource> {
+  async createIncomeSource(source: Omit<IncomeSource, 'id' | 'created_at' | 'updated_at'>): Promise<IncomeSource> {
     return this.request<IncomeSource>('/income-sources', {
       method: 'POST',
       body: JSON.stringify(source),
     });
   }
 
-  async updateIncomeSource(id: string, source: Omit<IncomeSource, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<IncomeSource> {
+  async updateIncomeSource(id: string, source: Omit<IncomeSource, 'id' | 'created_at' | 'updated_at'>): Promise<IncomeSource> {
     return this.request<IncomeSource>(`/income-sources/${id}`, {
       method: 'PUT',
       body: JSON.stringify(source),
@@ -225,14 +211,14 @@ class ApiClient {
     return this.request<RecurringPayment>(`/recurring-payments/${id}`);
   }
 
-  async createRecurringPayment(payment: Omit<RecurringPayment, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<RecurringPayment> {
+  async createRecurringPayment(payment: Omit<RecurringPayment, 'id' | 'created_at' | 'updated_at'>): Promise<RecurringPayment> {
     return this.request<RecurringPayment>('/recurring-payments', {
       method: 'POST',
       body: JSON.stringify(payment),
     });
   }
 
-  async updateRecurringPayment(id: string, payment: Omit<RecurringPayment, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<RecurringPayment> {
+  async updateRecurringPayment(id: string, payment: Omit<RecurringPayment, 'id' | 'created_at' | 'updated_at'>): Promise<RecurringPayment> {
     return this.request<RecurringPayment>(`/recurring-payments/${id}`, {
       method: 'PUT',
       body: JSON.stringify(payment),
@@ -245,38 +231,33 @@ class ApiClient {
     });
   }
 
-  // Cashflow Projection API
-  async getCashflowProjection(months: number = 36, onlyChanges: boolean = true): Promise<CashflowProjection[]> {
-    return this.request<CashflowProjection[]>(`/cashflow-projection?months=${months}&onlyChanges=${onlyChanges}`);
+  // Cashflow Projection
+  async getCashflowProjection(months: number, onlyChanges: boolean): Promise<CashflowProjection[]> {
+    const params = new URLSearchParams({ months: months.toString(), onlyChanges: String(onlyChanges) });
+    return this.request<CashflowProjection[]>(`/cashflow-projection?${params.toString()}`);
   }
 
-  // Dashboard API
+  // Dashboard Summary
   async getDashboardSummary(): Promise<DashboardSummary> {
     return this.request<DashboardSummary>('/dashboard/summary');
   }
 
-  // Settings API
+  // App Settings
   async getSettings(): Promise<AppSetting[]> {
     return this.request<AppSetting[]>('/settings');
   }
 
-  async updateSettings(settings: UpdateSettingsRequest): Promise<Record<string, string>> {
-    return this.request<Record<string, string>>('/settings', {
+  async updateSettings(settings: UpdateSettingsRequest): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>(`/settings`, {
       method: 'PUT',
       body: JSON.stringify(settings),
     });
   }
 
-  // Version API
+  // Version
   async getVersion(): Promise<VersionInfo> {
     return this.request<VersionInfo>('/version');
   }
-
-  // User API
-  async getCurrentUser(): Promise<UserInfo> {
-    return this.request<UserInfo>('/auth/me');
-  }
 }
 
-export const apiClient = new ApiClient();
 export default ApiClient;

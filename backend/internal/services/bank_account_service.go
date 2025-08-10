@@ -1,8 +1,9 @@
 package services
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"time"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
 )
@@ -17,8 +18,8 @@ func NewBankAccountService(bankAccountRepo BankAccountRepositoryInterface) *Bank
 	}
 }
 
-func (s *BankAccountService) GetBankAccounts(userID uuid.UUID) ([]models.BankAccount, error) {
-	return s.bankAccountRepo.GetAll(userID)
+func (s *BankAccountService) GetBankAccounts() ([]models.BankAccount, error) {
+	return s.bankAccountRepo.GetAll()
 }
 
 func (s *BankAccountService) GetBankAccount(id uuid.UUID) (*models.BankAccount, error) {

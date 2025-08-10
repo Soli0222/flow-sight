@@ -2,10 +2,11 @@ package repositories
 
 import (
 	"database/sql"
-	"github.com/Soli0222/flow-sight/backend/internal/models"
-	"github.com/Soli0222/flow-sight/backend/test/helpers"
 	"testing"
 	"time"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/test/helpers"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
@@ -17,61 +18,53 @@ func TestCreditCardRepository_GetAll(t *testing.T) {
 	defer helpers.TeardownMockDB(db)
 
 	repo := NewCreditCardRepository(db)
-	userID := uuid.New()
 
 	tests := []struct {
 		name          string
-		userID        uuid.UUID
 		setupMock     func(sqlmock.Sqlmock)
 		expectedCount int
 		expectedError bool
 	}{
 		{
-			name:   "successful retrieval",
-			userID: userID,
+			name: "successful retrieval",
 			setupMock: func(mock sqlmock.Sqlmock) {
 				bankAccountID := uuid.New()
 				closingDay := 25
 				rows := sqlmock.NewRows([]string{
-					"id", "user_id", "name", "closing_day", "payment_day", "bank_account", "created_at", "updated_at",
+					"id", "name", "closing_day", "payment_day", "bank_account", "created_at", "updated_at",
 				}).
 					AddRow(
-						uuid.New(), userID, "Main Credit Card", &closingDay, 10, bankAccountID,
+						uuid.New(), "Main Credit Card", &closingDay, 10, bankAccountID,
 						time.Now(), time.Now(),
 					).
 					AddRow(
-						uuid.New(), userID, "Sub Credit Card", &closingDay, 15, bankAccountID,
+						uuid.New(), "Sub Credit Card", &closingDay, 15, bankAccountID,
 						time.Now(), time.Now(),
 					)
 
-				mock.ExpectQuery(`SELECT id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards WHERE user_id = \$1 ORDER BY created_at DESC`).
-					WithArgs(userID).
+				mock.ExpectQuery(`SELECT id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards\s+ORDER BY created_at DESC`).
 					WillReturnRows(rows)
 			},
 			expectedCount: 2,
 			expectedError: false,
 		},
 		{
-			name:   "no credit cards found",
-			userID: userID,
+			name: "no credit cards found",
 			setupMock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{
-					"id", "user_id", "name", "closing_day", "payment_day", "bank_account", "created_at", "updated_at",
+					"id", "name", "closing_day", "payment_day", "bank_account", "created_at", "updated_at",
 				})
 
-				mock.ExpectQuery(`SELECT id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards WHERE user_id = \$1 ORDER BY created_at DESC`).
-					WithArgs(userID).
+				mock.ExpectQuery(`SELECT id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards\s+ORDER BY created_at DESC`).
 					WillReturnRows(rows)
 			},
 			expectedCount: 0,
 			expectedError: false,
 		},
 		{
-			name:   "database error",
-			userID: userID,
+			name: "database error",
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(`SELECT id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards WHERE user_id = \$1 ORDER BY created_at DESC`).
-					WithArgs(userID).
+				mock.ExpectQuery(`SELECT id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards\s+ORDER BY created_at DESC`).
 					WillReturnError(sql.ErrConnDone)
 			},
 			expectedCount: 0,
@@ -81,9 +74,10 @@ func TestCreditCardRepository_GetAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			tt.setupMock(mock)
 
-			creditCards, err := repo.GetAll(tt.userID)
+			creditCards, err := repo.GetAll()
 
 			if tt.expectedError {
 				assert.Error(t, err)
@@ -103,7 +97,6 @@ func TestCreditCardRepository_GetByID(t *testing.T) {
 
 	repo := NewCreditCardRepository(db)
 	creditCardID := uuid.New()
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
@@ -119,14 +112,14 @@ func TestCreditCardRepository_GetByID(t *testing.T) {
 			setupMock: func(mock sqlmock.Sqlmock) {
 				closingDay := 25
 				rows := sqlmock.NewRows([]string{
-					"id", "user_id", "name", "closing_day", "payment_day", "bank_account", "created_at", "updated_at",
+					"id", "name", "closing_day", "payment_day", "bank_account", "created_at", "updated_at",
 				}).
 					AddRow(
-						creditCardID, userID, "Main Credit Card", &closingDay, 10, bankAccountID,
+						creditCardID, "Main Credit Card", &closingDay, 10, bankAccountID,
 						time.Now(), time.Now(),
 					)
 
-				mock.ExpectQuery(`SELECT id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards WHERE id = \$1`).
+				mock.ExpectQuery(`SELECT id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards WHERE id = \$1`).
 					WithArgs(creditCardID).
 					WillReturnRows(rows)
 			},
@@ -137,7 +130,7 @@ func TestCreditCardRepository_GetByID(t *testing.T) {
 			name:         "credit card not found",
 			creditCardID: creditCardID,
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(`SELECT id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards WHERE id = \$1`).
+				mock.ExpectQuery(`SELECT id, name, closing_day, payment_day, bank_account, created_at, updated_at FROM credit_cards WHERE id = \$1`).
 					WithArgs(creditCardID).
 					WillReturnError(sql.ErrNoRows)
 			},
@@ -148,6 +141,7 @@ func TestCreditCardRepository_GetByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			tt.setupMock(mock)
 
 			creditCard, err := repo.GetByID(tt.creditCardID)
@@ -171,9 +165,8 @@ func TestCreditCardRepository_Create(t *testing.T) {
 	defer helpers.TeardownMockDB(db)
 
 	repo := NewCreditCardRepository(db)
-	userID := uuid.New()
 	bankAccountID := uuid.New()
-	creditCard := helpers.CreateTestCreditCard(userID, bankAccountID)
+	creditCard := helpers.CreateTestCreditCard(bankAccountID)
 
 	tests := []struct {
 		name          string
@@ -185,8 +178,8 @@ func TestCreditCardRepository_Create(t *testing.T) {
 			name:       "successful creation",
 			creditCard: creditCard,
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(`INSERT INTO credit_cards \(id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8\)`).
-					WithArgs(creditCard.ID, creditCard.UserID, creditCard.Name, creditCard.ClosingDay, creditCard.PaymentDay, creditCard.BankAccount, sqlmock.AnyArg(), sqlmock.AnyArg()).
+				mock.ExpectExec(`INSERT INTO credit_cards \(id, name, closing_day, payment_day, bank_account, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7\)`).
+					WithArgs(creditCard.ID, creditCard.Name, creditCard.ClosingDay, creditCard.PaymentDay, creditCard.BankAccount, sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			expectedError: false,
@@ -195,8 +188,8 @@ func TestCreditCardRepository_Create(t *testing.T) {
 			name:       "database error",
 			creditCard: creditCard,
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(`INSERT INTO credit_cards \(id, user_id, name, closing_day, payment_day, bank_account, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8\)`).
-					WithArgs(creditCard.ID, creditCard.UserID, creditCard.Name, creditCard.ClosingDay, creditCard.PaymentDay, creditCard.BankAccount, sqlmock.AnyArg(), sqlmock.AnyArg()).
+				mock.ExpectExec(`INSERT INTO credit_cards \(id, name, closing_day, payment_day, bank_account, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7\)`).
+					WithArgs(creditCard.ID, creditCard.Name, creditCard.ClosingDay, creditCard.PaymentDay, creditCard.BankAccount, sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(sql.ErrConnDone)
 			},
 			expectedError: true,
@@ -205,6 +198,7 @@ func TestCreditCardRepository_Create(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			tt.setupMock(mock)
 
 			err := repo.Create(tt.creditCard)
@@ -225,9 +219,8 @@ func TestCreditCardRepository_Update(t *testing.T) {
 	defer helpers.TeardownMockDB(db)
 
 	repo := NewCreditCardRepository(db)
-	userID := uuid.New()
 	bankAccountID := uuid.New()
-	creditCard := helpers.CreateTestCreditCard(userID, bankAccountID)
+	creditCard := helpers.CreateTestCreditCard(bankAccountID)
 	creditCard.Name = "Updated Credit Card Name"
 
 	tests := []struct {
@@ -260,6 +253,7 @@ func TestCreditCardRepository_Update(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			tt.setupMock(mock)
 
 			err := repo.Update(tt.creditCard)
@@ -312,6 +306,7 @@ func TestCreditCardRepository_Delete(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			tt.setupMock(mock)
 
 			err := repo.Delete(tt.creditCardID)

@@ -1,9 +1,10 @@
 package services
 
 import (
+	"time"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"github.com/Soli0222/flow-sight/backend/internal/repositories"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -21,8 +22,8 @@ func NewIncomeService(incomeSourceRepo *repositories.IncomeSourceRepository, mon
 }
 
 // Income Source methods
-func (s *IncomeService) GetIncomeSources(userID uuid.UUID) ([]models.IncomeSource, error) {
-	return s.incomeSourceRepo.GetAll(userID)
+func (s *IncomeService) GetIncomeSources() ([]models.IncomeSource, error) {
+	return s.incomeSourceRepo.GetAll()
 }
 
 func (s *IncomeService) GetIncomeSource(id uuid.UUID) (*models.IncomeSource, error) {

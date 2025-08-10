@@ -2,72 +2,65 @@ package repositories
 
 import (
 	"database/sql"
-	"github.com/Soli0222/flow-sight/backend/internal/models"
-	"github.com/Soli0222/flow-sight/backend/test/helpers"
 	"testing"
 	"time"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/test/helpers"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAppSettingRepository_GetByUserID(t *testing.T) {
+func TestAppSettingRepository_GetAll(t *testing.T) {
 	db, mock := helpers.SetupMockDB(t)
 	defer helpers.TeardownMockDB(db)
 
 	repo := NewAppSettingRepository(db)
-	userID := uuid.New()
 
 	tests := []struct {
 		name          string
-		userID        uuid.UUID
 		setupMock     func(sqlmock.Sqlmock)
 		expectedCount int
 		expectedError bool
 	}{
 		{
-			name:   "successful retrieval",
-			userID: userID,
+			name: "successful retrieval",
 			setupMock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{
-					"id", "user_id", "key", "value", "created_at", "updated_at",
+					"id", "key", "value", "created_at", "updated_at",
 				}).
 					AddRow(
-						uuid.New(), userID, "currency", "JPY", time.Now(), time.Now(),
+						uuid.New(), "currency", "JPY", time.Now(), time.Now(),
 					).
 					AddRow(
-						uuid.New(), userID, "timezone", "Asia/Tokyo", time.Now(), time.Now(),
+						uuid.New(), "timezone", "Asia/Tokyo", time.Now(), time.Now(),
 					)
 
-				mock.ExpectQuery(`SELECT id, user_id, key, value, created_at, updated_at FROM app_settings WHERE user_id = \$1 ORDER BY key ASC`).
-					WithArgs(userID).
+				mock.ExpectQuery(`SELECT id, key, value, created_at, updated_at FROM app_settings ORDER BY key ASC`).
 					WillReturnRows(rows)
 			},
 			expectedCount: 2,
 			expectedError: false,
 		},
 		{
-			name:   "no settings found",
-			userID: userID,
+			name: "no settings found",
 			setupMock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{
-					"id", "user_id", "key", "value", "created_at", "updated_at",
+					"id", "key", "value", "created_at", "updated_at",
 				})
 
-				mock.ExpectQuery(`SELECT id, user_id, key, value, created_at, updated_at FROM app_settings WHERE user_id = \$1 ORDER BY key ASC`).
-					WithArgs(userID).
+				mock.ExpectQuery(`SELECT id, key, value, created_at, updated_at FROM app_settings ORDER BY key ASC`).
 					WillReturnRows(rows)
 			},
 			expectedCount: 0,
 			expectedError: false,
 		},
 		{
-			name:   "database error",
-			userID: userID,
+			name: "database error",
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(`SELECT id, user_id, key, value, created_at, updated_at FROM app_settings WHERE user_id = \$1 ORDER BY key ASC`).
-					WithArgs(userID).
+				mock.ExpectQuery(`SELECT id, key, value, created_at, updated_at FROM app_settings ORDER BY key ASC`).
 					WillReturnError(sql.ErrConnDone)
 			},
 			expectedCount: 0,
@@ -77,9 +70,10 @@ func TestAppSettingRepository_GetByUserID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			tt.setupMock(mock)
 
-			settings, err := repo.GetByUserID(tt.userID)
+			settings, err := repo.GetAll()
 
 			if tt.expectedError {
 				assert.Error(t, err)
@@ -98,44 +92,40 @@ func TestAppSettingRepository_GetByKey(t *testing.T) {
 	defer helpers.TeardownMockDB(db)
 
 	repo := NewAppSettingRepository(db)
-	userID := uuid.New()
 	settingID := uuid.New()
 	key := "currency"
 
 	tests := []struct {
 		name          string
-		userID        uuid.UUID
 		key           string
 		setupMock     func(sqlmock.Sqlmock)
 		expectedFound bool
 		expectedError bool
 	}{
 		{
-			name:   "setting found",
-			userID: userID,
-			key:    key,
+			name: "setting found",
+			key:  key,
 			setupMock: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{
-					"id", "user_id", "key", "value", "created_at", "updated_at",
+					"id", "key", "value", "created_at", "updated_at",
 				}).
 					AddRow(
-						settingID, userID, key, "JPY", time.Now(), time.Now(),
+						settingID, key, "JPY", time.Now(), time.Now(),
 					)
 
-				mock.ExpectQuery(`SELECT id, user_id, key, value, created_at, updated_at FROM app_settings WHERE user_id = \$1 AND key = \$2`).
-					WithArgs(userID, key).
+				mock.ExpectQuery(`SELECT id, key, value, created_at, updated_at FROM app_settings WHERE key = \$1`).
+					WithArgs(key).
 					WillReturnRows(rows)
 			},
 			expectedFound: true,
 			expectedError: false,
 		},
 		{
-			name:   "setting not found",
-			userID: userID,
-			key:    key,
+			name: "setting not found",
+			key:  key,
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(`SELECT id, user_id, key, value, created_at, updated_at FROM app_settings WHERE user_id = \$1 AND key = \$2`).
-					WithArgs(userID, key).
+				mock.ExpectQuery(`SELECT id, key, value, created_at, updated_at FROM app_settings WHERE key = \$1`).
+					WithArgs(key).
 					WillReturnError(sql.ErrNoRows)
 			},
 			expectedFound: false,
@@ -145,9 +135,10 @@ func TestAppSettingRepository_GetByKey(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			tt.setupMock(mock)
 
-			setting, err := repo.GetByKey(tt.userID, tt.key)
+			setting, err := repo.GetByKey(tt.key)
 
 			if tt.expectedError {
 				assert.Error(t, err)
@@ -156,7 +147,6 @@ func TestAppSettingRepository_GetByKey(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, setting)
 				assert.Equal(t, tt.key, setting.Key)
-				assert.Equal(t, tt.userID, setting.UserID)
 			}
 
 			assert.NoError(t, mock.ExpectationsWereMet())
@@ -169,7 +159,6 @@ func TestAppSettingRepository_Upsert(t *testing.T) {
 	defer helpers.TeardownMockDB(db)
 
 	repo := NewAppSettingRepository(db)
-	userID := uuid.New()
 	settingID := uuid.New()
 
 	tests := []struct {
@@ -180,8 +169,8 @@ func TestAppSettingRepository_Upsert(t *testing.T) {
 		{
 			name: "successful upsert",
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(`INSERT INTO app_settings \(id, user_id, key, value, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6\) ON CONFLICT \(user_id, key\) DO UPDATE SET value = EXCLUDED\.value, updated_at = EXCLUDED\.updated_at`).
-					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+				mock.ExpectExec(`INSERT INTO app_settings \(id, key, value, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5\) ON CONFLICT \(key\) DO UPDATE SET value = EXCLUDED\.value, updated_at = EXCLUDED\.updated_at`).
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			expectedError: false,
@@ -189,8 +178,8 @@ func TestAppSettingRepository_Upsert(t *testing.T) {
 		{
 			name: "database error",
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(`INSERT INTO app_settings \(id, user_id, key, value, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6\) ON CONFLICT \(user_id, key\) DO UPDATE SET value = EXCLUDED\.value, updated_at = EXCLUDED\.updated_at`).
-					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+				mock.ExpectExec(`INSERT INTO app_settings \(id, key, value, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5\) ON CONFLICT \(key\) DO UPDATE SET value = EXCLUDED\.value, updated_at = EXCLUDED\.updated_at`).
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(sql.ErrConnDone)
 			},
 			expectedError: true,
@@ -201,13 +190,13 @@ func TestAppSettingRepository_Upsert(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			appSetting := &models.AppSetting{
 				ID:        settingID,
-				UserID:    userID,
 				Key:       "currency",
 				Value:     "JPY",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
 
+			tt := tt
 			tt.setupMock(mock)
 
 			err := repo.Upsert(appSetting)

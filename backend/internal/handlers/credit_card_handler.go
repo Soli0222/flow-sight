@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"net/http"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -19,27 +20,14 @@ func NewCreditCardHandler(creditCardService CreditCardServiceInterface) *CreditC
 }
 
 // @Summary Get all credit cards
-// @Description Get all credit cards for a user
+// @Description Get all credit cards
 // @Tags credit-cards
 // @Accept json
 // @Produce json
-// @Security BearerAuth
 // @Success 200 {array} models.CreditCard
 // @Router /credit-cards [get]
 func (h *CreditCardHandler) GetCreditCards(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
-		return
-	}
-
-	userUUID, ok := userID.(uuid.UUID)
-	if !ok {
-		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
-		return
-	}
-
-	creditCards, err := h.creditCardService.GetCreditCards(userUUID)
+	creditCards, err := h.creditCardService.GetCreditCards()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -78,31 +66,15 @@ func (h *CreditCardHandler) GetCreditCard(c *gin.Context) {
 // @Tags credit-cards
 // @Accept json
 // @Produce json
-// @Security BearerAuth
 // @Param creditCard body models.CreditCard true "Credit Card data"
 // @Success 201 {object} models.CreditCard
 // @Router /credit-cards [post]
 func (h *CreditCardHandler) CreateCreditCard(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
-		return
-	}
-
-	userUUID, ok := userID.(uuid.UUID)
-	if !ok {
-		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
-		return
-	}
-
 	var creditCard models.CreditCard
 	if err := c.ShouldBindJSON(&creditCard); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Set the user_id from the authenticated user
-	creditCard.UserID = userUUID
 
 	if err := h.creditCardService.CreateCreditCard(&creditCard); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

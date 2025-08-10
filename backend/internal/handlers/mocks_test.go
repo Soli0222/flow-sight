@@ -6,7 +6,6 @@ package handlers
 
 import (
 	"github.com/Soli0222/flow-sight/backend/internal/models"
-	"github.com/Soli0222/flow-sight/backend/internal/services"
 
 	"github.com/google/uuid"
 	mock "github.com/stretchr/testify/mock"
@@ -204,8 +203,8 @@ func (_c *MockBankAccountServiceInterface_GetBankAccount_Call) RunAndReturn(run 
 }
 
 // GetBankAccounts provides a mock function for the type MockBankAccountServiceInterface
-func (_mock *MockBankAccountServiceInterface) GetBankAccounts(userID uuid.UUID) ([]models.BankAccount, error) {
-	ret := _mock.Called(userID)
+func (_mock *MockBankAccountServiceInterface) GetBankAccounts() ([]models.BankAccount, error) {
+	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetBankAccounts")
@@ -213,18 +212,18 @@ func (_mock *MockBankAccountServiceInterface) GetBankAccounts(userID uuid.UUID) 
 
 	var r0 []models.BankAccount
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) ([]models.BankAccount, error)); ok {
-		return returnFunc(userID)
+	if returnFunc, ok := ret.Get(0).(func() ([]models.BankAccount, error)); ok {
+		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) []models.BankAccount); ok {
-		r0 = returnFunc(userID)
+	if returnFunc, ok := ret.Get(0).(func() []models.BankAccount); ok {
+		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.BankAccount)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = returnFunc(userID)
+	if returnFunc, ok := ret.Get(1).(func() error); ok {
+		r1 = returnFunc()
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -237,20 +236,13 @@ type MockBankAccountServiceInterface_GetBankAccounts_Call struct {
 }
 
 // GetBankAccounts is a helper method to define mock.On call
-//   - userID uuid.UUID
-func (_e *MockBankAccountServiceInterface_Expecter) GetBankAccounts(userID interface{}) *MockBankAccountServiceInterface_GetBankAccounts_Call {
-	return &MockBankAccountServiceInterface_GetBankAccounts_Call{Call: _e.mock.On("GetBankAccounts", userID)}
+func (_e *MockBankAccountServiceInterface_Expecter) GetBankAccounts() *MockBankAccountServiceInterface_GetBankAccounts_Call {
+	return &MockBankAccountServiceInterface_GetBankAccounts_Call{Call: _e.mock.On("GetBankAccounts")}
 }
 
-func (_c *MockBankAccountServiceInterface_GetBankAccounts_Call) Run(run func(userID uuid.UUID)) *MockBankAccountServiceInterface_GetBankAccounts_Call {
+func (_c *MockBankAccountServiceInterface_GetBankAccounts_Call) Run(run func()) *MockBankAccountServiceInterface_GetBankAccounts_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
+		run()
 	})
 	return _c
 }
@@ -260,7 +252,7 @@ func (_c *MockBankAccountServiceInterface_GetBankAccounts_Call) Return(bankAccou
 	return _c
 }
 
-func (_c *MockBankAccountServiceInterface_GetBankAccounts_Call) RunAndReturn(run func(userID uuid.UUID) ([]models.BankAccount, error)) *MockBankAccountServiceInterface_GetBankAccounts_Call {
+func (_c *MockBankAccountServiceInterface_GetBankAccounts_Call) RunAndReturn(run func() ([]models.BankAccount, error)) *MockBankAccountServiceInterface_GetBankAccounts_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -508,8 +500,8 @@ func (_c *MockCreditCardServiceInterface_GetCreditCard_Call) RunAndReturn(run fu
 }
 
 // GetCreditCards provides a mock function for the type MockCreditCardServiceInterface
-func (_mock *MockCreditCardServiceInterface) GetCreditCards(userID uuid.UUID) ([]models.CreditCard, error) {
-	ret := _mock.Called(userID)
+func (_mock *MockCreditCardServiceInterface) GetCreditCards() ([]models.CreditCard, error) {
+	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetCreditCards")
@@ -517,18 +509,18 @@ func (_mock *MockCreditCardServiceInterface) GetCreditCards(userID uuid.UUID) ([
 
 	var r0 []models.CreditCard
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) ([]models.CreditCard, error)); ok {
-		return returnFunc(userID)
+	if returnFunc, ok := ret.Get(0).(func() ([]models.CreditCard, error)); ok {
+		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) []models.CreditCard); ok {
-		r0 = returnFunc(userID)
+	if returnFunc, ok := ret.Get(0).(func() []models.CreditCard); ok {
+		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.CreditCard)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = returnFunc(userID)
+	if returnFunc, ok := ret.Get(1).(func() error); ok {
+		r1 = returnFunc()
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -541,20 +533,13 @@ type MockCreditCardServiceInterface_GetCreditCards_Call struct {
 }
 
 // GetCreditCards is a helper method to define mock.On call
-//   - userID uuid.UUID
-func (_e *MockCreditCardServiceInterface_Expecter) GetCreditCards(userID interface{}) *MockCreditCardServiceInterface_GetCreditCards_Call {
-	return &MockCreditCardServiceInterface_GetCreditCards_Call{Call: _e.mock.On("GetCreditCards", userID)}
+func (_e *MockCreditCardServiceInterface_Expecter) GetCreditCards() *MockCreditCardServiceInterface_GetCreditCards_Call {
+	return &MockCreditCardServiceInterface_GetCreditCards_Call{Call: _e.mock.On("GetCreditCards")}
 }
 
-func (_c *MockCreditCardServiceInterface_GetCreditCards_Call) Run(run func(userID uuid.UUID)) *MockCreditCardServiceInterface_GetCreditCards_Call {
+func (_c *MockCreditCardServiceInterface_GetCreditCards_Call) Run(run func()) *MockCreditCardServiceInterface_GetCreditCards_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
+		run()
 	})
 	return _c
 }
@@ -564,7 +549,7 @@ func (_c *MockCreditCardServiceInterface_GetCreditCards_Call) Return(creditCards
 	return _c
 }
 
-func (_c *MockCreditCardServiceInterface_GetCreditCards_Call) RunAndReturn(run func(userID uuid.UUID) ([]models.CreditCard, error)) *MockCreditCardServiceInterface_GetCreditCards_Call {
+func (_c *MockCreditCardServiceInterface_GetCreditCards_Call) RunAndReturn(run func() ([]models.CreditCard, error)) *MockCreditCardServiceInterface_GetCreditCards_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -620,640 +605,6 @@ func (_c *MockCreditCardServiceInterface_UpdateCreditCard_Call) RunAndReturn(run
 	return _c
 }
 
-// NewMockAuthServiceInterface creates a new instance of MockAuthServiceInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// The first argument is typically a *testing.T value.
-func NewMockAuthServiceInterface(t interface {
-	mock.TestingT
-	Cleanup(func())
-}) *MockAuthServiceInterface {
-	mock := &MockAuthServiceInterface{}
-	mock.Mock.Test(t)
-
-	t.Cleanup(func() { mock.AssertExpectations(t) })
-
-	return mock
-}
-
-// MockAuthServiceInterface is an autogenerated mock type for the AuthServiceInterface type
-type MockAuthServiceInterface struct {
-	mock.Mock
-}
-
-type MockAuthServiceInterface_Expecter struct {
-	mock *mock.Mock
-}
-
-func (_m *MockAuthServiceInterface) EXPECT() *MockAuthServiceInterface_Expecter {
-	return &MockAuthServiceInterface_Expecter{mock: &_m.Mock}
-}
-
-// GenerateJWT provides a mock function for the type MockAuthServiceInterface
-func (_mock *MockAuthServiceInterface) GenerateJWT(user *models.User) (string, error) {
-	ret := _mock.Called(user)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GenerateJWT")
-	}
-
-	var r0 string
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*models.User) (string, error)); ok {
-		return returnFunc(user)
-	}
-	if returnFunc, ok := ret.Get(0).(func(*models.User) string); ok {
-		r0 = returnFunc(user)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	if returnFunc, ok := ret.Get(1).(func(*models.User) error); ok {
-		r1 = returnFunc(user)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockAuthServiceInterface_GenerateJWT_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateJWT'
-type MockAuthServiceInterface_GenerateJWT_Call struct {
-	*mock.Call
-}
-
-// GenerateJWT is a helper method to define mock.On call
-//   - user *models.User
-func (_e *MockAuthServiceInterface_Expecter) GenerateJWT(user interface{}) *MockAuthServiceInterface_GenerateJWT_Call {
-	return &MockAuthServiceInterface_GenerateJWT_Call{Call: _e.mock.On("GenerateJWT", user)}
-}
-
-func (_c *MockAuthServiceInterface_GenerateJWT_Call) Run(run func(user *models.User)) *MockAuthServiceInterface_GenerateJWT_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *models.User
-		if args[0] != nil {
-			arg0 = args[0].(*models.User)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_GenerateJWT_Call) Return(s string, err error) *MockAuthServiceInterface_GenerateJWT_Call {
-	_c.Call.Return(s, err)
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_GenerateJWT_Call) RunAndReturn(run func(user *models.User) (string, error)) *MockAuthServiceInterface_GenerateJWT_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetGoogleAuthURL provides a mock function for the type MockAuthServiceInterface
-func (_mock *MockAuthServiceInterface) GetGoogleAuthURL(state string) string {
-	ret := _mock.Called(state)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetGoogleAuthURL")
-	}
-
-	var r0 string
-	if returnFunc, ok := ret.Get(0).(func(string) string); ok {
-		r0 = returnFunc(state)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	return r0
-}
-
-// MockAuthServiceInterface_GetGoogleAuthURL_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGoogleAuthURL'
-type MockAuthServiceInterface_GetGoogleAuthURL_Call struct {
-	*mock.Call
-}
-
-// GetGoogleAuthURL is a helper method to define mock.On call
-//   - state string
-func (_e *MockAuthServiceInterface_Expecter) GetGoogleAuthURL(state interface{}) *MockAuthServiceInterface_GetGoogleAuthURL_Call {
-	return &MockAuthServiceInterface_GetGoogleAuthURL_Call{Call: _e.mock.On("GetGoogleAuthURL", state)}
-}
-
-func (_c *MockAuthServiceInterface_GetGoogleAuthURL_Call) Run(run func(state string)) *MockAuthServiceInterface_GetGoogleAuthURL_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_GetGoogleAuthURL_Call) Return(s string) *MockAuthServiceInterface_GetGoogleAuthURL_Call {
-	_c.Call.Return(s)
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_GetGoogleAuthURL_Call) RunAndReturn(run func(state string) string) *MockAuthServiceInterface_GetGoogleAuthURL_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetUserByID provides a mock function for the type MockAuthServiceInterface
-func (_mock *MockAuthServiceInterface) GetUserByID(userID string) (*models.User, error) {
-	ret := _mock.Called(userID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetUserByID")
-	}
-
-	var r0 *models.User
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*models.User, error)); ok {
-		return returnFunc(userID)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string) *models.User); ok {
-		r0 = returnFunc(userID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.User)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(userID)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockAuthServiceInterface_GetUserByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByID'
-type MockAuthServiceInterface_GetUserByID_Call struct {
-	*mock.Call
-}
-
-// GetUserByID is a helper method to define mock.On call
-//   - userID string
-func (_e *MockAuthServiceInterface_Expecter) GetUserByID(userID interface{}) *MockAuthServiceInterface_GetUserByID_Call {
-	return &MockAuthServiceInterface_GetUserByID_Call{Call: _e.mock.On("GetUserByID", userID)}
-}
-
-func (_c *MockAuthServiceInterface_GetUserByID_Call) Run(run func(userID string)) *MockAuthServiceInterface_GetUserByID_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_GetUserByID_Call) Return(user *models.User, err error) *MockAuthServiceInterface_GetUserByID_Call {
-	_c.Call.Return(user, err)
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_GetUserByID_Call) RunAndReturn(run func(userID string) (*models.User, error)) *MockAuthServiceInterface_GetUserByID_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// HandleGoogleCallback provides a mock function for the type MockAuthServiceInterface
-func (_mock *MockAuthServiceInterface) HandleGoogleCallback(code string) (*models.User, string, error) {
-	ret := _mock.Called(code)
-
-	if len(ret) == 0 {
-		panic("no return value specified for HandleGoogleCallback")
-	}
-
-	var r0 *models.User
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*models.User, string, error)); ok {
-		return returnFunc(code)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string) *models.User); ok {
-		r0 = returnFunc(code)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.User)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(string) string); ok {
-		r1 = returnFunc(code)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(string) error); ok {
-		r2 = returnFunc(code)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockAuthServiceInterface_HandleGoogleCallback_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HandleGoogleCallback'
-type MockAuthServiceInterface_HandleGoogleCallback_Call struct {
-	*mock.Call
-}
-
-// HandleGoogleCallback is a helper method to define mock.On call
-//   - code string
-func (_e *MockAuthServiceInterface_Expecter) HandleGoogleCallback(code interface{}) *MockAuthServiceInterface_HandleGoogleCallback_Call {
-	return &MockAuthServiceInterface_HandleGoogleCallback_Call{Call: _e.mock.On("HandleGoogleCallback", code)}
-}
-
-func (_c *MockAuthServiceInterface_HandleGoogleCallback_Call) Run(run func(code string)) *MockAuthServiceInterface_HandleGoogleCallback_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_HandleGoogleCallback_Call) Return(user *models.User, s string, err error) *MockAuthServiceInterface_HandleGoogleCallback_Call {
-	_c.Call.Return(user, s, err)
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_HandleGoogleCallback_Call) RunAndReturn(run func(code string) (*models.User, string, error)) *MockAuthServiceInterface_HandleGoogleCallback_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// ValidateJWT provides a mock function for the type MockAuthServiceInterface
-func (_mock *MockAuthServiceInterface) ValidateJWT(tokenString string) (*services.Claims, error) {
-	ret := _mock.Called(tokenString)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ValidateJWT")
-	}
-
-	var r0 *services.Claims
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*services.Claims, error)); ok {
-		return returnFunc(tokenString)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string) *services.Claims); ok {
-		r0 = returnFunc(tokenString)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*services.Claims)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(tokenString)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockAuthServiceInterface_ValidateJWT_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ValidateJWT'
-type MockAuthServiceInterface_ValidateJWT_Call struct {
-	*mock.Call
-}
-
-// ValidateJWT is a helper method to define mock.On call
-//   - tokenString string
-func (_e *MockAuthServiceInterface_Expecter) ValidateJWT(tokenString interface{}) *MockAuthServiceInterface_ValidateJWT_Call {
-	return &MockAuthServiceInterface_ValidateJWT_Call{Call: _e.mock.On("ValidateJWT", tokenString)}
-}
-
-func (_c *MockAuthServiceInterface_ValidateJWT_Call) Run(run func(tokenString string)) *MockAuthServiceInterface_ValidateJWT_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_ValidateJWT_Call) Return(claims *services.Claims, err error) *MockAuthServiceInterface_ValidateJWT_Call {
-	_c.Call.Return(claims, err)
-	return _c
-}
-
-func (_c *MockAuthServiceInterface_ValidateJWT_Call) RunAndReturn(run func(tokenString string) (*services.Claims, error)) *MockAuthServiceInterface_ValidateJWT_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// NewMockRecurringPaymentServiceInterface creates a new instance of MockRecurringPaymentServiceInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// The first argument is typically a *testing.T value.
-func NewMockRecurringPaymentServiceInterface(t interface {
-	mock.TestingT
-	Cleanup(func())
-}) *MockRecurringPaymentServiceInterface {
-	mock := &MockRecurringPaymentServiceInterface{}
-	mock.Mock.Test(t)
-
-	t.Cleanup(func() { mock.AssertExpectations(t) })
-
-	return mock
-}
-
-// MockRecurringPaymentServiceInterface is an autogenerated mock type for the RecurringPaymentServiceInterface type
-type MockRecurringPaymentServiceInterface struct {
-	mock.Mock
-}
-
-type MockRecurringPaymentServiceInterface_Expecter struct {
-	mock *mock.Mock
-}
-
-func (_m *MockRecurringPaymentServiceInterface) EXPECT() *MockRecurringPaymentServiceInterface_Expecter {
-	return &MockRecurringPaymentServiceInterface_Expecter{mock: &_m.Mock}
-}
-
-// CreateRecurringPayment provides a mock function for the type MockRecurringPaymentServiceInterface
-func (_mock *MockRecurringPaymentServiceInterface) CreateRecurringPayment(payment *models.RecurringPayment) error {
-	ret := _mock.Called(payment)
-
-	if len(ret) == 0 {
-		panic("no return value specified for CreateRecurringPayment")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*models.RecurringPayment) error); ok {
-		r0 = returnFunc(payment)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateRecurringPayment'
-type MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call struct {
-	*mock.Call
-}
-
-// CreateRecurringPayment is a helper method to define mock.On call
-//   - payment *models.RecurringPayment
-func (_e *MockRecurringPaymentServiceInterface_Expecter) CreateRecurringPayment(payment interface{}) *MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call {
-	return &MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call{Call: _e.mock.On("CreateRecurringPayment", payment)}
-}
-
-func (_c *MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call) Run(run func(payment *models.RecurringPayment)) *MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *models.RecurringPayment
-		if args[0] != nil {
-			arg0 = args[0].(*models.RecurringPayment)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call) Return(err error) *MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call) RunAndReturn(run func(payment *models.RecurringPayment) error) *MockRecurringPaymentServiceInterface_CreateRecurringPayment_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// DeleteRecurringPayment provides a mock function for the type MockRecurringPaymentServiceInterface
-func (_mock *MockRecurringPaymentServiceInterface) DeleteRecurringPayment(id uuid.UUID) error {
-	ret := _mock.Called(id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteRecurringPayment")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) error); ok {
-		r0 = returnFunc(id)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteRecurringPayment'
-type MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call struct {
-	*mock.Call
-}
-
-// DeleteRecurringPayment is a helper method to define mock.On call
-//   - id uuid.UUID
-func (_e *MockRecurringPaymentServiceInterface_Expecter) DeleteRecurringPayment(id interface{}) *MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call {
-	return &MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call{Call: _e.mock.On("DeleteRecurringPayment", id)}
-}
-
-func (_c *MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call) Run(run func(id uuid.UUID)) *MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call) Return(err error) *MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call) RunAndReturn(run func(id uuid.UUID) error) *MockRecurringPaymentServiceInterface_DeleteRecurringPayment_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetRecurringPayment provides a mock function for the type MockRecurringPaymentServiceInterface
-func (_mock *MockRecurringPaymentServiceInterface) GetRecurringPayment(id uuid.UUID) (*models.RecurringPayment, error) {
-	ret := _mock.Called(id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRecurringPayment")
-	}
-
-	var r0 *models.RecurringPayment
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) (*models.RecurringPayment, error)); ok {
-		return returnFunc(id)
-	}
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) *models.RecurringPayment); ok {
-		r0 = returnFunc(id)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.RecurringPayment)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = returnFunc(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockRecurringPaymentServiceInterface_GetRecurringPayment_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRecurringPayment'
-type MockRecurringPaymentServiceInterface_GetRecurringPayment_Call struct {
-	*mock.Call
-}
-
-// GetRecurringPayment is a helper method to define mock.On call
-//   - id uuid.UUID
-func (_e *MockRecurringPaymentServiceInterface_Expecter) GetRecurringPayment(id interface{}) *MockRecurringPaymentServiceInterface_GetRecurringPayment_Call {
-	return &MockRecurringPaymentServiceInterface_GetRecurringPayment_Call{Call: _e.mock.On("GetRecurringPayment", id)}
-}
-
-func (_c *MockRecurringPaymentServiceInterface_GetRecurringPayment_Call) Run(run func(id uuid.UUID)) *MockRecurringPaymentServiceInterface_GetRecurringPayment_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_GetRecurringPayment_Call) Return(recurringPayment *models.RecurringPayment, err error) *MockRecurringPaymentServiceInterface_GetRecurringPayment_Call {
-	_c.Call.Return(recurringPayment, err)
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_GetRecurringPayment_Call) RunAndReturn(run func(id uuid.UUID) (*models.RecurringPayment, error)) *MockRecurringPaymentServiceInterface_GetRecurringPayment_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetRecurringPayments provides a mock function for the type MockRecurringPaymentServiceInterface
-func (_mock *MockRecurringPaymentServiceInterface) GetRecurringPayments(userID uuid.UUID) ([]models.RecurringPayment, error) {
-	ret := _mock.Called(userID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRecurringPayments")
-	}
-
-	var r0 []models.RecurringPayment
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) ([]models.RecurringPayment, error)); ok {
-		return returnFunc(userID)
-	}
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) []models.RecurringPayment); ok {
-		r0 = returnFunc(userID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.RecurringPayment)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = returnFunc(userID)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockRecurringPaymentServiceInterface_GetRecurringPayments_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRecurringPayments'
-type MockRecurringPaymentServiceInterface_GetRecurringPayments_Call struct {
-	*mock.Call
-}
-
-// GetRecurringPayments is a helper method to define mock.On call
-//   - userID uuid.UUID
-func (_e *MockRecurringPaymentServiceInterface_Expecter) GetRecurringPayments(userID interface{}) *MockRecurringPaymentServiceInterface_GetRecurringPayments_Call {
-	return &MockRecurringPaymentServiceInterface_GetRecurringPayments_Call{Call: _e.mock.On("GetRecurringPayments", userID)}
-}
-
-func (_c *MockRecurringPaymentServiceInterface_GetRecurringPayments_Call) Run(run func(userID uuid.UUID)) *MockRecurringPaymentServiceInterface_GetRecurringPayments_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_GetRecurringPayments_Call) Return(recurringPayments []models.RecurringPayment, err error) *MockRecurringPaymentServiceInterface_GetRecurringPayments_Call {
-	_c.Call.Return(recurringPayments, err)
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_GetRecurringPayments_Call) RunAndReturn(run func(userID uuid.UUID) ([]models.RecurringPayment, error)) *MockRecurringPaymentServiceInterface_GetRecurringPayments_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// UpdateRecurringPayment provides a mock function for the type MockRecurringPaymentServiceInterface
-func (_mock *MockRecurringPaymentServiceInterface) UpdateRecurringPayment(payment *models.RecurringPayment) error {
-	ret := _mock.Called(payment)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpdateRecurringPayment")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*models.RecurringPayment) error); ok {
-		r0 = returnFunc(payment)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateRecurringPayment'
-type MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call struct {
-	*mock.Call
-}
-
-// UpdateRecurringPayment is a helper method to define mock.On call
-//   - payment *models.RecurringPayment
-func (_e *MockRecurringPaymentServiceInterface_Expecter) UpdateRecurringPayment(payment interface{}) *MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call {
-	return &MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call{Call: _e.mock.On("UpdateRecurringPayment", payment)}
-}
-
-func (_c *MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call) Run(run func(payment *models.RecurringPayment)) *MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *models.RecurringPayment
-		if args[0] != nil {
-			arg0 = args[0].(*models.RecurringPayment)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call) Return(err error) *MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call) RunAndReturn(run func(payment *models.RecurringPayment) error) *MockRecurringPaymentServiceInterface_UpdateRecurringPayment_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // NewMockIncomeServiceInterface creates a new instance of MockIncomeServiceInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockIncomeServiceInterface(t interface {
@@ -1281,206 +632,55 @@ func (_m *MockIncomeServiceInterface) EXPECT() *MockIncomeServiceInterface_Expec
 	return &MockIncomeServiceInterface_Expecter{mock: &_m.Mock}
 }
 
-// CreateIncomeSource provides a mock function for the type MockIncomeServiceInterface
-func (_mock *MockIncomeServiceInterface) CreateIncomeSource(source *models.IncomeSource) error {
-	ret := _mock.Called(source)
+// GetIncomeSources provides a mock function for the type MockIncomeServiceInterface
+func (_mock *MockIncomeServiceInterface) GetIncomeSources() ([]models.IncomeSource, error) {
+	ret := _mock.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for CreateIncomeSource")
+		panic("no return value specified for GetIncomeSources")
 	}
 
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*models.IncomeSource) error); ok {
-		r0 = returnFunc(source)
-	} else {
-		r0 = ret.Error(0)
+	var r0 []models.IncomeSource
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func() ([]models.IncomeSource, error)); ok {
+		return returnFunc()
 	}
-	return r0
+	if returnFunc, ok := ret.Get(0).(func() []models.IncomeSource); ok {
+		r0 = returnFunc()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.IncomeSource)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func() error); ok {
+		r1 = returnFunc()
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
-// MockIncomeServiceInterface_CreateIncomeSource_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateIncomeSource'
-type MockIncomeServiceInterface_CreateIncomeSource_Call struct {
+// MockIncomeServiceInterface_GetIncomeSources_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetIncomeSources'
+type MockIncomeServiceInterface_GetIncomeSources_Call struct {
 	*mock.Call
 }
 
-// CreateIncomeSource is a helper method to define mock.On call
-//   - source *models.IncomeSource
-func (_e *MockIncomeServiceInterface_Expecter) CreateIncomeSource(source interface{}) *MockIncomeServiceInterface_CreateIncomeSource_Call {
-	return &MockIncomeServiceInterface_CreateIncomeSource_Call{Call: _e.mock.On("CreateIncomeSource", source)}
+// GetIncomeSources is a helper method to define mock.On call
+func (_e *MockIncomeServiceInterface_Expecter) GetIncomeSources() *MockIncomeServiceInterface_GetIncomeSources_Call {
+	return &MockIncomeServiceInterface_GetIncomeSources_Call{Call: _e.mock.On("GetIncomeSources")}
 }
 
-func (_c *MockIncomeServiceInterface_CreateIncomeSource_Call) Run(run func(source *models.IncomeSource)) *MockIncomeServiceInterface_CreateIncomeSource_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *models.IncomeSource
-		if args[0] != nil {
-			arg0 = args[0].(*models.IncomeSource)
-		}
-		run(
-			arg0,
-		)
-	})
+func (_c *MockIncomeServiceInterface_GetIncomeSources_Call) Run(run func()) *MockIncomeServiceInterface_GetIncomeSources_Call {
+	_c.Call.Run(func(args mock.Arguments) { run() })
 	return _c
 }
 
-func (_c *MockIncomeServiceInterface_CreateIncomeSource_Call) Return(err error) *MockIncomeServiceInterface_CreateIncomeSource_Call {
-	_c.Call.Return(err)
+func (_c *MockIncomeServiceInterface_GetIncomeSources_Call) Return(sources []models.IncomeSource, err error) *MockIncomeServiceInterface_GetIncomeSources_Call {
+	_c.Call.Return(sources, err)
 	return _c
 }
 
-func (_c *MockIncomeServiceInterface_CreateIncomeSource_Call) RunAndReturn(run func(source *models.IncomeSource) error) *MockIncomeServiceInterface_CreateIncomeSource_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// CreateMonthlyIncomeRecord provides a mock function for the type MockIncomeServiceInterface
-func (_mock *MockIncomeServiceInterface) CreateMonthlyIncomeRecord(record *models.MonthlyIncomeRecord) error {
-	ret := _mock.Called(record)
-
-	if len(ret) == 0 {
-		panic("no return value specified for CreateMonthlyIncomeRecord")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*models.MonthlyIncomeRecord) error); ok {
-		r0 = returnFunc(record)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateMonthlyIncomeRecord'
-type MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call struct {
-	*mock.Call
-}
-
-// CreateMonthlyIncomeRecord is a helper method to define mock.On call
-//   - record *models.MonthlyIncomeRecord
-func (_e *MockIncomeServiceInterface_Expecter) CreateMonthlyIncomeRecord(record interface{}) *MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call {
-	return &MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call{Call: _e.mock.On("CreateMonthlyIncomeRecord", record)}
-}
-
-func (_c *MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call) Run(run func(record *models.MonthlyIncomeRecord)) *MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *models.MonthlyIncomeRecord
-		if args[0] != nil {
-			arg0 = args[0].(*models.MonthlyIncomeRecord)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call) Return(err error) *MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call) RunAndReturn(run func(record *models.MonthlyIncomeRecord) error) *MockIncomeServiceInterface_CreateMonthlyIncomeRecord_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// DeleteIncomeSource provides a mock function for the type MockIncomeServiceInterface
-func (_mock *MockIncomeServiceInterface) DeleteIncomeSource(id uuid.UUID) error {
-	ret := _mock.Called(id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteIncomeSource")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) error); ok {
-		r0 = returnFunc(id)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockIncomeServiceInterface_DeleteIncomeSource_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteIncomeSource'
-type MockIncomeServiceInterface_DeleteIncomeSource_Call struct {
-	*mock.Call
-}
-
-// DeleteIncomeSource is a helper method to define mock.On call
-//   - id uuid.UUID
-func (_e *MockIncomeServiceInterface_Expecter) DeleteIncomeSource(id interface{}) *MockIncomeServiceInterface_DeleteIncomeSource_Call {
-	return &MockIncomeServiceInterface_DeleteIncomeSource_Call{Call: _e.mock.On("DeleteIncomeSource", id)}
-}
-
-func (_c *MockIncomeServiceInterface_DeleteIncomeSource_Call) Run(run func(id uuid.UUID)) *MockIncomeServiceInterface_DeleteIncomeSource_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_DeleteIncomeSource_Call) Return(err error) *MockIncomeServiceInterface_DeleteIncomeSource_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_DeleteIncomeSource_Call) RunAndReturn(run func(id uuid.UUID) error) *MockIncomeServiceInterface_DeleteIncomeSource_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// DeleteMonthlyIncomeRecord provides a mock function for the type MockIncomeServiceInterface
-func (_mock *MockIncomeServiceInterface) DeleteMonthlyIncomeRecord(id uuid.UUID) error {
-	ret := _mock.Called(id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteMonthlyIncomeRecord")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) error); ok {
-		r0 = returnFunc(id)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteMonthlyIncomeRecord'
-type MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call struct {
-	*mock.Call
-}
-
-// DeleteMonthlyIncomeRecord is a helper method to define mock.On call
-//   - id uuid.UUID
-func (_e *MockIncomeServiceInterface_Expecter) DeleteMonthlyIncomeRecord(id interface{}) *MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call {
-	return &MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call{Call: _e.mock.On("DeleteMonthlyIncomeRecord", id)}
-}
-
-func (_c *MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call) Run(run func(id uuid.UUID)) *MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call) Return(err error) *MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call) RunAndReturn(run func(id uuid.UUID) error) *MockIncomeServiceInterface_DeleteMonthlyIncomeRecord_Call {
+func (_c *MockIncomeServiceInterface_GetIncomeSources_Call) RunAndReturn(run func() ([]models.IncomeSource, error)) *MockIncomeServiceInterface_GetIncomeSources_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1513,162 +713,49 @@ func (_mock *MockIncomeServiceInterface) GetIncomeSource(id uuid.UUID) (*models.
 	return r0, r1
 }
 
-// MockIncomeServiceInterface_GetIncomeSource_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetIncomeSource'
-type MockIncomeServiceInterface_GetIncomeSource_Call struct {
-	*mock.Call
-}
-
-// GetIncomeSource is a helper method to define mock.On call
-//   - id uuid.UUID
-func (_e *MockIncomeServiceInterface_Expecter) GetIncomeSource(id interface{}) *MockIncomeServiceInterface_GetIncomeSource_Call {
-	return &MockIncomeServiceInterface_GetIncomeSource_Call{Call: _e.mock.On("GetIncomeSource", id)}
-}
-
-func (_c *MockIncomeServiceInterface_GetIncomeSource_Call) Run(run func(id uuid.UUID)) *MockIncomeServiceInterface_GetIncomeSource_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_GetIncomeSource_Call) Return(incomeSource *models.IncomeSource, err error) *MockIncomeServiceInterface_GetIncomeSource_Call {
-	_c.Call.Return(incomeSource, err)
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_GetIncomeSource_Call) RunAndReturn(run func(id uuid.UUID) (*models.IncomeSource, error)) *MockIncomeServiceInterface_GetIncomeSource_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetIncomeSources provides a mock function for the type MockIncomeServiceInterface
-func (_mock *MockIncomeServiceInterface) GetIncomeSources(userID uuid.UUID) ([]models.IncomeSource, error) {
-	ret := _mock.Called(userID)
-
+// CreateIncomeSource provides a mock function for the type MockIncomeServiceInterface
+func (_mock *MockIncomeServiceInterface) CreateIncomeSource(source *models.IncomeSource) error {
+	ret := _mock.Called(source)
 	if len(ret) == 0 {
-		panic("no return value specified for GetIncomeSources")
+		panic("no return value specified for CreateIncomeSource")
 	}
-
-	var r0 []models.IncomeSource
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) ([]models.IncomeSource, error)); ok {
-		return returnFunc(userID)
-	}
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) []models.IncomeSource); ok {
-		r0 = returnFunc(userID)
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*models.IncomeSource) error); ok {
+		r0 = returnFunc(source)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.IncomeSource)
-		}
+		r0 = ret.Error(0)
 	}
-	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = returnFunc(userID)
+	return r0
+}
+
+// UpdateIncomeSource provides a mock function for the type MockIncomeServiceInterface
+func (_mock *MockIncomeServiceInterface) UpdateIncomeSource(source *models.IncomeSource) error {
+	ret := _mock.Called(source)
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateIncomeSource")
+	}
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*models.IncomeSource) error); ok {
+		r0 = returnFunc(source)
 	} else {
-		r1 = ret.Error(1)
+		r0 = ret.Error(0)
 	}
-	return r0, r1
+	return r0
 }
 
-// MockIncomeServiceInterface_GetIncomeSources_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetIncomeSources'
-type MockIncomeServiceInterface_GetIncomeSources_Call struct {
-	*mock.Call
-}
-
-// GetIncomeSources is a helper method to define mock.On call
-//   - userID uuid.UUID
-func (_e *MockIncomeServiceInterface_Expecter) GetIncomeSources(userID interface{}) *MockIncomeServiceInterface_GetIncomeSources_Call {
-	return &MockIncomeServiceInterface_GetIncomeSources_Call{Call: _e.mock.On("GetIncomeSources", userID)}
-}
-
-func (_c *MockIncomeServiceInterface_GetIncomeSources_Call) Run(run func(userID uuid.UUID)) *MockIncomeServiceInterface_GetIncomeSources_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_GetIncomeSources_Call) Return(incomeSources []models.IncomeSource, err error) *MockIncomeServiceInterface_GetIncomeSources_Call {
-	_c.Call.Return(incomeSources, err)
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_GetIncomeSources_Call) RunAndReturn(run func(userID uuid.UUID) ([]models.IncomeSource, error)) *MockIncomeServiceInterface_GetIncomeSources_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetMonthlyIncomeRecord provides a mock function for the type MockIncomeServiceInterface
-func (_mock *MockIncomeServiceInterface) GetMonthlyIncomeRecord(id uuid.UUID) (*models.MonthlyIncomeRecord, error) {
+// DeleteIncomeSource provides a mock function for the type MockIncomeServiceInterface
+func (_mock *MockIncomeServiceInterface) DeleteIncomeSource(id uuid.UUID) error {
 	ret := _mock.Called(id)
-
 	if len(ret) == 0 {
-		panic("no return value specified for GetMonthlyIncomeRecord")
+		panic("no return value specified for DeleteIncomeSource")
 	}
-
-	var r0 *models.MonthlyIncomeRecord
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) (*models.MonthlyIncomeRecord, error)); ok {
-		return returnFunc(id)
-	}
-	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) *models.MonthlyIncomeRecord); ok {
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) error); ok {
 		r0 = returnFunc(id)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.MonthlyIncomeRecord)
-		}
+		r0 = ret.Error(0)
 	}
-	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = returnFunc(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetMonthlyIncomeRecord'
-type MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call struct {
-	*mock.Call
-}
-
-// GetMonthlyIncomeRecord is a helper method to define mock.On call
-//   - id uuid.UUID
-func (_e *MockIncomeServiceInterface_Expecter) GetMonthlyIncomeRecord(id interface{}) *MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call {
-	return &MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call{Call: _e.mock.On("GetMonthlyIncomeRecord", id)}
-}
-
-func (_c *MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call) Run(run func(id uuid.UUID)) *MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call) Return(monthlyIncomeRecord *models.MonthlyIncomeRecord, err error) *MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call {
-	_c.Call.Return(monthlyIncomeRecord, err)
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call) RunAndReturn(run func(id uuid.UUID) (*models.MonthlyIncomeRecord, error)) *MockIncomeServiceInterface_GetMonthlyIncomeRecord_Call {
-	_c.Call.Return(run)
-	return _c
+	return r0
 }
 
 // GetMonthlyIncomeRecords provides a mock function for the type MockIncomeServiceInterface
@@ -1699,99 +786,40 @@ func (_mock *MockIncomeServiceInterface) GetMonthlyIncomeRecords(incomeSourceID 
 	return r0, r1
 }
 
-// MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetMonthlyIncomeRecords'
-type MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call struct {
-	*mock.Call
-}
-
-// GetMonthlyIncomeRecords is a helper method to define mock.On call
-//   - incomeSourceID uuid.UUID
-func (_e *MockIncomeServiceInterface_Expecter) GetMonthlyIncomeRecords(incomeSourceID interface{}) *MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call {
-	return &MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call{Call: _e.mock.On("GetMonthlyIncomeRecords", incomeSourceID)}
-}
-
-func (_c *MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call) Run(run func(incomeSourceID uuid.UUID)) *MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 uuid.UUID
-		if args[0] != nil {
-			arg0 = args[0].(uuid.UUID)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call) Return(monthlyIncomeRecords []models.MonthlyIncomeRecord, err error) *MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call {
-	_c.Call.Return(monthlyIncomeRecords, err)
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call) RunAndReturn(run func(incomeSourceID uuid.UUID) ([]models.MonthlyIncomeRecord, error)) *MockIncomeServiceInterface_GetMonthlyIncomeRecords_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// UpdateIncomeSource provides a mock function for the type MockIncomeServiceInterface
-func (_mock *MockIncomeServiceInterface) UpdateIncomeSource(source *models.IncomeSource) error {
-	ret := _mock.Called(source)
+// GetMonthlyIncomeRecord provides a mock function for the type MockIncomeServiceInterface
+func (_mock *MockIncomeServiceInterface) GetMonthlyIncomeRecord(id uuid.UUID) (*models.MonthlyIncomeRecord, error) {
+	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
-		panic("no return value specified for UpdateIncomeSource")
+		panic("no return value specified for GetMonthlyIncomeRecord")
 	}
 
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*models.IncomeSource) error); ok {
-		r0 = returnFunc(source)
+	var r0 *models.MonthlyIncomeRecord
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) (*models.MonthlyIncomeRecord, error)); ok {
+		return returnFunc(id)
+	}
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) *models.MonthlyIncomeRecord); ok {
+		r0 = returnFunc(id)
 	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockIncomeServiceInterface_UpdateIncomeSource_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateIncomeSource'
-type MockIncomeServiceInterface_UpdateIncomeSource_Call struct {
-	*mock.Call
-}
-
-// UpdateIncomeSource is a helper method to define mock.On call
-//   - source *models.IncomeSource
-func (_e *MockIncomeServiceInterface_Expecter) UpdateIncomeSource(source interface{}) *MockIncomeServiceInterface_UpdateIncomeSource_Call {
-	return &MockIncomeServiceInterface_UpdateIncomeSource_Call{Call: _e.mock.On("UpdateIncomeSource", source)}
-}
-
-func (_c *MockIncomeServiceInterface_UpdateIncomeSource_Call) Run(run func(source *models.IncomeSource)) *MockIncomeServiceInterface_UpdateIncomeSource_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *models.IncomeSource
-		if args[0] != nil {
-			arg0 = args[0].(*models.IncomeSource)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.MonthlyIncomeRecord)
 		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_UpdateIncomeSource_Call) Return(err error) *MockIncomeServiceInterface_UpdateIncomeSource_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockIncomeServiceInterface_UpdateIncomeSource_Call) RunAndReturn(run func(source *models.IncomeSource) error) *MockIncomeServiceInterface_UpdateIncomeSource_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// UpdateMonthlyIncomeRecord provides a mock function for the type MockIncomeServiceInterface
-func (_mock *MockIncomeServiceInterface) UpdateMonthlyIncomeRecord(record *models.MonthlyIncomeRecord) error {
-	ret := _mock.Called(record)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpdateMonthlyIncomeRecord")
 	}
+	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
+		r1 = returnFunc(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
 
+// CreateMonthlyIncomeRecord provides a mock function for the type MockIncomeServiceInterface
+func (_mock *MockIncomeServiceInterface) CreateMonthlyIncomeRecord(record *models.MonthlyIncomeRecord) error {
+	ret := _mock.Called(record)
+	if len(ret) == 0 {
+		panic("no return value specified for CreateMonthlyIncomeRecord")
+	}
 	var r0 error
 	if returnFunc, ok := ret.Get(0).(func(*models.MonthlyIncomeRecord) error); ok {
 		r0 = returnFunc(record)
@@ -1801,36 +829,485 @@ func (_mock *MockIncomeServiceInterface) UpdateMonthlyIncomeRecord(record *model
 	return r0
 }
 
-// MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateMonthlyIncomeRecord'
-type MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call struct {
-	*mock.Call
+// UpdateMonthlyIncomeRecord provides a mock function for the type MockIncomeServiceInterface
+func (_mock *MockIncomeServiceInterface) UpdateMonthlyIncomeRecord(record *models.MonthlyIncomeRecord) error {
+	ret := _mock.Called(record)
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateMonthlyIncomeRecord")
+	}
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*models.MonthlyIncomeRecord) error); ok {
+		r0 = returnFunc(record)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
 }
 
-// UpdateMonthlyIncomeRecord is a helper method to define mock.On call
-//   - record *models.MonthlyIncomeRecord
-func (_e *MockIncomeServiceInterface_Expecter) UpdateMonthlyIncomeRecord(record interface{}) *MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call {
-	return &MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call{Call: _e.mock.On("UpdateMonthlyIncomeRecord", record)}
+// DeleteMonthlyIncomeRecord provides a mock function for the type MockIncomeServiceInterface
+func (_mock *MockIncomeServiceInterface) DeleteMonthlyIncomeRecord(id uuid.UUID) error {
+	ret := _mock.Called(id)
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteMonthlyIncomeRecord")
+	}
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) error); ok {
+		r0 = returnFunc(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
 }
 
-func (_c *MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call) Run(run func(record *models.MonthlyIncomeRecord)) *MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *models.MonthlyIncomeRecord
-		if args[0] != nil {
-			arg0 = args[0].(*models.MonthlyIncomeRecord)
+// NewMockRecurringPaymentServiceInterface creates a new instance of MockRecurringPaymentServiceInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewMockRecurringPaymentServiceInterface(t interface {
+	mock.TestingT
+	Cleanup(func())
+}) *MockRecurringPaymentServiceInterface {
+	mock := &MockRecurringPaymentServiceInterface{}
+	mock.Mock.Test(t)
+
+	t.Cleanup(func() { mock.AssertExpectations(t) })
+
+	return mock
+}
+
+// MockRecurringPaymentServiceInterface is an autogenerated mock type for the RecurringPaymentServiceInterface type
+type MockRecurringPaymentServiceInterface struct {
+	mock.Mock
+}
+
+type MockRecurringPaymentServiceInterface_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *MockRecurringPaymentServiceInterface) EXPECT() *MockRecurringPaymentServiceInterface_Expecter {
+	return &MockRecurringPaymentServiceInterface_Expecter{mock: &_m.Mock}
+}
+
+func (_mock *MockRecurringPaymentServiceInterface) GetRecurringPayments() ([]models.RecurringPayment, error) {
+	ret := _mock.Called()
+	if len(ret) == 0 {
+		panic("no return value specified for GetRecurringPayments")
+	}
+	var r0 []models.RecurringPayment
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func() ([]models.RecurringPayment, error)); ok {
+		return returnFunc()
+	}
+	if returnFunc, ok := ret.Get(0).(func() []models.RecurringPayment); ok {
+		r0 = returnFunc()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.RecurringPayment)
 		}
-		run(
-			arg0,
-		)
-	})
-	return _c
+	}
+	if returnFunc, ok := ret.Get(1).(func() error); ok {
+		r1 = returnFunc()
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
-func (_c *MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call) Return(err error) *MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call {
-	_c.Call.Return(err)
-	return _c
+func (_mock *MockRecurringPaymentServiceInterface) GetRecurringPayment(id uuid.UUID) (*models.RecurringPayment, error) {
+	ret := _mock.Called(id)
+	if len(ret) == 0 {
+		panic("no return value specified for GetRecurringPayment")
+	}
+	var r0 *models.RecurringPayment
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) (*models.RecurringPayment, error)); ok {
+		return returnFunc(id)
+	}
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) *models.RecurringPayment); ok {
+		r0 = returnFunc(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.RecurringPayment)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(uuid.UUID) error); ok {
+		r1 = returnFunc(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
-func (_c *MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call) RunAndReturn(run func(record *models.MonthlyIncomeRecord) error) *MockIncomeServiceInterface_UpdateMonthlyIncomeRecord_Call {
-	_c.Call.Return(run)
-	return _c
+func (_mock *MockRecurringPaymentServiceInterface) CreateRecurringPayment(payment *models.RecurringPayment) error {
+	ret := _mock.Called(payment)
+	if len(ret) == 0 {
+		panic("no return value specified for CreateRecurringPayment")
+	}
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*models.RecurringPayment) error); ok {
+		r0 = returnFunc(payment)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
 }
+
+func (_mock *MockRecurringPaymentServiceInterface) UpdateRecurringPayment(payment *models.RecurringPayment) error {
+	ret := _mock.Called(payment)
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateRecurringPayment")
+	}
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*models.RecurringPayment) error); ok {
+		r0 = returnFunc(payment)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+func (_mock *MockRecurringPaymentServiceInterface) DeleteRecurringPayment(id uuid.UUID) error {
+	ret := _mock.Called(id)
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteRecurringPayment")
+	}
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(uuid.UUID) error); ok {
+		r0 = returnFunc(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// NOTE: Auth has been removed from the application.
+// The following AuthServiceInterface mocks are disabled to avoid build errors:
+/*
+	// NewMockAuthServiceInterface creates a new instance of MockAuthServiceInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+	// The first argument is typically a *testing.T value.
+	func NewMockAuthServiceInterface(t interface {
+		mock.TestingT
+		Cleanup(func())
+	}) *MockAuthServiceInterface {
+		mock := &MockAuthServiceInterface{}
+		mock.Mock.Test(t)
+
+		t.Cleanup(func() { mock.AssertExpectations(t) })
+
+		return mock
+	}
+
+	// MockAuthServiceInterface is an autogenerated mock type for the AuthServiceInterface type
+	type MockAuthServiceInterface struct {
+		mock.Mock
+	}
+
+	type MockAuthServiceInterface_Expecter struct {
+		mock *mock.Mock
+	}
+
+	func (_m *MockAuthServiceInterface) EXPECT() *MockAuthServiceInterface_Expecter {
+		return &MockAuthServiceInterface_Expecter{mock: &_m.Mock}
+	}
+
+	// GenerateJWT provides a mock function for the type MockAuthServiceInterface
+	func (_mock *MockAuthServiceInterface) GenerateJWT(user *models.User) (string, error) {
+		ret := _mock.Called(user)
+
+		if len(ret) == 0 {
+			panic("no return value specified for GenerateJWT")
+		}
+
+		var r0 string
+		var r1 error
+		if returnFunc, ok := ret.Get(0).(func(*models.User) (string, error)); ok {
+			return returnFunc(user)
+		}
+		if returnFunc, ok := ret.Get(0).(func(*models.User) string); ok {
+			r0 = returnFunc(user)
+		} else {
+			r0 = ret.Get(0).(string)
+		}
+		if returnFunc, ok := ret.Get(1).(func(*models.User) error); ok {
+			r1 = returnFunc(user)
+		} else {
+			r1 = ret.Error(1)
+		}
+		return r0, r1
+	}
+
+	// MockAuthServiceInterface_GenerateJWT_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateJWT'
+	type MockAuthServiceInterface_GenerateJWT_Call struct {
+		*mock.Call
+	}
+
+	// GenerateJWT is a helper method to define mock.On call
+	//   - user *models.User
+	func (_e *MockAuthServiceInterface_Expecter) GenerateJWT(user interface{}) *MockAuthServiceInterface_GenerateJWT_Call {
+		return &MockAuthServiceInterface_GenerateJWT_Call{Call: _e.mock.On("GenerateJWT", user)}
+	}
+
+	func (_c *MockAuthServiceInterface_GenerateJWT_Call) Run(run func(user *models.User)) *MockAuthServiceInterface_GenerateJWT_Call {
+		_c.Call.Run(func(args mock.Arguments) {
+			var arg0 *models.User
+			if args[0] != nil {
+				arg0 = args[0].(*models.User)
+			}
+			run(
+				arg0,
+			)
+		})
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_GenerateJWT_Call) Return(s string, err error) *MockAuthServiceInterface_GenerateJWT_Call {
+		_c.Call.Return(s, err)
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_GenerateJWT_Call) RunAndReturn(run func(user *models.User) (string, error)) *MockAuthServiceInterface_GenerateJWT_Call {
+		_c.Call.Return(run)
+		return _c
+	}
+
+	// GetGoogleAuthURL provides a mock function for the type MockAuthServiceInterface
+	func (_mock *MockAuthServiceInterface) GetGoogleAuthURL(state string) string {
+		ret := _mock.Called(state)
+
+		if len(ret) == 0 {
+			panic("no return value specified for GetGoogleAuthURL")
+		}
+
+		var r0 string
+		if returnFunc, ok := ret.Get(0).(func(string) string); ok {
+			r0 = returnFunc(state)
+		} else {
+			r0 = ret.Get(0).(string)
+		}
+		return r0
+	}
+
+	// MockAuthServiceInterface_GetGoogleAuthURL_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGoogleAuthURL'
+	type MockAuthServiceInterface_GetGoogleAuthURL_Call struct {
+		*mock.Call
+	}
+
+	// GetGoogleAuthURL is a helper method to define mock.On call
+	//   - state string
+	func (_e *MockAuthServiceInterface_Expecter) GetGoogleAuthURL(state interface{}) *MockAuthServiceInterface_GetGoogleAuthURL_Call {
+		return &MockAuthServiceInterface_GetGoogleAuthURL_Call{Call: _e.mock.On("GetGoogleAuthURL", state)}
+	}
+
+	func (_c *MockAuthServiceInterface_GetGoogleAuthURL_Call) Run(run func(state string)) *MockAuthServiceInterface_GetGoogleAuthURL_Call {
+		_c.Call.Run(func(args mock.Arguments) {
+			var arg0 string
+			if args[0] != nil {
+				arg0 = args[0].(string)
+			}
+			run(
+				arg0,
+			)
+		})
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_GetGoogleAuthURL_Call) Return(s string) *MockAuthServiceInterface_GetGoogleAuthURL_Call {
+		_c.Call.Return(s)
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_GetGoogleAuthURL_Call) RunAndReturn(run func(state string) string) *MockAuthServiceInterface_GetGoogleAuthURL_Call {
+		_c.Call.Return(run)
+		return _c
+	}
+
+	// GetUserByID provides a mock function for the type MockAuthServiceInterface
+	func (_mock *MockAuthServiceInterface) GetUserByID(userID string) (*models.User, error) {
+		ret := _mock.Called(userID)
+
+		if len(ret) == 0 {
+			panic("no return value specified for GetUserByID")
+		}
+
+		var r0 *models.User
+		var r1 error
+		if returnFunc, ok := ret.Get(0).(func(string) (*models.User, error)); ok {
+			return returnFunc(userID)
+		}
+		if returnFunc, ok := ret.Get(0).(func(string) *models.User); ok {
+			r0 = returnFunc(userID)
+		} else {
+			if ret.Get(0) != nil {
+				r0 = ret.Get(0).(*models.User)
+			}
+		}
+		if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+			r1 = returnFunc(userID)
+		} else {
+			r1 = ret.Error(1)
+		}
+		return r0, r1
+	}
+
+	// MockAuthServiceInterface_GetUserByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByID'
+	type MockAuthServiceInterface_GetUserByID_Call struct {
+		*mock.Call
+	}
+
+	// GetUserByID is a helper method to define mock.On call
+	//   - userID string
+	func (_e *MockAuthServiceInterface_Expecter) GetUserByID(userID interface{}) *MockAuthServiceInterface_GetUserByID_Call {
+		return &MockAuthServiceInterface_GetUserByID_Call{Call: _e.mock.On("GetUserByID", userID)}
+	}
+
+	func (_c *MockAuthServiceInterface_GetUserByID_Call) Run(run func(userID string)) *MockAuthServiceInterface_GetUserByID_Call {
+		_c.Call.Run(func(args mock.Arguments) {
+			var arg0 string
+			if args[0] != nil {
+				arg0 = args[0].(string)
+			}
+			run(
+				arg0,
+			)
+		})
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_GetUserByID_Call) Return(user *models.User, err error) *MockAuthServiceInterface_GetUserByID_Call {
+		_c.Call.Return(user, err)
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_GetUserByID_Call) RunAndReturn(run func(userID string) (*models.User, error)) *MockAuthServiceInterface_GetUserByID_Call {
+		_c.Call.Return(run)
+		return _c
+	}
+
+	// HandleGoogleCallback provides a mock function for the type MockAuthServiceInterface
+	func (_mock *MockAuthServiceInterface) HandleGoogleCallback(code string) (*models.User, string, error) {
+		ret := _mock.Called(code)
+
+		if len(ret) == 0 {
+			panic("no return value specified for HandleGoogleCallback")
+		}
+
+		var r0 *models.User
+		var r1 string
+		var r2 error
+		if returnFunc, ok := ret.Get(0).(func(string) (*models.User, string, error)); ok {
+			return returnFunc(code)
+		}
+		if returnFunc, ok := ret.Get(0).(func(string) *models.User); ok {
+			r0 = returnFunc(code)
+		} else {
+			if ret.Get(0) != nil {
+				r0 = ret.Get(0).(*models.User)
+			}
+		}
+		if returnFunc, ok := ret.Get(1).(func(string) string); ok {
+			r1 = returnFunc(code)
+		} else {
+			r1 = ret.Get(1).(string)
+		}
+		if returnFunc, ok := ret.Get(2).(func(string) error); ok {
+			r2 = returnFunc(code)
+		} else {
+			r2 = ret.Error(2)
+		}
+		return r0, r1, r2
+	}
+
+	// MockAuthServiceInterface_HandleGoogleCallback_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HandleGoogleCallback'
+	type MockAuthServiceInterface_HandleGoogleCallback_Call struct {
+		*mock.Call
+	}
+
+	// HandleGoogleCallback is a helper method to define mock.On call
+	//   - code string
+	func (_e *MockAuthServiceInterface_Expecter) HandleGoogleCallback(code interface{}) *MockAuthServiceInterface_HandleGoogleCallback_Call {
+		return &MockAuthServiceInterface_HandleGoogleCallback_Call{Call: _e.mock.On("HandleGoogleCallback", code)}
+	}
+
+	func (_c *MockAuthServiceInterface_HandleGoogleCallback_Call) Run(run func(code string)) *MockAuthServiceInterface_HandleGoogleCallback_Call {
+		_c.Call.Run(func(args mock.Arguments) {
+			var arg0 string
+			if args[0] != nil {
+				arg0 = args[0].(string)
+			}
+			run(
+				arg0,
+			)
+		})
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_HandleGoogleCallback_Call) Return(user *models.User, s string, err error) *MockAuthServiceInterface_HandleGoogleCallback_Call {
+		_c.Call.Return(user, s, err)
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_HandleGoogleCallback_Call) RunAndReturn(run func(code string) (*models.User, string, error)) *MockAuthServiceInterface_HandleGoogleCallback_Call {
+		_c.Call.Return(run)
+		return _c
+	}
+
+	// ValidateJWT provides a mock function for the type MockAuthServiceInterface
+	func (_mock *MockAuthServiceInterface) ValidateJWT(tokenString string) (*services.Claims, error) {
+		ret := _mock.Called(tokenString)
+
+		if len(ret) == 0 {
+			panic("no return value specified for ValidateJWT")
+		}
+
+		var r0 *services.Claims
+		var r1 error
+		if returnFunc, ok := ret.Get(0).(func(string) (*services.Claims, error)); ok {
+			return returnFunc(tokenString)
+		}
+		if returnFunc, ok := ret.Get(0).(func(string) *services.Claims); ok {
+			r0 = returnFunc(tokenString)
+		} else {
+			if ret.Get(0) != nil {
+				r0 = ret.Get(0).(*services.Claims)
+			}
+		}
+		if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+			r1 = returnFunc(tokenString)
+		} else {
+			r1 = ret.Error(1)
+		}
+		return r0, r1
+	}
+
+	// MockAuthServiceInterface_ValidateJWT_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ValidateJWT'
+	type MockAuthServiceInterface_ValidateJWT_Call struct {
+		*mock.Call
+	}
+
+	// ValidateJWT is a helper method to define mock.On call
+	//   - tokenString string
+	func (_e *MockAuthServiceInterface_Expecter) ValidateJWT(tokenString interface{}) *MockAuthServiceInterface_ValidateJWT_Call {
+		return &MockAuthServiceInterface_ValidateJWT_Call{Call: _e.mock.On("ValidateJWT", tokenString)}
+	}
+
+	func (_c *MockAuthServiceInterface_ValidateJWT_Call) Run(run func(tokenString string)) *MockAuthServiceInterface_ValidateJWT_Call {
+		_c.Call.Run(func(args mock.Arguments) {
+			var arg0 string
+			if args[0] != nil {
+				arg0 = args[0].(string)
+			}
+			run(
+				arg0,
+			)
+		})
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_ValidateJWT_Call) Return(claims *services.Claims, err error) *MockAuthServiceInterface_ValidateJWT_Call {
+		_c.Call.Return(claims, err)
+		return _c
+	}
+
+	func (_c *MockAuthServiceInterface_ValidateJWT_Call) RunAndReturn(run func(tokenString string) (*services.Claims, error)) *MockAuthServiceInterface_ValidateJWT_Call {
+		_c.Call.Return(run)
+		return _c
+	}
+*/

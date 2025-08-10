@@ -1,9 +1,10 @@
 package services
 
 import (
+	"time"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"github.com/Soli0222/flow-sight/backend/internal/repositories"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -18,14 +19,13 @@ func NewAppSettingService(appSettingRepo *repositories.AppSettingRepository) *Ap
 	}
 }
 
-func (s *AppSettingService) GetSettings(userID uuid.UUID) ([]models.AppSetting, error) {
-	return s.appSettingRepo.GetByUserID(userID)
+func (s *AppSettingService) GetSettings() ([]models.AppSetting, error) {
+	return s.appSettingRepo.GetAll()
 }
 
-func (s *AppSettingService) UpdateSetting(userID uuid.UUID, key, value string) error {
+func (s *AppSettingService) UpdateSetting(key, value string) error {
 	setting := &models.AppSetting{
 		ID:        uuid.New(),
-		UserID:    userID,
 		Key:       key,
 		Value:     value,
 		CreatedAt: time.Now(),

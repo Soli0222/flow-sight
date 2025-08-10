@@ -1,11 +1,10 @@
 package services
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
-	"github.com/Soli0222/flow-sight/backend/internal/repositories"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/internal/repositories"
 )
 
 type DashboardService struct {
@@ -35,9 +34,9 @@ func NewDashboardService(
 	}
 }
 
-func (s *DashboardService) GetDashboardSummary(userID uuid.UUID) (*models.DashboardSummary, error) {
+func (s *DashboardService) GetDashboardSummary() (*models.DashboardSummary, error) {
 	// Get total balance from all bank accounts
-	bankAccounts, err := s.bankAccountRepo.GetAll(userID)
+	bankAccounts, err := s.bankAccountRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +47,7 @@ func (s *DashboardService) GetDashboardSummary(userID uuid.UUID) (*models.Dashbo
 	}
 
 	// Get credit cards count
-	creditCards, err := s.creditCardRepo.GetAll(userID)
+	creditCards, err := s.creditCardRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -61,13 +60,13 @@ func (s *DashboardService) GetDashboardSummary(userID uuid.UUID) (*models.Dashbo
 	currentYearMonth := currentTime.Format("2006-01")
 
 	// Calculate monthly income and expense
-	monthlyIncome, monthlyExpense, err := s.calculateMonthlyIncomeExpense(userID, currentYearMonth)
+	monthlyIncome, monthlyExpense, err := s.calculateMonthlyIncomeExpense(currentYearMonth)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get recent cashflow activities
-	recentActivities, err := s.cashflowService.GetCashflowProjection(userID, 1, true)
+	recentActivities, err := s.cashflowService.GetCashflowProjection(1, true)
 	if err != nil {
 		// If cashflow fails, continue with empty activities
 		recentActivities = make([]models.CashflowProjection, 0)
@@ -105,12 +104,12 @@ func (s *DashboardService) GetDashboardSummary(userID uuid.UUID) (*models.Dashbo
 	}, nil
 }
 
-func (s *DashboardService) calculateMonthlyIncomeExpense(userID uuid.UUID, yearMonth string) (int64, int64, error) {
+func (s *DashboardService) calculateMonthlyIncomeExpense(yearMonth string) (int64, int64, error) {
 	var totalIncome int64 = 0
 	var totalExpense int64 = 0
 
 	// Get active income sources
-	incomeSources, err := s.incomeSourceRepo.GetActiveByUserID(userID)
+	incomeSources, err := s.incomeSourceRepo.GetActive()
 	if err != nil {
 		return 0, 0, err
 	}
@@ -119,7 +118,7 @@ func (s *DashboardService) calculateMonthlyIncomeExpense(userID uuid.UUID, yearM
 	for _, source := range incomeSources {
 		if source.IncomeType == "monthly_fixed" {
 			// Check if there's a specific record for this month
-			records, err := s.monthlyIncomeRepo.GetByUserIDAndYearMonth(userID, yearMonth)
+			records, err := s.monthlyIncomeRepo.GetByYearMonth(yearMonth)
 			if err == nil {
 				recordFound := false
 				for _, record := range records {
@@ -146,7 +145,7 @@ func (s *DashboardService) calculateMonthlyIncomeExpense(userID uuid.UUID, yearM
 	}
 
 	// Get active recurring payments
-	recurringPayments, err := s.recurringPaymentRepo.GetActiveByUserID(userID)
+	recurringPayments, err := s.recurringPaymentRepo.GetActive()
 	if err != nil {
 		return totalIncome, 0, err
 	}

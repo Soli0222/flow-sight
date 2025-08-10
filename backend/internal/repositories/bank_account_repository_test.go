@@ -2,10 +2,11 @@ package repositories
 
 import (
 	"database/sql"
-	"github.com/Soli0222/flow-sight/backend/internal/models"
-	"github.com/Soli0222/flow-sight/backend/test/helpers"
 	"testing"
 	"time"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
+	"github.com/Soli0222/flow-sight/backend/test/helpers"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
@@ -18,24 +19,20 @@ func TestBankAccountRepository_GetAll(t *testing.T) {
 	defer helpers.TeardownMockDB(db)
 
 	repo := NewBankAccountRepository(db)
-	userID := uuid.New()
 
 	tests := []struct {
 		name          string
-		userID        uuid.UUID
 		setupMock     func(sqlmock.Sqlmock)
 		expectedCount int
 		expectedError bool
 		errorType     string
 	}{
 		{
-			name:   "successful retrieval with multiple accounts",
-			userID: userID,
+			name: "successful retrieval with multiple accounts",
 			setupMock: func(mock sqlmock.Sqlmock) {
 				accounts := []helpers.MockBankAccountData{
 					{
 						ID:        uuid.New(),
-						UserID:    userID,
 						Name:      "Main Account",
 						Balance:   100000,
 						CreatedAt: time.Now(),
@@ -43,92 +40,68 @@ func TestBankAccountRepository_GetAll(t *testing.T) {
 					},
 					{
 						ID:        uuid.New(),
-						UserID:    userID,
 						Name:      "Savings Account",
 						Balance:   50000,
 						CreatedAt: time.Now(),
 						UpdatedAt: time.Now(),
 					},
 				}
-				rows := helpers.ExpectBankAccountRows(mock, accounts)
+				rows := sqlmock.NewRows([]string{"id", "name", "balance", "created_at", "updated_at"})
+				for _, a := range accounts {
+					rows.AddRow(a.ID, a.Name, a.Balance, a.CreatedAt, a.UpdatedAt)
+				}
 
-				mock.ExpectQuery(`SELECT id, user_id, name, balance, created_at, updated_at FROM bank_accounts WHERE user_id = \$1 ORDER BY created_at DESC`).
-					WithArgs(userID).
+				mock.ExpectQuery(`SELECT id, name, balance, created_at, updated_at FROM bank_accounts\s+ORDER BY created_at DESC`).
 					WillReturnRows(rows)
 			},
 			expectedCount: 2,
 			expectedError: false,
 		},
 		{
-			name:   "successful retrieval with single account",
-			userID: userID,
+			name: "successful retrieval with single account",
 			setupMock: func(mock sqlmock.Sqlmock) {
 				accounts := []helpers.MockBankAccountData{
-					{
-						ID:        uuid.New(),
-						UserID:    userID,
-						Name:      "Main Account",
-						Balance:   100000,
-						CreatedAt: time.Now(),
-						UpdatedAt: time.Now(),
-					},
+					{ID: uuid.New(), Name: "Main Account", Balance: 100000, CreatedAt: time.Now(), UpdatedAt: time.Now()},
 				}
-				rows := helpers.ExpectBankAccountRows(mock, accounts)
-
-				mock.ExpectQuery(`SELECT id, user_id, name, balance, created_at, updated_at FROM bank_accounts WHERE user_id = \$1 ORDER BY created_at DESC`).
-					WithArgs(userID).
+				rows := sqlmock.NewRows([]string{"id", "name", "balance", "created_at", "updated_at"})
+				for _, a := range accounts {
+					rows.AddRow(a.ID, a.Name, a.Balance, a.CreatedAt, a.UpdatedAt)
+				}
+				mock.ExpectQuery(`SELECT id, name, balance, created_at, updated_at FROM bank_accounts\s+ORDER BY created_at DESC`).
 					WillReturnRows(rows)
 			},
 			expectedCount: 1,
 			expectedError: false,
 		},
 		{
-			name:   "no accounts found - empty result",
-			userID: userID,
+			name: "no accounts found - empty result",
 			setupMock: func(mock sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{
-					"id", "user_id", "name", "balance", "created_at", "updated_at",
-				})
-
-				mock.ExpectQuery(`SELECT id, user_id, name, balance, created_at, updated_at FROM bank_accounts WHERE user_id = \$1 ORDER BY created_at DESC`).
-					WithArgs(userID).
+				rows := sqlmock.NewRows([]string{"id", "name", "balance", "created_at", "updated_at"})
+				mock.ExpectQuery(`SELECT id, name, balance, created_at, updated_at FROM bank_accounts\s+ORDER BY created_at DESC`).
 					WillReturnRows(rows)
 			},
 			expectedCount: 0,
 			expectedError: false,
 		},
 		{
-			name:   "database connection error",
-			userID: userID,
+			name: "database connection error",
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(`SELECT id, user_id, name, balance, created_at, updated_at FROM bank_accounts WHERE user_id = \$1 ORDER BY created_at DESC`).
-					WithArgs(userID).
+				mock.ExpectQuery(`SELECT id, name, balance, created_at, updated_at FROM bank_accounts\s+ORDER BY created_at DESC`).
 					WillReturnError(sql.ErrConnDone)
 			},
 			expectedCount: 0,
 			expectedError: true,
 			errorType:     "connection",
 		},
-		{
-			name:   "invalid user ID",
-			userID: uuid.Nil,
-			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectQuery(`SELECT id, user_id, name, balance, created_at, updated_at FROM bank_accounts WHERE user_id = \$1 ORDER BY created_at DESC`).
-					WithArgs(uuid.Nil).
-					WillReturnRows(sqlmock.NewRows([]string{
-						"id", "user_id", "name", "balance", "created_at", "updated_at",
-					}))
-			},
-			expectedCount: 0,
-			expectedError: false,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt // capture range var
+
 			tt.setupMock(mock)
 
-			accounts, err := repo.GetAll(tt.userID)
+			accounts, err := repo.GetAll()
 
 			if tt.expectedError {
 				assert.Error(t, err)
@@ -139,9 +112,8 @@ func TestBankAccountRepository_GetAll(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Len(t, accounts, tt.expectedCount)
 
-				// Validate that all returned accounts belong to the correct user
+				// Validate that returned accounts have sane fields
 				for _, account := range accounts {
-					assert.Equal(t, tt.userID, account.UserID)
 					helpers.ValidateNonEmptyUUID(t, account.ID)
 					assert.NotEmpty(t, account.Name)
 					assert.GreaterOrEqual(t, account.Balance, int64(0))
@@ -171,13 +143,13 @@ func TestBankAccountRepository_GetByID(t *testing.T) {
 			accountID: uuid.New(),
 			setupMock: func(mock sqlmock.Sqlmock, id uuid.UUID) {
 				row := sqlmock.NewRows([]string{
-					"id", "user_id", "name", "balance", "created_at", "updated_at",
+					"id", "name", "balance", "created_at", "updated_at",
 				}).AddRow(
-					id, uuid.New(), "Test Account", int64(100000),
+					id, "Test Account", int64(100000),
 					time.Now(), time.Now(),
 				)
 
-				mock.ExpectQuery(`SELECT id, user_id, name, balance, created_at, updated_at FROM bank_accounts WHERE id = \$1`).
+				mock.ExpectQuery(`SELECT id, name, balance, created_at, updated_at FROM bank_accounts WHERE id = \$1`).
 					WithArgs(id).
 					WillReturnRows(row)
 			},
@@ -187,7 +159,7 @@ func TestBankAccountRepository_GetByID(t *testing.T) {
 			name:      "account not found",
 			accountID: uuid.New(),
 			setupMock: func(mock sqlmock.Sqlmock, id uuid.UUID) {
-				mock.ExpectQuery(`SELECT id, user_id, name, balance, created_at, updated_at FROM bank_accounts WHERE id = \$1`).
+				mock.ExpectQuery(`SELECT id, name, balance, created_at, updated_at FROM bank_accounts WHERE id = \$1`).
 					WithArgs(id).
 					WillReturnError(sql.ErrNoRows)
 			},
@@ -198,7 +170,7 @@ func TestBankAccountRepository_GetByID(t *testing.T) {
 			name:      "database connection error",
 			accountID: uuid.New(),
 			setupMock: func(mock sqlmock.Sqlmock, id uuid.UUID) {
-				mock.ExpectQuery(`SELECT id, user_id, name, balance, created_at, updated_at FROM bank_accounts WHERE id = \$1`).
+				mock.ExpectQuery(`SELECT id, name, balance, created_at, updated_at FROM bank_accounts WHERE id = \$1`).
 					WithArgs(id).
 					WillReturnError(sql.ErrConnDone)
 			},
@@ -227,7 +199,6 @@ func TestBankAccountRepository_GetByID(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, account)
 				assert.Equal(t, tt.accountID, account.ID)
-				helpers.ValidateNonEmptyUUID(t, account.UserID)
 				assert.NotEmpty(t, account.Name)
 				assert.GreaterOrEqual(t, account.Balance, int64(0))
 			}
@@ -252,20 +223,20 @@ func TestBankAccountRepository_Create(t *testing.T) {
 	}{
 		{
 			name:    "successful creation",
-			account: helpers.CreateTestBankAccount(uuid.New()),
+			account: helpers.CreateTestBankAccount(),
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(`INSERT INTO bank_accounts \(id, user_id, name, balance, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6\)`).
-					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+				mock.ExpectExec(`INSERT INTO bank_accounts \(id, name, balance, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5\)`).
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			expectedError: false,
 		},
 		{
 			name:    "database error",
-			account: helpers.CreateTestBankAccount(uuid.New()),
+			account: helpers.CreateTestBankAccount(),
 			setupMock: func(mock sqlmock.Sqlmock) {
-				mock.ExpectExec(`INSERT INTO bank_accounts \(id, user_id, name, balance, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5, \$6\)`).
-					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+				mock.ExpectExec(`INSERT INTO bank_accounts \(id, name, balance, created_at, updated_at\) VALUES \(\$1, \$2, \$3, \$4, \$5\)`).
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(sql.ErrConnDone)
 			},
 			expectedError: true,
@@ -288,7 +259,6 @@ func TestBankAccountRepository_Create(t *testing.T) {
 				assert.NoError(t, err)
 				// Verify that the account has required fields set
 				helpers.ValidateNonEmptyUUID(t, tt.account.ID)
-				helpers.ValidateNonEmptyUUID(t, tt.account.UserID)
 				assert.NotEmpty(t, tt.account.Name)
 			}
 
@@ -312,7 +282,7 @@ func TestBankAccountRepository_Update(t *testing.T) {
 	}{
 		{
 			name:    "successful update",
-			account: helpers.CreateTestBankAccount(uuid.New()),
+			account: helpers.CreateTestBankAccount(),
 			setupMock: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(`UPDATE bank_accounts SET name = \$2, balance = \$3, updated_at = \$4 WHERE id = \$1`).
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
@@ -322,7 +292,7 @@ func TestBankAccountRepository_Update(t *testing.T) {
 		},
 		{
 			name:    "account not found",
-			account: helpers.CreateTestBankAccount(uuid.New()),
+			account: helpers.CreateTestBankAccount(),
 			setupMock: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(`UPDATE bank_accounts SET name = \$2, balance = \$3, updated_at = \$4 WHERE id = \$1`).
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
@@ -332,7 +302,7 @@ func TestBankAccountRepository_Update(t *testing.T) {
 		},
 		{
 			name:    "database error",
-			account: helpers.CreateTestBankAccount(uuid.New()),
+			account: helpers.CreateTestBankAccount(),
 			setupMock: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(`UPDATE bank_accounts SET name = \$2, balance = \$3, updated_at = \$4 WHERE id = \$1`).
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).

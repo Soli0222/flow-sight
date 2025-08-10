@@ -1,8 +1,9 @@
 package services
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"time"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
 )
@@ -17,8 +18,8 @@ func NewCreditCardService(creditCardRepo CreditCardRepositoryInterface) *CreditC
 	}
 }
 
-func (s *CreditCardService) GetCreditCards(userID uuid.UUID) ([]models.CreditCard, error) {
-	return s.creditCardRepo.GetAll(userID)
+func (s *CreditCardService) GetCreditCards() ([]models.CreditCard, error) {
+	return s.creditCardRepo.GetAll()
 }
 
 func (s *CreditCardService) GetCreditCard(id uuid.UUID) (*models.CreditCard, error) {

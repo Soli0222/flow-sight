@@ -1,8 +1,9 @@
 package services
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"time"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
 )
@@ -17,8 +18,8 @@ func NewRecurringPaymentService(recurringPaymentRepo RecurringPaymentRepositoryI
 	}
 }
 
-func (s *RecurringPaymentService) GetRecurringPayments(userID uuid.UUID) ([]models.RecurringPayment, error) {
-	return s.recurringPaymentRepo.GetAll(userID)
+func (s *RecurringPaymentService) GetRecurringPayments() ([]models.RecurringPayment, error) {
+	return s.recurringPaymentRepo.GetAll()
 }
 
 func (s *RecurringPaymentService) GetRecurringPayment(id uuid.UUID) (*models.RecurringPayment, error) {

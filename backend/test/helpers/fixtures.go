@@ -1,29 +1,17 @@
 package helpers
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"time"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
 )
 
-// CreateTestUser creates a test user with default values
-func CreateTestUser() *models.User {
-	return &models.User{
-		ID:        uuid.New(),
-		Email:     "test@example.com",
-		Name:      "Test User",
-		GoogleID:  "test-google-id",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-}
-
 // CreateTestBankAccount creates a test bank account with default values
-func CreateTestBankAccount(userID uuid.UUID) *models.BankAccount {
+func CreateTestBankAccount() *models.BankAccount {
 	return &models.BankAccount{
 		ID:        uuid.New(),
-		UserID:    userID,
 		Name:      "Test Bank Account",
 		Balance:   100000, // 1000.00 in cents
 		CreatedAt: time.Now(),
@@ -32,11 +20,10 @@ func CreateTestBankAccount(userID uuid.UUID) *models.BankAccount {
 }
 
 // CreateTestCreditCard creates a test credit card with default values
-func CreateTestCreditCard(userID, bankAccountID uuid.UUID) *models.CreditCard {
+func CreateTestCreditCard(bankAccountID uuid.UUID) *models.CreditCard {
 	closingDay := 25
 	return &models.CreditCard{
 		ID:          uuid.New(),
-		UserID:      userID,
 		Name:        "Test Credit Card",
 		ClosingDay:  &closingDay,
 		PaymentDay:  10,
@@ -47,11 +34,10 @@ func CreateTestCreditCard(userID, bankAccountID uuid.UUID) *models.CreditCard {
 }
 
 // CreateTestIncomeSource creates a test income source with default values
-func CreateTestIncomeSource(userID, bankAccountID uuid.UUID) *models.IncomeSource {
+func CreateTestIncomeSource(bankAccountID uuid.UUID) *models.IncomeSource {
 	paymentDay := 25
 	return &models.IncomeSource{
 		ID:          uuid.New(),
-		UserID:      userID,
 		Name:        "Test Income Source",
 		IncomeType:  "monthly_fixed",
 		BaseAmount:  300000, // 3000.00 in cents
@@ -64,10 +50,9 @@ func CreateTestIncomeSource(userID, bankAccountID uuid.UUID) *models.IncomeSourc
 }
 
 // CreateTestRecurringPayment creates a test recurring payment with default values
-func CreateTestRecurringPayment(userID, bankAccountID uuid.UUID) *models.RecurringPayment {
+func CreateTestRecurringPayment(bankAccountID uuid.UUID) *models.RecurringPayment {
 	return &models.RecurringPayment{
 		ID:             uuid.New(),
-		UserID:         userID,
 		Name:           "Test Recurring Payment",
 		Amount:         50000, // 500.00 in cents
 		PaymentDay:     15,
@@ -121,10 +106,9 @@ func CreateTestMonthlyIncomeRecord(incomeSourceID uuid.UUID) *models.MonthlyInco
 }
 
 // CreateTestAppSetting creates a test AppSetting with default values
-func CreateTestAppSetting(userID uuid.UUID) *models.AppSetting {
+func CreateTestAppSetting() *models.AppSetting {
 	return &models.AppSetting{
 		ID:        uuid.New(),
-		UserID:    userID,
 		Key:       "test_setting",
 		Value:     "test_value",
 		CreatedAt: time.Now(),
@@ -133,64 +117,12 @@ func CreateTestAppSetting(userID uuid.UUID) *models.AppSetting {
 }
 
 // CreateTestAppSettingWithKeyValue creates a test AppSetting with specified key and value
-func CreateTestAppSettingWithKeyValue(userID uuid.UUID, key, value string) *models.AppSetting {
+func CreateTestAppSettingWithKeyValue(key, value string) *models.AppSetting {
 	return &models.AppSetting{
 		ID:        uuid.New(),
-		UserID:    userID,
 		Key:       key,
 		Value:     value,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-	}
-}
-
-// CreateTestUserWithEmail creates a test user with specified email
-func CreateTestUserWithEmail(email string) *models.User {
-	return &models.User{
-		ID:        uuid.New(),
-		Email:     email,
-		Name:      "Test User",
-		Picture:   "https://example.com/picture.jpg",
-		GoogleID:  "test-google-id",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-}
-
-// CreateTestIncomeSourceOneTime creates a test one-time income source
-func CreateTestIncomeSourceOneTime(userID, bankAccountID uuid.UUID) *models.IncomeSource {
-	scheduledDate := "2024-12-25"
-	return &models.IncomeSource{
-		ID:            uuid.New(),
-		UserID:        userID,
-		Name:          "Test One-time Income",
-		IncomeType:    "one_time",
-		BaseAmount:    500000, // 5000.00 in cents
-		BankAccount:   bankAccountID,
-		ScheduledDate: &scheduledDate,
-		IsActive:      true,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
-	}
-}
-
-// CreateTestRecurringPaymentWithLoan creates a test recurring payment with loan details
-func CreateTestRecurringPaymentWithLoan(userID, bankAccountID uuid.UUID) *models.RecurringPayment {
-	totalPayments := 36
-	remainingPayments := 24
-	return &models.RecurringPayment{
-		ID:                uuid.New(),
-		UserID:            userID,
-		Name:              "Test Loan Payment",
-		Amount:            120000, // 1200.00 in cents
-		PaymentDay:        15,
-		StartYearMonth:    "2024-01",
-		TotalPayments:     &totalPayments,
-		RemainingPayments: &remainingPayments,
-		BankAccount:       bankAccountID,
-		IsActive:          true,
-		Note:              "Test loan payment with installments",
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
 	}
 }

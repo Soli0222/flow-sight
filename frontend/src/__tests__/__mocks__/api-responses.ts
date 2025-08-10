@@ -1,8 +1,7 @@
-import { CreditCard, BankAccount, DashboardSummary, UserInfo, CashflowProjection } from '@/types/api'
+import { CreditCard, BankAccount, DashboardSummary, CashflowProjection } from '@/types/api'
 
 export const mockCreditCard: CreditCard = {
   id: '1',
-  user_id: 'user1',
   name: 'テストカード',
   bank_account: 'bank1',
   closing_day: 25,
@@ -13,7 +12,6 @@ export const mockCreditCard: CreditCard = {
 
 export const mockBankAccount: BankAccount = {
   id: 'bank1',
-  user_id: 'user1',
   name: 'テスト銀行',
   balance: 100000,
   created_at: '2024-01-01T00:00:00Z',
@@ -42,19 +40,8 @@ export const mockDashboardSummary: DashboardSummary = {
   recent_activities: [mockCashflowProjection],
 }
 
-export const mockUserInfo: UserInfo = {
-  id: 'user1',
-  email: 'test@example.com',
-  name: 'テストユーザー',
-  picture: 'https://example.com/avatar.jpg',
-  google_id: 'google123',
-  created_at: '2024-01-01T00:00:00Z',
-  updated_at: '2024-01-01T00:00:00Z',
-}
-
 export const mockApiResponses = {
   creditCards: [mockCreditCard],
   bankAccounts: [mockBankAccount],
   dashboardSummary: mockDashboardSummary,
-  userInfo: mockUserInfo,
 }

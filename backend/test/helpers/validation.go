@@ -1,8 +1,9 @@
 package helpers
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"testing"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,6 @@ import (
 // AssertBankAccount validates BankAccount model properties
 func AssertBankAccount(t *testing.T, expected, actual *models.BankAccount) {
 	assert.Equal(t, expected.ID, actual.ID)
-	assert.Equal(t, expected.UserID, actual.UserID)
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.Balance, actual.Balance)
 	assert.WithinDuration(t, expected.CreatedAt, actual.CreatedAt, 0)
@@ -21,7 +21,6 @@ func AssertBankAccount(t *testing.T, expected, actual *models.BankAccount) {
 // AssertCreditCard validates CreditCard model properties
 func AssertCreditCard(t *testing.T, expected, actual *models.CreditCard) {
 	assert.Equal(t, expected.ID, actual.ID)
-	assert.Equal(t, expected.UserID, actual.UserID)
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.ClosingDay, actual.ClosingDay)
 	assert.Equal(t, expected.PaymentDay, actual.PaymentDay)
@@ -33,7 +32,6 @@ func AssertCreditCard(t *testing.T, expected, actual *models.CreditCard) {
 // AssertIncomeSource validates IncomeSource model properties
 func AssertIncomeSource(t *testing.T, expected, actual *models.IncomeSource) {
 	assert.Equal(t, expected.ID, actual.ID)
-	assert.Equal(t, expected.UserID, actual.UserID)
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.IncomeType, actual.IncomeType)
 	assert.Equal(t, expected.BaseAmount, actual.BaseAmount)
@@ -49,7 +47,6 @@ func AssertIncomeSource(t *testing.T, expected, actual *models.IncomeSource) {
 // AssertRecurringPayment validates RecurringPayment model properties
 func AssertRecurringPayment(t *testing.T, expected, actual *models.RecurringPayment) {
 	assert.Equal(t, expected.ID, actual.ID)
-	assert.Equal(t, expected.UserID, actual.UserID)
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.Amount, actual.Amount)
 	assert.Equal(t, expected.PaymentDay, actual.PaymentDay)
@@ -82,27 +79,6 @@ func AssertCardMonthlyTotal(t *testing.T, expected, actual *models.CardMonthlyTo
 	assert.Equal(t, expected.YearMonth, actual.YearMonth)
 	assert.Equal(t, expected.TotalAmount, actual.TotalAmount)
 	assert.Equal(t, expected.IsConfirmed, actual.IsConfirmed)
-	assert.WithinDuration(t, expected.CreatedAt, actual.CreatedAt, 0)
-	assert.WithinDuration(t, expected.UpdatedAt, actual.UpdatedAt, 0)
-}
-
-// AssertUser validates User model properties
-func AssertUser(t *testing.T, expected, actual *models.User) {
-	assert.Equal(t, expected.ID, actual.ID)
-	assert.Equal(t, expected.Email, actual.Email)
-	assert.Equal(t, expected.Name, actual.Name)
-	assert.Equal(t, expected.Picture, actual.Picture)
-	assert.Equal(t, expected.GoogleID, actual.GoogleID)
-	assert.WithinDuration(t, expected.CreatedAt, actual.CreatedAt, 0)
-	assert.WithinDuration(t, expected.UpdatedAt, actual.UpdatedAt, 0)
-}
-
-// AssertAppSetting validates AppSetting model properties
-func AssertAppSetting(t *testing.T, expected, actual *models.AppSetting) {
-	assert.Equal(t, expected.ID, actual.ID)
-	assert.Equal(t, expected.UserID, actual.UserID)
-	assert.Equal(t, expected.Key, actual.Key)
-	assert.Equal(t, expected.Value, actual.Value)
 	assert.WithinDuration(t, expected.CreatedAt, actual.CreatedAt, 0)
 	assert.WithinDuration(t, expected.UpdatedAt, actual.UpdatedAt, 0)
 }

@@ -12,8 +12,13 @@ type MockRecurringPaymentRepository struct {
 	mock.Mock
 }
 
-func (m *MockRecurringPaymentRepository) GetAll(userID uuid.UUID) ([]models.RecurringPayment, error) {
-	args := m.Called(userID)
+func (m *MockRecurringPaymentRepository) GetAll() ([]models.RecurringPayment, error) {
+	args := m.Called()
+	return args.Get(0).([]models.RecurringPayment), args.Error(1)
+}
+
+func (m *MockRecurringPaymentRepository) GetActive() ([]models.RecurringPayment, error) {
+	args := m.Called()
 	return args.Get(0).([]models.RecurringPayment), args.Error(1)
 }
 
@@ -38,10 +43,4 @@ func (m *MockRecurringPaymentRepository) Update(payment *models.RecurringPayment
 func (m *MockRecurringPaymentRepository) Delete(id uuid.UUID) error {
 	args := m.Called(id)
 	return args.Error(0)
-}
-
-// Add convenience method used by services
-func (m *MockRecurringPaymentRepository) GetActiveByUserID(userID uuid.UUID) ([]models.RecurringPayment, error) {
-	args := m.Called(userID)
-	return args.Get(0).([]models.RecurringPayment), args.Error(1)
 }

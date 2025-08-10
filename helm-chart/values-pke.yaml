@@ -26,7 +26,6 @@ backend:
     HOST: "https://flow-sight.tailscale.oky.pke.str08.net/"
     DB_HOST: "flow-sight-db"
     DB_SSLMODE: "disable"
-    GOOGLE_REDIRECT_URL: "https://flow-sight.tailscale.oky.pke.str08.net/api/v1/auth/google/callback"
     ENV: "production"
   database:
     name: flowsight_db
@@ -40,10 +39,7 @@ backend:
       pullPolicy: IfNotPresent
   secrets:
     externalName: "flow-sight-backend-secrets"  # 外部Secretの名前（設定すると外部Secretを参照）
-    GOOGLE_CLIENT_ID: ""
-    GOOGLE_CLIENT_SECRET: ""
     DB_PASSWORD: ""
-    JWT_SECRET: ""
   service:
     type: ClusterIP
     port: 8080

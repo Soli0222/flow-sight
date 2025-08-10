@@ -11,7 +11,6 @@ import (
 
 func TestCashflowService_shouldApplyRecurringPayment(t *testing.T) {
 	service := &CashflowService{}
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
@@ -24,8 +23,7 @@ func TestCashflowService_shouldApplyRecurringPayment(t *testing.T) {
 		{
 			name: "infinite payments - should apply",
 			payment: models.RecurringPayment{
-				ID:                userID,
-				UserID:            userID,
+				ID:                uuid.New(),
 				Name:              "Monthly Rent",
 				Amount:            100000,
 				PaymentDay:        1,
@@ -44,8 +42,7 @@ func TestCashflowService_shouldApplyRecurringPayment(t *testing.T) {
 		{
 			name: "zero total payments - should apply",
 			payment: models.RecurringPayment{
-				ID:                userID,
-				UserID:            userID,
+				ID:                uuid.New(),
 				Name:              "Monthly Rent",
 				Amount:            100000,
 				PaymentDay:        1,
@@ -64,8 +61,7 @@ func TestCashflowService_shouldApplyRecurringPayment(t *testing.T) {
 		{
 			name: "within payment period - should apply",
 			payment: models.RecurringPayment{
-				ID:                userID,
-				UserID:            userID,
+				ID:                uuid.New(),
 				Name:              "Loan Payment",
 				Amount:            50000,
 				PaymentDay:        15,
@@ -84,8 +80,7 @@ func TestCashflowService_shouldApplyRecurringPayment(t *testing.T) {
 		{
 			name: "exceeds payment period - should not apply",
 			payment: models.RecurringPayment{
-				ID:                userID,
-				UserID:            userID,
+				ID:                uuid.New(),
 				Name:              "Loan Payment",
 				Amount:            50000,
 				PaymentDay:        15,
@@ -104,8 +99,7 @@ func TestCashflowService_shouldApplyRecurringPayment(t *testing.T) {
 		{
 			name: "before start month - should not apply",
 			payment: models.RecurringPayment{
-				ID:                userID,
-				UserID:            userID,
+				ID:                uuid.New(),
 				Name:              "Future Payment",
 				Amount:            30000,
 				PaymentDay:        10,
@@ -124,8 +118,7 @@ func TestCashflowService_shouldApplyRecurringPayment(t *testing.T) {
 		{
 			name: "inactive payment - should not apply",
 			payment: models.RecurringPayment{
-				ID:                userID,
-				UserID:            userID,
+				ID:                uuid.New(),
 				Name:              "Inactive Payment",
 				Amount:            25000,
 				PaymentDay:        5,

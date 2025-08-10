@@ -32,7 +32,6 @@ func TestRecurringPaymentHandler_GetRecurringPayments(t *testing.T) {
 				testPayments := []models.RecurringPayment{
 					{
 						ID:                uuid.MustParse("11223344-5566-7788-99aa-bbccddeeff00"),
-						UserID:            uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d"),
 						Name:              "Monthly Subscription",
 						Amount:            int64(99900), // $999.00 in cents
 						PaymentDay:        15,
@@ -46,25 +45,26 @@ func TestRecurringPaymentHandler_GetRecurringPayments(t *testing.T) {
 						UpdatedAt:         time.Now(),
 					},
 				}
-				m.On("GetRecurringPayments", uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d")).Return(testPayments, nil)
+				m.On("GetRecurringPayments").Return(testPayments, nil)
 			},
 			expectedStatus: http.StatusOK,
 			expectedCount:  1,
 		},
 		{
-			name:          "unauthenticated user",
+			name:          "unauthenticated user - still processes request",
 			authenticated: false,
 			setupMock: func(m *MockRecurringPaymentServiceInterface) {
-				// No mock setup needed for unauthenticated request
+				// Handler doesn't check auth in single-user mode; still calls service
+				m.On("GetRecurringPayments").Return([]models.RecurringPayment{}, nil)
 			},
-			expectedStatus: http.StatusForbidden,
+			expectedStatus: http.StatusOK,
 			expectedCount:  0,
 		},
 		{
 			name:          "service error",
 			authenticated: true,
 			setupMock: func(m *MockRecurringPaymentServiceInterface) {
-				m.On("GetRecurringPayments", uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d")).Return([]models.RecurringPayment{}, assert.AnError)
+				m.On("GetRecurringPayments").Return([]models.RecurringPayment{}, assert.AnError)
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedCount:  0,
@@ -118,7 +118,6 @@ func TestRecurringPaymentHandler_GetRecurringPayment(t *testing.T) {
 			setupMock: func(m *MockRecurringPaymentServiceInterface) {
 				testPayment := &models.RecurringPayment{
 					ID:                uuid.MustParse("11223344-5566-7788-99aa-bbccddeeff00"),
-					UserID:            uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d"),
 					Name:              "Monthly Subscription",
 					Amount:            int64(99900),
 					PaymentDay:        15,
@@ -200,7 +199,7 @@ func TestRecurringPaymentHandler_CreateRecurringPayment(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 		},
 		{
-			name:          "unauthenticated user",
+			name:          "unauthenticated user - still processes request",
 			authenticated: false,
 			requestBody: map[string]interface{}{
 				"name":             "Monthly Subscription",
@@ -212,15 +211,16 @@ func TestRecurringPaymentHandler_CreateRecurringPayment(t *testing.T) {
 				"note":             "Netflix subscription",
 			},
 			setupMock: func(m *MockRecurringPaymentServiceInterface) {
-				// No mock setup needed for unauthenticated request
+				// Handler doesn't check auth; still calls service
+				m.On("CreateRecurringPayment", mock.AnythingOfType("*models.RecurringPayment")).Return(nil)
 			},
-			expectedStatus: http.StatusForbidden,
+			expectedStatus: http.StatusCreated,
 		},
 		{
 			name:          "service validation error",
 			authenticated: true,
 			requestBody: map[string]interface{}{
-				"name": "", // 空の名前でサービスエラーが発生することを期待
+				"name": "",
 			},
 			setupMock: func(m *MockRecurringPaymentServiceInterface) {
 				m.On("CreateRecurringPayment", mock.AnythingOfType("*models.RecurringPayment")).Return(assert.AnError)

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
@@ -55,38 +56,6 @@ func (r *MonthlyIncomeRepository) GetByYearMonth(yearMonth string) ([]models.Mon
 	`
 
 	rows, err := r.db.Query(query, yearMonth)
-	if err != nil {
-		return []models.MonthlyIncomeRecord{}, err
-	}
-	defer rows.Close()
-
-	records := make([]models.MonthlyIncomeRecord, 0)
-	for rows.Next() {
-		var record models.MonthlyIncomeRecord
-		err := rows.Scan(
-			&record.ID, &record.IncomeSourceID, &record.YearMonth,
-			&record.ActualAmount, &record.IsConfirmed, &record.Note,
-			&record.CreatedAt, &record.UpdatedAt,
-		)
-		if err != nil {
-			return []models.MonthlyIncomeRecord{}, err
-		}
-		records = append(records, record)
-	}
-
-	return records, nil
-}
-
-func (r *MonthlyIncomeRepository) GetByUserIDAndYearMonth(userID uuid.UUID, yearMonth string) ([]models.MonthlyIncomeRecord, error) {
-	query := `
-		SELECT mir.id, mir.income_source_id, mir.year_month, mir.actual_amount, mir.is_confirmed, mir.note, mir.created_at, mir.updated_at
-		FROM monthly_income_records mir
-		JOIN income_sources isr ON mir.income_source_id = isr.id
-		WHERE isr.user_id = $1 AND mir.year_month = $2
-		ORDER BY mir.created_at DESC
-	`
-
-	rows, err := r.db.Query(query, userID, yearMonth)
 	if err != nil {
 		return []models.MonthlyIncomeRecord{}, err
 	}

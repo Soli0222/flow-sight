@@ -12,8 +12,8 @@ type MockBankAccountRepository struct {
 	mock.Mock
 }
 
-func (m *MockBankAccountRepository) GetAll(userID uuid.UUID) ([]models.BankAccount, error) {
-	args := m.Called(userID)
+func (m *MockBankAccountRepository) GetAll() ([]models.BankAccount, error) {
+	args := m.Called()
 	return args.Get(0).([]models.BankAccount), args.Error(1)
 }
 

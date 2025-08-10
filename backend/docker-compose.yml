@@ -26,7 +26,6 @@ services:
       DB_PASSWORD: password
       DB_NAME: flowsight_db
       DB_SSLMODE: disable
-      JWT_SECRET: your-jwt-secret-key
       ENV: development
     depends_on:
       db:

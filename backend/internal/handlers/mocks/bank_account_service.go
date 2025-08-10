@@ -12,8 +12,8 @@ type MockBankAccountService struct {
 	mock.Mock
 }
 
-func (m *MockBankAccountService) GetBankAccounts(userID uuid.UUID) ([]models.BankAccount, error) {
-	args := m.Called(userID)
+func (m *MockBankAccountService) GetBankAccounts() ([]models.BankAccount, error) {
+	args := m.Called()
 	return args.Get(0).([]models.BankAccount), args.Error(1)
 }
 

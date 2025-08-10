@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"net/http"
+
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -21,27 +22,14 @@ func NewIncomeHandler(incomeService IncomeServiceInterface) *IncomeHandler {
 // Income Source handlers
 
 // @Summary Get all income sources
-// @Description Get all income sources for a user
+// @Description Get all income sources
 // @Tags income
 // @Accept json
 // @Produce json
-// @Security BearerAuth
 // @Success 200 {array} models.IncomeSource
 // @Router /income-sources [get]
 func (h *IncomeHandler) GetIncomeSources(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
-		return
-	}
-
-	userUUID, ok := userID.(uuid.UUID)
-	if !ok {
-		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
-		return
-	}
-
-	sources, err := h.incomeService.GetIncomeSources(userUUID)
+	sources, err := h.incomeService.GetIncomeSources()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -80,31 +68,15 @@ func (h *IncomeHandler) GetIncomeSource(c *gin.Context) {
 // @Tags income
 // @Accept json
 // @Produce json
-// @Security BearerAuth
 // @Param source body models.IncomeSource true "Income Source data"
 // @Success 201 {object} models.IncomeSource
 // @Router /income-sources [post]
 func (h *IncomeHandler) CreateIncomeSource(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
-		return
-	}
-
-	userUUID, ok := userID.(uuid.UUID)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
-		return
-	}
-
 	var source models.IncomeSource
 	if err := c.ShouldBindJSON(&source); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Set the user_id from the authenticated user
-	source.UserID = userUUID
 
 	if err := h.incomeService.CreateIncomeSource(&source); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

@@ -23,7 +23,7 @@ Flow Sightは個人の金融管理を行うためのWebアプリケーション�
 4. **固定支出管理API** - 家賃、保険料などの定期支払いの管理
 5. **カード月次利用額管理API** - クレジットカードの月次利用総額の管理
 6. **キャッシュフロー予測API** - 将来の資金残高推移の予測計算
-7. **アプリケーション設定API** - ユーザー設定の管理
+7. **アプリケーション設定API** - 設定の管理（シングルユーザー）
 
 ### キャッシュフロー予測の特徴
 
@@ -31,65 +31,6 @@ Flow Sightは個人の金融管理を行うためのWebアプリケーション�
 - 複数銀行口座の残高統合
 - 最大36ヶ月先までの予測
 - 日次残高推移の詳細計算
-
-## ログ
-
-### ログ設計
-
-アプリケーションは構造化ログ（slog）を使用し、環境に応じて適切な形式で出力します。
-
-**development環境**:
-- 出力形式: テキスト（人間が読みやすい）
-- ログレベル: DEBUG以上
-- スタックトレース: 有効
-
-**production環境**:
-- 出力形式: JSON（ログ収集ツール用）
-- ログレベル: INFO以上
-- セキュリティ情報のマスキング: 有効
-
-### ログレベル
-
-- **DEBUG**: 開発時の詳細情報
-- **INFO**: 通常の操作情報（リクエスト、ビジネス操作）
-- **WARN**: 警告（認証失敗など）
-- **ERROR**: エラー情報（システムエラー）
-
-### ログ構造
-
-```json
-{
-  "time": "2025-07-27T02:30:04Z",
-  "level": "INFO",
-  "msg": "HTTP request",
-  "service": "flow-sight-backend",
-  "version": "1.0.0",
-  "environment": "production",
-  "request_id": "abc123def456",
-  "method": "POST",
-  "path": "/api/v1/bank-accounts",
-  "status_code": 201,
-  "duration": "15ms",
-  "user_id": "user-uuid"
-}
-```
-
-### セキュリティログ
-
-認証関連のイベントは自動的にログに記録されます：
-
-- ログイン成功/失敗
-- 認証トークンの検証
-- 不正なアクセス試行
-
-### ビジネスログ
-
-重要なビジネス操作も自動的にログに記録されます：
-
-- 口座作成/更新/削除
-- 収入源の管理
-- 支出の記録
-- 設定変更
 
 ## セットアップ
 
@@ -111,20 +52,8 @@ DB_USER=postgres
 DB_PASSWORD=password
 DB_NAME=flowsight_db
 DB_SSLMODE=disable
-JWT_SECRET=your-jwt-secret-key
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_REDIRECT_URL=http://localhost:8080/api/v1/auth/google/callback
 ENV=development
 ```
-
-### Google OAuth設定
-
-1. [Google Cloud Console](https://console.cloud.google.com/)でプロジェクトを作成
-2. OAuth 2.0認証情報を作成:
-   - 承認済みのリダイレクトURI: `http://localhost:4000/api/v1/auth/google/callback`
-   - 承認済みのJavaScript生成元: `http://localhost:4000`
-3. クライアントIDとクライアントシークレットを環境変数に設定
 
 ### Docker統合環境での起動
 
@@ -138,14 +67,6 @@ make setup
 make up
 
 # アクセス: http://localhost:4000
-```
-
-詳細な統合環境の使い方は、プロジェクトルートの`README.md`を参照してください。
-DB_PASSWORD=password
-DB_NAME=flowsight_db
-DB_SSLMODE=disable
-JWT_SECRET=your-jwt-secret-key
-ENV=development
 ```
 
 ### Docker Composeを使用した起動
@@ -303,12 +224,10 @@ http://localhost:8080/swagger/index.html
 本番環境では以下の環境変数を適切に設定してください：
 
 - `ENV=production`
-- `JWT_SECRET` - 強力なランダム文字列
 - `DB_*` - 本番データベースの接続情報
 
 ### セキュリティ
 
-- JWTシークレットは十分にランダムで複雑なものを使用
 - データベース接続情報は環境変数で管理
 - HTTPS通信の使用を推奨
 - 定期的なセキュリティアップデート

@@ -12,8 +12,8 @@ type MockIncomeSourceRepository struct {
 	mock.Mock
 }
 
-func (m *MockIncomeSourceRepository) GetAll(userID uuid.UUID) ([]models.IncomeSource, error) {
-	args := m.Called(userID)
+func (m *MockIncomeSourceRepository) GetAll() ([]models.IncomeSource, error) {
+	args := m.Called()
 	return args.Get(0).([]models.IncomeSource), args.Error(1)
 }
 
@@ -25,8 +25,8 @@ func (m *MockIncomeSourceRepository) GetByID(id uuid.UUID) (*models.IncomeSource
 	return args.Get(0).(*models.IncomeSource), args.Error(1)
 }
 
-func (m *MockIncomeSourceRepository) GetActiveByUserID(userID uuid.UUID) ([]models.IncomeSource, error) {
-	args := m.Called(userID)
+func (m *MockIncomeSourceRepository) GetActive() ([]models.IncomeSource, error) {
+	args := m.Called()
 	return args.Get(0).([]models.IncomeSource), args.Error(1)
 }
 

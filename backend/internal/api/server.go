@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+
 	"github.com/Soli0222/flow-sight/backend/internal/config"
 	"github.com/Soli0222/flow-sight/backend/internal/handlers"
 	"github.com/Soli0222/flow-sight/backend/internal/logger"
@@ -38,7 +39,7 @@ func NewServer(db *sql.DB, cfg *config.Config, appLogger *logger.Logger) *Server
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{cfg.Host}
 	corsConfig.AllowCredentials = true
-	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Accept"}
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	router.Use(cors.New(corsConfig))
 
@@ -55,7 +56,6 @@ func NewServer(db *sql.DB, cfg *config.Config, appLogger *logger.Logger) *Server
 
 func (s *Server) setupRoutes() {
 	// Initialize repositories
-	userRepo := repositories.NewUserRepository(s.db)
 	creditCardRepo := repositories.NewCreditCardRepository(s.db)
 	bankAccountRepo := repositories.NewBankAccountRepository(s.db)
 	incomeSourceRepo := repositories.NewIncomeSourceRepository(s.db)
@@ -65,7 +65,6 @@ func (s *Server) setupRoutes() {
 	appSettingRepo := repositories.NewAppSettingRepository(s.db)
 
 	// Initialize services
-	authService := services.NewAuthService(userRepo, s.config)
 	creditCardService := services.NewCreditCardService(creditCardRepo)
 	bankAccountService := services.NewBankAccountService(bankAccountRepo)
 	incomeService := services.NewIncomeService(incomeSourceRepo, monthlyIncomeRepo)
@@ -76,7 +75,6 @@ func (s *Server) setupRoutes() {
 	dashboardService := services.NewDashboardService(bankAccountRepo, creditCardRepo, incomeSourceRepo, monthlyIncomeRepo, recurringPaymentRepo, cashflowService)
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(authService, s.config)
 	creditCardHandler := handlers.NewCreditCardHandler(creditCardService)
 	bankAccountHandler := handlers.NewBankAccountHandler(bankAccountService)
 	incomeHandler := handlers.NewIncomeHandler(incomeService)
@@ -86,70 +84,60 @@ func (s *Server) setupRoutes() {
 	cashflowHandler := handlers.NewCashflowHandler(cashflowService)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 
-	// Public routes (no authentication required)
+	// Public routes (single-user mode, no authentication)
 	api := s.router.Group("/api/v1")
-
-	// Auth routes
-	api.GET("/auth/google", authHandler.GoogleLogin)
-	api.GET("/auth/google/callback", authHandler.GoogleCallback)
-
-	// Protected routes (authentication required)
-	protected := api.Group("")
-	protected.Use(middleware.AuthMiddleware(authService))
-
-	// User info
-	protected.GET("/auth/me", authHandler.GetMe)
+	api.Use(middleware.SingleUserMiddleware())
 
 	// Credit Card routes
-	protected.GET("/credit-cards", creditCardHandler.GetCreditCards)
-	protected.POST("/credit-cards", creditCardHandler.CreateCreditCard)
-	protected.GET("/credit-cards/:id", creditCardHandler.GetCreditCard)
-	protected.PUT("/credit-cards/:id", creditCardHandler.UpdateCreditCard)
-	protected.DELETE("/credit-cards/:id", creditCardHandler.DeleteCreditCard)
+	api.GET("/credit-cards", creditCardHandler.GetCreditCards)
+	api.POST("/credit-cards", creditCardHandler.CreateCreditCard)
+	api.GET("/credit-cards/:id", creditCardHandler.GetCreditCard)
+	api.PUT("/credit-cards/:id", creditCardHandler.UpdateCreditCard)
+	api.DELETE("/credit-cards/:id", creditCardHandler.DeleteCreditCard)
 
 	// Bank Account routes
-	protected.GET("/bank-accounts", bankAccountHandler.GetBankAccounts)
-	protected.POST("/bank-accounts", bankAccountHandler.CreateBankAccount)
-	protected.GET("/bank-accounts/:id", bankAccountHandler.GetBankAccount)
-	protected.PUT("/bank-accounts/:id", bankAccountHandler.UpdateBankAccount)
-	protected.DELETE("/bank-accounts/:id", bankAccountHandler.DeleteBankAccount)
+	api.GET("/bank-accounts", bankAccountHandler.GetBankAccounts)
+	api.POST("/bank-accounts", bankAccountHandler.CreateBankAccount)
+	api.GET("/bank-accounts/:id", bankAccountHandler.GetBankAccount)
+	api.PUT("/bank-accounts/:id", bankAccountHandler.UpdateBankAccount)
+	api.DELETE("/bank-accounts/:id", bankAccountHandler.DeleteBankAccount)
 
 	// Income routes
-	protected.GET("/income-sources", incomeHandler.GetIncomeSources)
-	protected.POST("/income-sources", incomeHandler.CreateIncomeSource)
-	protected.GET("/income-sources/:id", incomeHandler.GetIncomeSource)
-	protected.PUT("/income-sources/:id", incomeHandler.UpdateIncomeSource)
-	protected.DELETE("/income-sources/:id", incomeHandler.DeleteIncomeSource)
+	api.GET("/income-sources", incomeHandler.GetIncomeSources)
+	api.POST("/income-sources", incomeHandler.CreateIncomeSource)
+	api.GET("/income-sources/:id", incomeHandler.GetIncomeSource)
+	api.PUT("/income-sources/:id", incomeHandler.UpdateIncomeSource)
+	api.DELETE("/income-sources/:id", incomeHandler.DeleteIncomeSource)
 
-	protected.GET("/monthly-income-records", incomeHandler.GetMonthlyIncomeRecords)
-	protected.POST("/monthly-income-records", incomeHandler.CreateMonthlyIncomeRecord)
-	protected.GET("/monthly-income-records/:id", incomeHandler.GetMonthlyIncomeRecord)
-	protected.PUT("/monthly-income-records/:id", incomeHandler.UpdateMonthlyIncomeRecord)
-	protected.DELETE("/monthly-income-records/:id", incomeHandler.DeleteMonthlyIncomeRecord)
+	api.GET("/monthly-income-records", incomeHandler.GetMonthlyIncomeRecords)
+	api.POST("/monthly-income-records", incomeHandler.CreateMonthlyIncomeRecord)
+	api.GET("/monthly-income-records/:id", incomeHandler.GetMonthlyIncomeRecord)
+	api.PUT("/monthly-income-records/:id", incomeHandler.UpdateMonthlyIncomeRecord)
+	api.DELETE("/monthly-income-records/:id", incomeHandler.DeleteMonthlyIncomeRecord)
 
 	// Recurring Payment routes
-	protected.GET("/recurring-payments", recurringPaymentHandler.GetRecurringPayments)
-	protected.POST("/recurring-payments", recurringPaymentHandler.CreateRecurringPayment)
-	protected.GET("/recurring-payments/:id", recurringPaymentHandler.GetRecurringPayment)
-	protected.PUT("/recurring-payments/:id", recurringPaymentHandler.UpdateRecurringPayment)
-	protected.DELETE("/recurring-payments/:id", recurringPaymentHandler.DeleteRecurringPayment)
+	api.GET("/recurring-payments", recurringPaymentHandler.GetRecurringPayments)
+	api.POST("/recurring-payments", recurringPaymentHandler.CreateRecurringPayment)
+	api.GET("/recurring-payments/:id", recurringPaymentHandler.GetRecurringPayment)
+	api.PUT("/recurring-payments/:id", recurringPaymentHandler.UpdateRecurringPayment)
+	api.DELETE("/recurring-payments/:id", recurringPaymentHandler.DeleteRecurringPayment)
 
 	// Card Monthly Total routes
-	protected.GET("/card-monthly-totals", cardMonthlyTotalHandler.GetCardMonthlyTotals)
-	protected.POST("/card-monthly-totals", cardMonthlyTotalHandler.CreateCardMonthlyTotal)
-	protected.GET("/card-monthly-totals/:id", cardMonthlyTotalHandler.GetCardMonthlyTotal)
-	protected.PUT("/card-monthly-totals/:id", cardMonthlyTotalHandler.UpdateCardMonthlyTotal)
-	protected.DELETE("/card-monthly-totals/:id", cardMonthlyTotalHandler.DeleteCardMonthlyTotal)
+	api.GET("/card-monthly-totals", cardMonthlyTotalHandler.GetCardMonthlyTotals)
+	api.POST("/card-monthly-totals", cardMonthlyTotalHandler.CreateCardMonthlyTotal)
+	api.GET("/card-monthly-totals/:id", cardMonthlyTotalHandler.GetCardMonthlyTotal)
+	api.PUT("/card-monthly-totals/:id", cardMonthlyTotalHandler.UpdateCardMonthlyTotal)
+	api.DELETE("/card-monthly-totals/:id", cardMonthlyTotalHandler.DeleteCardMonthlyTotal)
 
 	// App Setting routes
-	protected.GET("/settings", appSettingHandler.GetSettings)
-	protected.PUT("/settings", appSettingHandler.UpdateSettings)
+	api.GET("/settings", appSettingHandler.GetSettings)
+	api.PUT("/settings", appSettingHandler.UpdateSettings)
 
 	// Cashflow Projection routes
-	protected.GET("/cashflow-projection", cashflowHandler.GetCashflowProjection)
+	api.GET("/cashflow-projection", cashflowHandler.GetCashflowProjection)
 
 	// Dashboard routes
-	protected.GET("/dashboard/summary", dashboardHandler.GetDashboardSummary)
+	api.GET("/dashboard/summary", dashboardHandler.GetDashboardSummary)
 
 	// Health check
 	api.GET("/health", func(c *gin.Context) {

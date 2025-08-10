@@ -2,9 +2,8 @@ package repositories
 
 import (
 	"database/sql"
-	"github.com/Soli0222/flow-sight/backend/internal/models"
 
-	"github.com/google/uuid"
+	"github.com/Soli0222/flow-sight/backend/internal/models"
 )
 
 type AppSettingRepository struct {
@@ -15,15 +14,14 @@ func NewAppSettingRepository(db *sql.DB) *AppSettingRepository {
 	return &AppSettingRepository{db: db}
 }
 
-func (r *AppSettingRepository) GetByUserID(userID uuid.UUID) ([]models.AppSetting, error) {
+func (r *AppSettingRepository) GetAll() ([]models.AppSetting, error) {
 	query := `
-		SELECT id, user_id, key, value, created_at, updated_at
+		SELECT id, key, value, created_at, updated_at
 		FROM app_settings 
-		WHERE user_id = $1
 		ORDER BY key ASC
 	`
 
-	rows, err := r.db.Query(query, userID)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return []models.AppSetting{}, err
 	}
@@ -33,7 +31,7 @@ func (r *AppSettingRepository) GetByUserID(userID uuid.UUID) ([]models.AppSettin
 	for rows.Next() {
 		var setting models.AppSetting
 		err := rows.Scan(
-			&setting.ID, &setting.UserID, &setting.Key, &setting.Value,
+			&setting.ID, &setting.Key, &setting.Value,
 			&setting.CreatedAt, &setting.UpdatedAt,
 		)
 		if err != nil {
@@ -45,16 +43,16 @@ func (r *AppSettingRepository) GetByUserID(userID uuid.UUID) ([]models.AppSettin
 	return settings, nil
 }
 
-func (r *AppSettingRepository) GetByKey(userID uuid.UUID, key string) (*models.AppSetting, error) {
+func (r *AppSettingRepository) GetByKey(key string) (*models.AppSetting, error) {
 	query := `
-		SELECT id, user_id, key, value, created_at, updated_at
+		SELECT id, key, value, created_at, updated_at
 		FROM app_settings 
-		WHERE user_id = $1 AND key = $2
+		WHERE key = $1
 	`
 
 	var setting models.AppSetting
-	err := r.db.QueryRow(query, userID, key).Scan(
-		&setting.ID, &setting.UserID, &setting.Key, &setting.Value,
+	err := r.db.QueryRow(query, key).Scan(
+		&setting.ID, &setting.Key, &setting.Value,
 		&setting.CreatedAt, &setting.UpdatedAt,
 	)
 
@@ -67,22 +65,22 @@ func (r *AppSettingRepository) GetByKey(userID uuid.UUID, key string) (*models.A
 
 func (r *AppSettingRepository) Upsert(setting *models.AppSetting) error {
 	query := `
-		INSERT INTO app_settings (id, user_id, key, value, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		ON CONFLICT (user_id, key) 
+		INSERT INTO app_settings (id, key, value, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (key) 
 		DO UPDATE SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at
 	`
 
 	_, err := r.db.Exec(query,
-		setting.ID, setting.UserID, setting.Key, setting.Value,
+		setting.ID, setting.Key, setting.Value,
 		setting.CreatedAt, setting.UpdatedAt,
 	)
 
 	return err
 }
 
-func (r *AppSettingRepository) Delete(userID uuid.UUID, key string) error {
-	query := `DELETE FROM app_settings WHERE user_id = $1 AND key = $2`
-	_, err := r.db.Exec(query, userID, key)
+func (r *AppSettingRepository) Delete(key string) error {
+	query := `DELETE FROM app_settings WHERE key = $1`
+	_, err := r.db.Exec(query, key)
 	return err
 }

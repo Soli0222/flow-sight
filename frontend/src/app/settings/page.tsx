@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Save, User, Info } from 'lucide-react';
-import Image from 'next/image';
+import { Save, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { MainLayout } from '@/components/layout/main-layout';
 import { useApi } from '@/components/providers/api-provider';
 import { toast } from 'sonner';
-import { VersionInfo, UserInfo } from '@/types/api';
+import { VersionInfo } from '@/types/api';
 import { FRONTEND_VERSION } from '@/lib/version';
 
 export default function SettingsPage() {
@@ -21,7 +20,6 @@ export default function SettingsPage() {
     theme: 'light',
   });
   const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -60,14 +58,6 @@ export default function SettingsPage() {
         setVersionInfo(version);
       } catch (error) {
         console.error('Failed to load version info:', error);
-      }
-
-      // Load user info
-      try {
-        const user = await apiClient.getCurrentUser();
-        setUserInfo(user);
-      } catch (error) {
-        console.error('Failed to load user info:', error);
       }
     } catch (error) {
       toast.error('設定の取得に失敗しました');
@@ -204,58 +194,6 @@ export default function SettingsPage() {
                     className="bg-muted"
                   />
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                アカウント情報
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {userInfo && (
-                <>
-                  <div className="flex items-center gap-4">
-                    <Image
-                      src={userInfo.picture || '/default-avatar.png'}
-                      alt={userInfo.name || 'User'}
-                      width={64}
-                      height={64}
-                      className="rounded-full"
-                    />
-                    <div>
-                      <h3 className="font-semibold">{userInfo.name || 'Unknown'}</h3>
-                      <p className="text-sm text-muted-foreground">{userInfo.email || 'No email'}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>ユーザーID</Label>
-                    <Input
-                      value={userInfo.id || ''}
-                      readOnly
-                      className="bg-muted font-mono text-xs"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Google ID</Label>
-                    <Input
-                      value={userInfo.google_id || ''}
-                      readOnly
-                      className="bg-muted font-mono text-xs"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>登録日時</Label>
-                    <Input
-                      value={userInfo.created_at ? new Date(userInfo.created_at).toLocaleString('ja-JP') : ''}
-                      readOnly
-                      className="bg-muted"
-                    />
-                  </div>
-                </>
               )}
             </CardContent>
           </Card>

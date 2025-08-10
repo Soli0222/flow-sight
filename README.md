@@ -22,11 +22,6 @@
 - **締め日・支払日考慮** - 正確な支払いスケジュール計算
 - **日次残高推移** - 詳細な資金動向の可視化
 
-### 🛡️ セキュリティ・認証
-- **Google OAuth認証** - 安全なユーザー認証
-- **JWT トークン管理** - セキュアなAPI認証
-- **構造化ログ** - セキュリティイベントの追跡
-
 ## 🏗️ 技術スタック
 
 ### バックエンド
@@ -74,16 +69,7 @@ cd flow-sight
 make setup
 ```
 
-`.env`ファイルを編集してGoogle OAuth情報を設定してください：
-
-```bash
-# Google OAuth設定
-GOOGLE_CLIENT_ID=your-google-client-id-here
-GOOGLE_CLIENT_SECRET=your-google-client-secret-here
-
-# 開発環境設定
-NODE_ENV=development
-```
+`.env` を必要に応じて調整してください。
 
 ### 3. アプリケーション起動
 
@@ -214,12 +200,12 @@ pnpm test:coverage
 
 ### 主要APIエンドポイント
 
-- **認証**: `/api/v1/auth/*`
 - **銀行口座**: `/api/v1/bank-accounts`
 - **クレジットカード**: `/api/v1/credit-cards`
-- **収入管理**: `/api/v1/income-sources`
+- **収入管理**: `/api/v1/income-sources`, `/api/v1/monthly-income-records`
 - **固定支出**: `/api/v1/recurring-payments`
 - **キャッシュフロー予測**: `/api/v1/cashflow-projection`
+- **アプリ設定**: `/api/v1/settings`
 
 ## 🚢 デプロイメント
 
@@ -242,18 +228,12 @@ helm uninstall flow-sight
 本番環境では以下の環境変数を適切に設定してください：
 
 ```bash
-# セキュリティ
-JWT_SECRET=強力なランダム文字列
 ENV=production
 
 # データベース
 DB_HOST=本番データベースホスト
 DB_PASSWORD=強力なパスワード
 DB_SSLMODE=require
-
-# OAuth
-GOOGLE_CLIENT_ID=本番用クライアントID
-GOOGLE_CLIENT_SECRET=本番用クライアントシークレット
 ```
 
 ## 🎯 パフォーマンス
@@ -270,11 +250,9 @@ GOOGLE_CLIENT_SECRET=本番用クライアントシークレット
 
 ## 🔒 セキュリティ
 
-- **JWT認証**: セキュアなAPI認証
-- **Google OAuth**: 外部認証連携
-- **HTTPS推奨**: 本番環境での暗号化通信
-- **環境変数管理**: 機密情報の適切な管理
-- **構造化ログ**: セキュリティイベントの記録
+- HTTPS推奨: 本番環境での暗号化通信
+- 環境変数管理: 機密情報の適切な管理
+- 構造化ログ: 重要イベントの記録
 
 ## 🗺️ 今後の拡張予定
 

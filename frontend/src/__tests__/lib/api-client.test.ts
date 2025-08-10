@@ -3,13 +3,6 @@
  */
 import ApiClient from '@/lib/api-client'
 import { mockApiResponses } from '../__mocks__/api-responses'
-import Cookies from 'js-cookie'
-
-// cookieのモック
-jest.mock('js-cookie', () => ({
-  get: jest.fn(),
-  remove: jest.fn(),
-}))
 
 // fetchのモック
 global.fetch = jest.fn()
@@ -17,13 +10,10 @@ global.fetch = jest.fn()
 describe('ApiClient', () => {
   let apiClient: ApiClient
   const mockFetch = fetch as jest.MockedFunction<typeof fetch>
-  const mockCookiesGet = Cookies.get as jest.MockedFunction<typeof Cookies.get>
-  const mockCookiesRemove = Cookies.remove as jest.MockedFunction<typeof Cookies.remove>
 
   beforeEach(() => {
     jest.clearAllMocks()
     apiClient = new ApiClient()
-    ;(mockCookiesGet as jest.Mock).mockReturnValue('test-token')
   })
 
   afterEach(() => {
@@ -44,7 +34,6 @@ describe('ApiClient', () => {
       expect(fetch).toHaveBeenCalledWith('/api/v1/test', {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token',
         },
       })
       expect(result).toEqual(mockData)
@@ -60,17 +49,6 @@ describe('ApiClient', () => {
       expect(result).toBeUndefined()
     })
 
-    // NOTE: JSDOMの制限により、window.location.hrefのテストはスキップ
-    // it('should handle 401 Unauthorized responses', async () => {
-    //   mockFetch.mockResolvedValueOnce({
-    //     ok: false,
-    //     status: 401,
-    //   } as Response)
-
-    //   await expect(apiClient['request']('/test')).rejects.toThrow('Unauthorized')
-    //   expect(mockCookiesRemove).toHaveBeenCalledWith('auth_token')
-    // })
-
     it('should handle other HTTP errors', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -78,40 +56,6 @@ describe('ApiClient', () => {
       } as Response)
 
       await expect(apiClient['request']('/test')).rejects.toThrow('HTTP error! status: 500')
-    })
-
-    it('should include auth headers when token is available', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({}),
-      } as Response)
-
-      await apiClient['request']('/test')
-
-      expect(fetch).toHaveBeenCalledWith('/api/v1/test', {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token',
-        },
-      })
-    })
-
-    it('should not include auth headers when token is not available', async () => {
-      ;(mockCookiesGet as jest.Mock).mockReturnValue(undefined)
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({}),
-      } as Response)
-
-      await apiClient['request']('/test')
-
-      expect(fetch).toHaveBeenCalledWith('/api/v1/test', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
     })
   })
 
@@ -149,7 +93,7 @@ describe('ApiClient', () => {
         bank_account: 'bank1',
         payment_day: 10,
       }
-      const createdCard = { ...newCreditCard, id: '2', user_id: 'user1', created_at: '2024-01-01', updated_at: '2024-01-01' }
+      const createdCard = { ...newCreditCard, id: '2', created_at: '2024-01-01', updated_at: '2024-01-01' }
       
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -164,7 +108,6 @@ describe('ApiClient', () => {
         body: JSON.stringify(newCreditCard),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token',
         },
       })
       expect(result).toEqual(createdCard)
@@ -182,7 +125,6 @@ describe('ApiClient', () => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token',
         },
       })
     })

@@ -32,7 +32,6 @@ func TestIncomeHandler_GetIncomeSources(t *testing.T) {
 				testSources := []models.IncomeSource{
 					{
 						ID:                 uuid.MustParse("11223344-5566-7788-99aa-bbccddeeff00"),
-						UserID:             uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d"),
 						Name:               "Monthly Salary",
 						IncomeType:         "monthly_fixed",
 						BaseAmount:         int64(500000), // $5000.00 in cents
@@ -45,25 +44,27 @@ func TestIncomeHandler_GetIncomeSources(t *testing.T) {
 						UpdatedAt:          time.Now(),
 					},
 				}
-				m.On("GetIncomeSources", uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d")).Return(testSources, nil)
+				m.On("GetIncomeSources").Return(testSources, nil)
 			},
 			expectedStatus: http.StatusOK,
 			expectedCount:  1,
 		},
 		{
-			name:          "unauthenticated user",
+			name:          "unauthenticated user - still processes request",
 			authenticated: false,
 			setupMock: func(m *MockIncomeServiceInterface) {
-				// No mock setup needed for unauthenticated request
+				// Handler doesn't check auth in single-user mode; still calls service
+				testSources := []models.IncomeSource{}
+				m.On("GetIncomeSources").Return(testSources, nil)
 			},
-			expectedStatus: http.StatusForbidden,
+			expectedStatus: http.StatusOK,
 			expectedCount:  0,
 		},
 		{
 			name:          "service error",
 			authenticated: true,
 			setupMock: func(m *MockIncomeServiceInterface) {
-				m.On("GetIncomeSources", uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d")).Return([]models.IncomeSource{}, assert.AnError)
+				m.On("GetIncomeSources").Return([]models.IncomeSource{}, assert.AnError)
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedCount:  0,
@@ -117,7 +118,6 @@ func TestIncomeHandler_GetIncomeSource(t *testing.T) {
 			setupMock: func(m *MockIncomeServiceInterface) {
 				testSource := &models.IncomeSource{
 					ID:                 uuid.MustParse("11223344-5566-7788-99aa-bbccddeeff00"),
-					UserID:             uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d"),
 					Name:               "Monthly Salary",
 					IncomeType:         "monthly_fixed",
 					BaseAmount:         int64(500000),
@@ -213,7 +213,7 @@ func TestIncomeHandler_CreateIncomeSource(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 		},
 		{
-			name:          "unauthenticated user",
+			name:          "unauthenticated user - still processes request",
 			authenticated: false,
 			requestBody: map[string]interface{}{
 				"name":         "Monthly Salary",
@@ -224,9 +224,10 @@ func TestIncomeHandler_CreateIncomeSource(t *testing.T) {
 				"is_active":    true,
 			},
 			setupMock: func(m *MockIncomeServiceInterface) {
-				// No mock setup needed for unauthenticated request
+				// Handler doesn't check auth; still calls service
+				m.On("CreateIncomeSource", mock.AnythingOfType("*models.IncomeSource")).Return(nil)
 			},
-			expectedStatus: http.StatusForbidden,
+			expectedStatus: http.StatusCreated,
 		},
 		{
 			name:          "service error",

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -20,19 +19,16 @@ import (
 func TestCreditCardHandler_GetCreditCards(t *testing.T) {
 	tests := []struct {
 		name           string
-		authenticated  bool
 		setupMock      func(*MockCreditCardServiceInterface)
 		expectedStatus int
 		expectedCount  int
 	}{
 		{
-			name:          "successful retrieval",
-			authenticated: true,
+			name: "successful retrieval",
 			setupMock: func(m *MockCreditCardServiceInterface) {
 				testCreditCards := []models.CreditCard{
 					{
 						ID:          uuid.MustParse("11223344-5566-7788-99aa-bbccddeeff00"),
-						UserID:      uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d"),
 						Name:        "My Credit Card",
 						ClosingDay:  func(i int) *int { return &i }(15),
 						PaymentDay:  25,
@@ -41,25 +37,15 @@ func TestCreditCardHandler_GetCreditCards(t *testing.T) {
 						UpdatedAt:   time.Now(),
 					},
 				}
-				m.On("GetCreditCards", uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d")).Return(testCreditCards, nil)
+				m.On("GetCreditCards").Return(testCreditCards, nil)
 			},
 			expectedStatus: http.StatusOK,
 			expectedCount:  1,
 		},
 		{
-			name:          "unauthenticated user",
-			authenticated: false,
+			name: "service error",
 			setupMock: func(m *MockCreditCardServiceInterface) {
-				// No mock setup needed for unauthenticated request
-			},
-			expectedStatus: http.StatusForbidden,
-			expectedCount:  0,
-		},
-		{
-			name:          "service error",
-			authenticated: true,
-			setupMock: func(m *MockCreditCardServiceInterface) {
-				m.On("GetCreditCards", uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d")).Return([]models.CreditCard{}, assert.AnError)
+				m.On("GetCreditCards").Return([]models.CreditCard{}, assert.AnError)
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedCount:  0,
@@ -75,14 +61,7 @@ func TestCreditCardHandler_GetCreditCards(t *testing.T) {
 			tt.setupMock(mockService)
 
 			// Create test context
-			var c *gin.Context
-			var w *httptest.ResponseRecorder
-			if tt.authenticated {
-				userID := uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d")
-				c, w = helpers.CreateTestContextWithUserID(t, "GET", "/credit-cards", nil, userID)
-			} else {
-				c, w = helpers.CreateTestContext(t, "GET", "/credit-cards", nil, false)
-			}
+			c, w := helpers.CreateTestContext(t, "GET", "/credit-cards", nil, true)
 
 			// Call handler
 			handler.GetCreditCards(c)
@@ -113,7 +92,6 @@ func TestCreditCardHandler_GetCreditCard(t *testing.T) {
 			setupMock: func(m *MockCreditCardServiceInterface) {
 				testCreditCard := &models.CreditCard{
 					ID:          uuid.MustParse("11223344-5566-7788-99aa-bbccddeeff00"),
-					UserID:      uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d"),
 					Name:        "My Credit Card",
 					ClosingDay:  func(i int) *int { return &i }(15),
 					PaymentDay:  25,
@@ -167,14 +145,12 @@ func TestCreditCardHandler_GetCreditCard(t *testing.T) {
 func TestCreditCardHandler_CreateCreditCard(t *testing.T) {
 	tests := []struct {
 		name           string
-		authenticated  bool
 		requestBody    map[string]interface{}
 		setupMock      func(*MockCreditCardServiceInterface)
 		expectedStatus int
 	}{
 		{
-			name:          "successful creation",
-			authenticated: true,
+			name: "successful creation",
 			requestBody: map[string]interface{}{
 				"name":         "My Credit Card",
 				"closing_day":  15,
@@ -187,22 +163,7 @@ func TestCreditCardHandler_CreateCreditCard(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 		},
 		{
-			name:          "unauthenticated user",
-			authenticated: false,
-			requestBody: map[string]interface{}{
-				"name":         "My Credit Card",
-				"closing_day":  15,
-				"payment_day":  25,
-				"bank_account": "aabbccdd-eeff-1122-3344-556677889900",
-			},
-			setupMock: func(m *MockCreditCardServiceInterface) {
-				// No mock setup needed for unauthenticated request
-			},
-			expectedStatus: http.StatusForbidden,
-		},
-		{
-			name:          "service validation error",
-			authenticated: true,
+			name: "service validation error",
 			requestBody: map[string]interface{}{
 				"name": "", // 空の名前でサービスエラーが発生することを期待
 			},
@@ -212,8 +173,7 @@ func TestCreditCardHandler_CreateCreditCard(t *testing.T) {
 			expectedStatus: http.StatusInternalServerError,
 		},
 		{
-			name:          "service error",
-			authenticated: true,
+			name: "service error",
 			requestBody: map[string]interface{}{
 				"name":         "My Credit Card",
 				"closing_day":  15,
@@ -236,14 +196,7 @@ func TestCreditCardHandler_CreateCreditCard(t *testing.T) {
 			tt.setupMock(mockService)
 
 			// Create test context
-			var c *gin.Context
-			var w *httptest.ResponseRecorder
-			if tt.authenticated {
-				userID := uuid.MustParse("cbf3d545-d81d-450d-acb3-c5c49a597d6d")
-				c, w = helpers.CreateTestContextWithUserID(t, "POST", "/credit-cards", tt.requestBody, userID)
-			} else {
-				c, w = helpers.CreateTestContext(t, "POST", "/credit-cards", tt.requestBody, false)
-			}
+			c, w := helpers.CreateTestContext(t, "POST", "/credit-cards", tt.requestBody, true)
 
 			// Call handler
 			handler.CreateCreditCard(c)

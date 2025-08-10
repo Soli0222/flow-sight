@@ -1,10 +1,11 @@
 package services
 
 import (
+	"testing"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"github.com/Soli0222/flow-sight/backend/internal/services/mocks"
 	"github.com/Soli0222/flow-sight/backend/test/helpers"
-	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -38,9 +39,9 @@ func NewMockDashboardService(
 	}
 }
 
-func (s *MockDashboardService) GetDashboardSummary(userID uuid.UUID) (*models.DashboardSummary, error) {
+func (s *MockDashboardService) GetDashboardSummary() (*models.DashboardSummary, error) {
 	// Get total balance from all bank accounts
-	bankAccounts, err := s.bankAccountRepo.GetAll(userID)
+	bankAccounts, err := s.bankAccountRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func (s *MockDashboardService) GetDashboardSummary(userID uuid.UUID) (*models.Da
 	}
 
 	// Get credit cards count
-	creditCards, err := s.creditCardRepo.GetAll(userID)
+	creditCards, err := s.creditCardRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (s *MockDashboardService) GetDashboardSummary(userID uuid.UUID) (*models.Da
 	totalAssets := len(bankAccounts) + len(creditCards)
 
 	// Get recent cashflow activities
-	recentActivities, err := s.cashflowService.GetCashflowProjection(userID, 1, true)
+	recentActivities, err := s.cashflowService.GetCashflowProjection(1, true)
 	if err != nil {
 		recentActivities = make([]models.CashflowProjection, 0)
 	}
@@ -91,33 +92,30 @@ func TestDashboardService_GetDashboardSummary(t *testing.T) {
 		mockCashflowService,
 	)
 
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
 		name          string
-		userID        uuid.UUID
 		setupMocks    func()
 		expectedError bool
 	}{
 		{
-			name:   "successful dashboard summary",
-			userID: userID,
+			name: "successful dashboard summary",
 			setupMocks: func() {
 				// Setup bank accounts
 				bankAccounts := []models.BankAccount{
-					*helpers.CreateTestBankAccount(userID),
-					*helpers.CreateTestBankAccount(userID),
+					*helpers.CreateTestBankAccount(),
+					*helpers.CreateTestBankAccount(),
 				}
 				bankAccounts[0].Balance = 100000 // 1000.00
 				bankAccounts[1].Balance = 200000 // 2000.00
-				mockBankAccountRepo.On("GetAll", userID).Return(bankAccounts, nil)
+				mockBankAccountRepo.On("GetAll").Return(bankAccounts, nil)
 
 				// Setup credit cards
 				creditCards := []models.CreditCard{
-					*helpers.CreateTestCreditCard(userID, bankAccountID),
+					*helpers.CreateTestCreditCard(bankAccountID),
 				}
-				mockCreditCardRepo.On("GetAll", userID).Return(creditCards, nil)
+				mockCreditCardRepo.On("GetAll").Return(creditCards, nil)
 
 				// Setup cashflow activities
 				activities := []models.CashflowProjection{
@@ -127,30 +125,28 @@ func TestDashboardService_GetDashboardSummary(t *testing.T) {
 						Expense: 0,
 					},
 				}
-				mockCashflowService.On("GetCashflowProjection", userID, 1, true).Return(activities, nil)
+				mockCashflowService.On("GetCashflowProjection", 1, true).Return(activities, nil)
 			},
 			expectedError: false,
 		},
 		{
-			name:   "bank account repository error",
-			userID: userID,
+			name: "bank account repository error",
 			setupMocks: func() {
-				mockBankAccountRepo.On("GetAll", userID).Return([]models.BankAccount{}, assert.AnError)
+				mockBankAccountRepo.On("GetAll").Return([]models.BankAccount{}, assert.AnError)
 			},
 			expectedError: true,
 		},
 		{
-			name:   "credit card repository error",
-			userID: userID,
+			name: "credit card repository error",
 			setupMocks: func() {
 				// Setup successful bank accounts
 				bankAccounts := []models.BankAccount{
-					*helpers.CreateTestBankAccount(userID),
+					*helpers.CreateTestBankAccount(),
 				}
-				mockBankAccountRepo.On("GetAll", userID).Return(bankAccounts, nil)
+				mockBankAccountRepo.On("GetAll").Return(bankAccounts, nil)
 
 				// Setup error for credit cards
-				mockCreditCardRepo.On("GetAll", userID).Return([]models.CreditCard{}, assert.AnError)
+				mockCreditCardRepo.On("GetAll").Return([]models.CreditCard{}, assert.AnError)
 			},
 			expectedError: true,
 		},
@@ -165,7 +161,7 @@ func TestDashboardService_GetDashboardSummary(t *testing.T) {
 
 			tt.setupMocks()
 
-			result, err := service.GetDashboardSummary(tt.userID)
+			result, err := service.GetDashboardSummary()
 
 			if tt.expectedError {
 				assert.Error(t, err)

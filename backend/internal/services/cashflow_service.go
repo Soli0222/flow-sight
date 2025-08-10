@@ -8,8 +8,6 @@ import (
 
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"github.com/Soli0222/flow-sight/backend/internal/repositories"
-
-	"github.com/google/uuid"
 )
 
 type CashflowService struct {
@@ -42,9 +40,9 @@ func NewCashflowService(
 	}
 }
 
-func (s *CashflowService) GetCashflowProjection(userID uuid.UUID, months int, onlyChanges bool) ([]models.CashflowProjection, error) {
+func (s *CashflowService) GetCashflowProjection(months int, onlyChanges bool) ([]models.CashflowProjection, error) {
 	// Get initial balance from all bank accounts
-	bankAccounts, err := s.bankAccountRepo.GetAll(userID)
+	bankAccounts, err := s.bankAccountRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -55,25 +53,25 @@ func (s *CashflowService) GetCashflowProjection(userID uuid.UUID, months int, on
 	}
 
 	// Get active income sources
-	incomeSources, err := s.incomeSourceRepo.GetActiveByUserID(userID)
+	incomeSources, err := s.incomeSourceRepo.GetActive()
 	if err != nil {
 		return nil, err
 	}
 
 	// Get active recurring payments
-	recurringPayments, err := s.recurringPaymentRepo.GetActiveByUserID(userID)
+	recurringPayments, err := s.recurringPaymentRepo.GetActive()
 	if err != nil {
 		return nil, err
 	}
 
 	// Get credit cards (for card payments calculation)
-	creditCards, err := s.creditCardRepo.GetAll(userID)
+	creditCards, err := s.creditCardRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
 	// Get minimum monthly expense setting
-	minimumMonthlyExpense := s.getMinimumMonthlyExpense(userID)
+	minimumMonthlyExpense := s.getMinimumMonthlyExpense()
 
 	// Generate cashflow projection for the specified months
 	projections := make([]models.CashflowProjection, 0)
@@ -109,7 +107,7 @@ func (s *CashflowService) GetCashflowProjection(userID uuid.UUID, months int, on
 					if day == paymentDay {
 
 						// Check if there's a specific record for this month
-						records, err := s.monthlyIncomeRepo.GetByUserIDAndYearMonth(userID, yearMonth)
+						records, err := s.monthlyIncomeRepo.GetByYearMonth(yearMonth)
 						if err == nil {
 							recordFound := false
 							for _, record := range records {
@@ -188,6 +186,7 @@ func (s *CashflowService) GetCashflowProjection(userID uuid.UUID, months int, on
 						}
 					}
 				}
+
 			}
 
 			// Calculate recurring payments for this day
@@ -260,9 +259,9 @@ func (s *CashflowService) GetCashflowProjection(userID uuid.UUID, months int, on
 	return projections, nil
 }
 
-// getMinimumMonthlyExpense retrieves the minimum monthly expense setting for a user
-func (s *CashflowService) getMinimumMonthlyExpense(userID uuid.UUID) int64 {
-	settings, err := s.appSettingRepo.GetByUserID(userID)
+// getMinimumMonthlyExpense retrieves the minimum monthly expense setting
+func (s *CashflowService) getMinimumMonthlyExpense() int64 {
+	settings, err := s.appSettingRepo.GetAll()
 	if err != nil {
 		return 0
 	}

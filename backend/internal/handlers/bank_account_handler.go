@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/Soli0222/flow-sight/backend/internal/middleware"
 	"github.com/Soli0222/flow-sight/backend/internal/models"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -21,27 +22,14 @@ func NewBankAccountHandler(bankAccountService BankAccountServiceInterface) *Bank
 }
 
 // @Summary Get all bank accounts
-// @Description Get all bank accounts for a user
+// @Description Get all bank accounts
 // @Tags bank-accounts
 // @Accept json
 // @Produce json
-// @Security BearerAuth
 // @Success 200 {array} models.BankAccount
 // @Router /bank-accounts [get]
 func (h *BankAccountHandler) GetBankAccounts(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
-		return
-	}
-
-	userUUID, ok := userID.(uuid.UUID)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id format in context"})
-		return
-	}
-
-	accounts, err := h.bankAccountService.GetBankAccounts(userUUID)
+	accounts, err := h.bankAccountService.GetBankAccounts()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -80,7 +68,6 @@ func (h *BankAccountHandler) GetBankAccount(c *gin.Context) {
 // @Tags bank-accounts
 // @Accept json
 // @Produce json
-// @Security BearerAuth
 // @Param account body models.BankAccount true "Bank Account data"
 // @Success 201 {object} models.BankAccount
 // @Router /bank-accounts [post]
@@ -88,38 +75,17 @@ func (h *BankAccountHandler) CreateBankAccount(c *gin.Context) {
 	logger := middleware.GetLogger(c)
 	ctx := context.Background()
 
-	userID, exists := c.Get("user_id")
-	if !exists {
-		logger.WarnContext(ctx, "Bank account creation attempted without authentication")
-		c.JSON(http.StatusForbidden, gin.H{"error": "user not authenticated"})
-		return
-	}
-
-	userUUID, ok := userID.(uuid.UUID)
-	if !ok {
-		logger.ErrorContext(ctx, "Invalid user_id format in context",
-			"user_id", userID,
-		)
-		c.JSON(http.StatusForbidden, gin.H{"error": "invalid user_id format in context"})
-		return
-	}
-
 	var account models.BankAccount
 	if err := c.ShouldBindJSON(&account); err != nil {
 		logger.WarnContext(ctx, "Invalid request body for bank account creation",
-			"user_id", userUUID.String(),
 			"error", err.Error(),
 		)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Set the user_id from the authenticated user
-	account.UserID = userUUID
-
 	if err := h.bankAccountService.CreateBankAccount(&account); err != nil {
 		logger.ErrorContext(ctx, "Failed to create bank account",
-			"user_id", userUUID.String(),
 			"account_name", account.Name,
 			"error", err.Error(),
 		)
@@ -127,7 +93,7 @@ func (h *BankAccountHandler) CreateBankAccount(c *gin.Context) {
 		return
 	}
 
-	logger.BusinessOperation(ctx, "bank_account_created", userUUID.String(), map[string]interface{}{
+	logger.BusinessOperation(ctx, "bank_account_created", "single-user", map[string]interface{}{
 		"account_id":   account.ID.String(),
 		"account_name": account.Name,
 		"balance":      account.Balance,
@@ -146,13 +112,6 @@ func (h *BankAccountHandler) CreateBankAccount(c *gin.Context) {
 // @Success 200 {object} models.BankAccount
 // @Router /bank-accounts/{id} [put]
 func (h *BankAccountHandler) UpdateBankAccount(c *gin.Context) {
-	// Check authentication
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -167,7 +126,6 @@ func (h *BankAccountHandler) UpdateBankAccount(c *gin.Context) {
 	}
 
 	account.ID = id
-	account.UserID = userID.(uuid.UUID)
 	if err := h.bankAccountService.UpdateBankAccount(&account); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -185,13 +143,6 @@ func (h *BankAccountHandler) UpdateBankAccount(c *gin.Context) {
 // @Success 204
 // @Router /bank-accounts/{id} [delete]
 func (h *BankAccountHandler) DeleteBankAccount(c *gin.Context) {
-	// Check authentication
-	_, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {

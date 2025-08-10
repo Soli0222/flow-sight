@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
@@ -15,15 +16,14 @@ func NewBankAccountRepository(db *sql.DB) *BankAccountRepository {
 	return &BankAccountRepository{db: db}
 }
 
-func (r *BankAccountRepository) GetAll(userID uuid.UUID) ([]models.BankAccount, error) {
+func (r *BankAccountRepository) GetAll() ([]models.BankAccount, error) {
 	query := `
-		SELECT id, user_id, name, balance, created_at, updated_at
+		SELECT id, name, balance, created_at, updated_at
 		FROM bank_accounts 
-		WHERE user_id = $1
 		ORDER BY created_at DESC
 	`
 
-	rows, err := r.db.Query(query, userID)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return []models.BankAccount{}, err
 	}
@@ -33,7 +33,7 @@ func (r *BankAccountRepository) GetAll(userID uuid.UUID) ([]models.BankAccount, 
 	for rows.Next() {
 		var account models.BankAccount
 		err := rows.Scan(
-			&account.ID, &account.UserID, &account.Name, &account.Balance,
+			&account.ID, &account.Name, &account.Balance,
 			&account.CreatedAt, &account.UpdatedAt,
 		)
 		if err != nil {
@@ -47,14 +47,14 @@ func (r *BankAccountRepository) GetAll(userID uuid.UUID) ([]models.BankAccount, 
 
 func (r *BankAccountRepository) GetByID(id uuid.UUID) (*models.BankAccount, error) {
 	query := `
-		SELECT id, user_id, name, balance, created_at, updated_at
+		SELECT id, name, balance, created_at, updated_at
 		FROM bank_accounts 
 		WHERE id = $1
 	`
 
 	var account models.BankAccount
 	err := r.db.QueryRow(query, id).Scan(
-		&account.ID, &account.UserID, &account.Name, &account.Balance,
+		&account.ID, &account.Name, &account.Balance,
 		&account.CreatedAt, &account.UpdatedAt,
 	)
 
@@ -67,12 +67,12 @@ func (r *BankAccountRepository) GetByID(id uuid.UUID) (*models.BankAccount, erro
 
 func (r *BankAccountRepository) Create(account *models.BankAccount) error {
 	query := `
-		INSERT INTO bank_accounts (id, user_id, name, balance, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO bank_accounts (id, name, balance, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5)
 	`
 
 	_, err := r.db.Exec(query,
-		account.ID, account.UserID, account.Name, account.Balance,
+		account.ID, account.Name, account.Balance,
 		account.CreatedAt, account.UpdatedAt,
 	)
 

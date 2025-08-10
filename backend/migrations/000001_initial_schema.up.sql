@@ -1,21 +1,12 @@
--- Initial schema for Flow Sight financial management application
+-- Initial schema (single-user baseline)
+-- No authentication, no users table, no user_id columns.
 
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    picture TEXT, -- Changed from VARCHAR(500) to TEXT to allow longer URLs
-    google_id VARCHAR(255) UNIQUE,
-    password VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- Enable extension for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Bank accounts table
 CREATE TABLE IF NOT EXISTS bank_accounts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     balance BIGINT NOT NULL DEFAULT 0, -- Amount in cents
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -25,14 +16,12 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
 -- Credit cards table
 CREATE TABLE IF NOT EXISTS credit_cards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     closing_day INTEGER, -- Closing day of the month (1-31)
     payment_day INTEGER NOT NULL, -- Payment day (1-31)
-    bank_account UUID NOT NULL REFERENCES bank_accounts(id),
+    bank_account UUID NOT NULL REFERENCES bank_accounts(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     CONSTRAINT check_closing_day CHECK (closing_day IS NULL OR (closing_day >= 1 AND closing_day <= 31)),
     CONSTRAINT check_payment_day CHECK (payment_day >= 1 AND payment_day <= 31)
 );
@@ -40,18 +29,16 @@ CREATE TABLE IF NOT EXISTS credit_cards (
 -- Income sources table
 CREATE TABLE IF NOT EXISTS income_sources (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     income_type VARCHAR(50) NOT NULL CHECK (income_type IN ('monthly_fixed', 'one_time')),
     base_amount BIGINT NOT NULL, -- Amount in cents
-    bank_account UUID NOT NULL REFERENCES bank_accounts(id),
+    bank_account UUID NOT NULL REFERENCES bank_accounts(id) ON DELETE CASCADE,
     scheduled_year_month VARCHAR(7), -- Format: "2024-01" for one-time income
     payment_day INTEGER, -- Payment day for monthly_fixed income (1-31)
     scheduled_date DATE, -- Scheduled date for one_time income
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     CONSTRAINT check_payment_day CHECK (payment_day IS NULL OR (payment_day >= 1 AND payment_day <= 31))
 );
 
@@ -65,26 +52,23 @@ CREATE TABLE IF NOT EXISTS monthly_income_records (
     note TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     UNIQUE(income_source_id, year_month)
 );
 
 -- Recurring payments table
 CREATE TABLE IF NOT EXISTS recurring_payments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     amount BIGINT NOT NULL, -- Amount in cents
     payment_day INTEGER NOT NULL, -- Payment day (1-31)
     start_year_month VARCHAR(7) NOT NULL, -- Format: "2024-01"
     total_payments INTEGER, -- For loans
     remaining_payments INTEGER, -- For loans
-    bank_account UUID NOT NULL REFERENCES bank_accounts(id),
+    bank_account UUID NOT NULL REFERENCES bank_accounts(id) ON DELETE CASCADE,
     is_active BOOLEAN NOT NULL DEFAULT true,
     note TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     CONSTRAINT check_payment_day CHECK (payment_day >= 1 AND payment_day <= 31),
     CONSTRAINT check_total_payments CHECK (total_payments IS NULL OR total_payments > 0),
     CONSTRAINT check_remaining_payments CHECK (remaining_payments IS NULL OR remaining_payments >= 0)
@@ -99,34 +83,26 @@ CREATE TABLE IF NOT EXISTS card_monthly_totals (
     is_confirmed BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     UNIQUE(credit_card_id, year_month)
 );
 
 -- App settings table
 CREATE TABLE IF NOT EXISTS app_settings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     key VARCHAR(255) NOT NULL,
     value TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    UNIQUE(user_id, key)
+    CONSTRAINT app_settings_key_unique UNIQUE(key)
 );
 
 -- Indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_bank_accounts_user_id ON bank_accounts(user_id);
-CREATE INDEX IF NOT EXISTS idx_credit_cards_user_id ON credit_cards(user_id);
-CREATE INDEX IF NOT EXISTS idx_income_sources_user_id ON income_sources(user_id);
 CREATE INDEX IF NOT EXISTS idx_income_sources_active ON income_sources(is_active);
 CREATE INDEX IF NOT EXISTS idx_monthly_income_records_income_source_id ON monthly_income_records(income_source_id);
 CREATE INDEX IF NOT EXISTS idx_monthly_income_records_year_month ON monthly_income_records(year_month);
-CREATE INDEX IF NOT EXISTS idx_recurring_payments_user_id ON recurring_payments(user_id);
 CREATE INDEX IF NOT EXISTS idx_recurring_payments_active ON recurring_payments(is_active);
 CREATE INDEX IF NOT EXISTS idx_card_monthly_totals_credit_card_id ON card_monthly_totals(credit_card_id);
 CREATE INDEX IF NOT EXISTS idx_card_monthly_totals_year_month ON card_monthly_totals(year_month);
-CREATE INDEX IF NOT EXISTS idx_app_settings_user_id ON app_settings(user_id);
 
 -- Update triggers for updated_at columns
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -136,9 +112,6 @@ BEGIN
     RETURN NEW;
 END;
 $$ language 'plpgsql';
-
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_bank_accounts_updated_at BEFORE UPDATE ON bank_accounts
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

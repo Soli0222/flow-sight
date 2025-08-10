@@ -1,10 +1,11 @@
 package services
 
 import (
+	"testing"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 	"github.com/Soli0222/flow-sight/backend/internal/services/mocks"
 	"github.com/Soli0222/flow-sight/backend/test/helpers"
-	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -14,43 +15,38 @@ import (
 func TestCreditCardService_GetCreditCards(t *testing.T) {
 	mockRepo := &mocks.MockCreditCardRepository{}
 	service := NewCreditCardService(mockRepo)
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
 		name          string
-		userID        uuid.UUID
 		setupMock     func(*mocks.MockCreditCardRepository)
 		expectedCount int
 		expectedError bool
 	}{
 		{
-			name:   "successful retrieval",
-			userID: userID,
+			name: "successful retrieval",
 			setupMock: func(m *mocks.MockCreditCardRepository) {
 				creditCards := []models.CreditCard{
-					*helpers.CreateTestCreditCard(userID, bankAccountID),
-					*helpers.CreateTestCreditCard(userID, bankAccountID),
+					*helpers.CreateTestCreditCard(bankAccountID),
+					*helpers.CreateTestCreditCard(bankAccountID),
 				}
-				m.On("GetAll", userID).Return(creditCards, nil)
+				m.On("GetAll").Return(creditCards, nil)
 			},
 			expectedCount: 2,
 			expectedError: false,
 		},
 		{
-			name:   "empty result",
-			userID: userID,
+			name: "empty result",
 			setupMock: func(m *mocks.MockCreditCardRepository) {
-				m.On("GetAll", userID).Return([]models.CreditCard{}, nil)
+				m.On("GetAll").Return([]models.CreditCard{}, nil)
 			},
 			expectedCount: 0,
 			expectedError: false,
 		},
 		{
-			name:   "repository error",
-			userID: userID,
+			name: "repository error",
 			setupMock: func(m *mocks.MockCreditCardRepository) {
-				m.On("GetAll", userID).Return([]models.CreditCard{}, assert.AnError)
+				m.On("GetAll").Return([]models.CreditCard{}, assert.AnError)
 			},
 			expectedCount: 0,
 			expectedError: true,
@@ -62,7 +58,7 @@ func TestCreditCardService_GetCreditCards(t *testing.T) {
 			mockRepo.ExpectedCalls = nil
 			tt.setupMock(mockRepo)
 
-			result, err := service.GetCreditCards(tt.userID)
+			result, err := service.GetCreditCards()
 
 			if tt.expectedError {
 				assert.Error(t, err)
@@ -80,7 +76,6 @@ func TestCreditCardService_GetCreditCard(t *testing.T) {
 	mockRepo := &mocks.MockCreditCardRepository{}
 	service := NewCreditCardService(mockRepo)
 	creditCardID := uuid.New()
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
@@ -94,7 +89,7 @@ func TestCreditCardService_GetCreditCard(t *testing.T) {
 			name:         "successful retrieval",
 			creditCardID: creditCardID,
 			setupMock: func(m *mocks.MockCreditCardRepository) {
-				creditCard := helpers.CreateTestCreditCard(userID, bankAccountID)
+				creditCard := helpers.CreateTestCreditCard(bankAccountID)
 				creditCard.ID = creditCardID
 				m.On("GetByID", creditCardID).Return(creditCard, nil)
 			},
@@ -140,7 +135,6 @@ func TestCreditCardService_GetCreditCard(t *testing.T) {
 func TestCreditCardService_CreateCreditCard(t *testing.T) {
 	mockRepo := &mocks.MockCreditCardRepository{}
 	service := NewCreditCardService(mockRepo)
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
@@ -151,17 +145,17 @@ func TestCreditCardService_CreateCreditCard(t *testing.T) {
 	}{
 		{
 			name:       "successful creation",
-			creditCard: helpers.CreateTestCreditCard(userID, bankAccountID),
+			creditCard: helpers.CreateTestCreditCard(bankAccountID),
 			setupMock: func(m *mocks.MockCreditCardRepository, cc *models.CreditCard) {
 				m.On("Create", mock.MatchedBy(func(card *models.CreditCard) bool {
-					return card.UserID == userID && card.Name == cc.Name
+					return card.Name == cc.Name
 				})).Return(nil)
 			},
 			expectedError: false,
 		},
 		{
 			name:       "repository error",
-			creditCard: helpers.CreateTestCreditCard(userID, bankAccountID),
+			creditCard: helpers.CreateTestCreditCard(bankAccountID),
 			setupMock: func(m *mocks.MockCreditCardRepository, cc *models.CreditCard) {
 				m.On("Create", mock.AnythingOfType("*models.CreditCard")).Return(assert.AnError)
 			},
@@ -197,7 +191,6 @@ func TestCreditCardService_CreateCreditCard(t *testing.T) {
 func TestCreditCardService_UpdateCreditCard(t *testing.T) {
 	mockRepo := &mocks.MockCreditCardRepository{}
 	service := NewCreditCardService(mockRepo)
-	userID := uuid.New()
 	bankAccountID := uuid.New()
 
 	tests := []struct {
@@ -208,7 +201,7 @@ func TestCreditCardService_UpdateCreditCard(t *testing.T) {
 	}{
 		{
 			name:       "successful update",
-			creditCard: helpers.CreateTestCreditCard(userID, bankAccountID),
+			creditCard: helpers.CreateTestCreditCard(bankAccountID),
 			setupMock: func(m *mocks.MockCreditCardRepository) {
 				m.On("Update", mock.AnythingOfType("*models.CreditCard")).Return(nil)
 			},
@@ -216,7 +209,7 @@ func TestCreditCardService_UpdateCreditCard(t *testing.T) {
 		},
 		{
 			name:       "repository error",
-			creditCard: helpers.CreateTestCreditCard(userID, bankAccountID),
+			creditCard: helpers.CreateTestCreditCard(bankAccountID),
 			setupMock: func(m *mocks.MockCreditCardRepository) {
 				m.On("Update", mock.AnythingOfType("*models.CreditCard")).Return(assert.AnError)
 			},

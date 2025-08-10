@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+
 	"github.com/Soli0222/flow-sight/backend/internal/models"
 
 	"github.com/google/uuid"
@@ -15,16 +16,15 @@ func NewIncomeSourceRepository(db *sql.DB) *IncomeSourceRepository {
 	return &IncomeSourceRepository{db: db}
 }
 
-func (r *IncomeSourceRepository) GetAll(userID uuid.UUID) ([]models.IncomeSource, error) {
+func (r *IncomeSourceRepository) GetAll() ([]models.IncomeSource, error) {
 	query := `
-		SELECT id, user_id, name, income_type, base_amount, bank_account, 
+		SELECT id, name, income_type, base_amount, bank_account, 
 		       payment_day, scheduled_date::text, scheduled_year_month, is_active, created_at, updated_at
 		FROM income_sources 
-		WHERE user_id = $1
 		ORDER BY created_at DESC
 	`
 
-	rows, err := r.db.Query(query, userID)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return []models.IncomeSource{}, err
 	}
@@ -34,7 +34,7 @@ func (r *IncomeSourceRepository) GetAll(userID uuid.UUID) ([]models.IncomeSource
 	for rows.Next() {
 		var source models.IncomeSource
 		err := rows.Scan(
-			&source.ID, &source.UserID, &source.Name, &source.IncomeType,
+			&source.ID, &source.Name, &source.IncomeType,
 			&source.BaseAmount, &source.BankAccount, &source.PaymentDay, &source.ScheduledDate,
 			&source.ScheduledYearMonth, &source.IsActive, &source.CreatedAt, &source.UpdatedAt,
 		)
@@ -49,7 +49,7 @@ func (r *IncomeSourceRepository) GetAll(userID uuid.UUID) ([]models.IncomeSource
 
 func (r *IncomeSourceRepository) GetByID(id uuid.UUID) (*models.IncomeSource, error) {
 	query := `
-		SELECT id, user_id, name, income_type, base_amount, bank_account, 
+		SELECT id, name, income_type, base_amount, bank_account, 
 		       payment_day, scheduled_date::text, scheduled_year_month, is_active, created_at, updated_at
 		FROM income_sources 
 		WHERE id = $1
@@ -57,7 +57,7 @@ func (r *IncomeSourceRepository) GetByID(id uuid.UUID) (*models.IncomeSource, er
 
 	var source models.IncomeSource
 	err := r.db.QueryRow(query, id).Scan(
-		&source.ID, &source.UserID, &source.Name, &source.IncomeType,
+		&source.ID, &source.Name, &source.IncomeType,
 		&source.BaseAmount, &source.BankAccount, &source.PaymentDay, &source.ScheduledDate,
 		&source.ScheduledYearMonth, &source.IsActive, &source.CreatedAt, &source.UpdatedAt,
 	)
@@ -69,16 +69,16 @@ func (r *IncomeSourceRepository) GetByID(id uuid.UUID) (*models.IncomeSource, er
 	return &source, nil
 }
 
-func (r *IncomeSourceRepository) GetActiveByUserID(userID uuid.UUID) ([]models.IncomeSource, error) {
+func (r *IncomeSourceRepository) GetActive() ([]models.IncomeSource, error) {
 	query := `
-		SELECT id, user_id, name, income_type, base_amount, bank_account, 
+		SELECT id, name, income_type, base_amount, bank_account, 
 		       payment_day, scheduled_date::text, scheduled_year_month, is_active, created_at, updated_at
 		FROM income_sources 
-		WHERE user_id = $1 AND is_active = true
+		WHERE is_active = true
 		ORDER BY created_at DESC
 	`
 
-	rows, err := r.db.Query(query, userID)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (r *IncomeSourceRepository) GetActiveByUserID(userID uuid.UUID) ([]models.I
 	for rows.Next() {
 		var source models.IncomeSource
 		err := rows.Scan(
-			&source.ID, &source.UserID, &source.Name, &source.IncomeType,
+			&source.ID, &source.Name, &source.IncomeType,
 			&source.BaseAmount, &source.BankAccount, &source.PaymentDay, &source.ScheduledDate,
 			&source.ScheduledYearMonth, &source.IsActive, &source.CreatedAt, &source.UpdatedAt,
 		)
@@ -103,14 +103,14 @@ func (r *IncomeSourceRepository) GetActiveByUserID(userID uuid.UUID) ([]models.I
 
 func (r *IncomeSourceRepository) Create(source *models.IncomeSource) error {
 	query := `
-		INSERT INTO income_sources (id, user_id, name, income_type, base_amount, 
+		INSERT INTO income_sources (id, name, income_type, base_amount, 
 		                           bank_account, payment_day, scheduled_date, scheduled_year_month, 
 		                           is_active, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 	`
 
 	_, err := r.db.Exec(query,
-		source.ID, source.UserID, source.Name, source.IncomeType,
+		source.ID, source.Name, source.IncomeType,
 		source.BaseAmount, source.BankAccount, source.PaymentDay, source.ScheduledDate,
 		source.ScheduledYearMonth, source.IsActive, source.CreatedAt, source.UpdatedAt,
 	)

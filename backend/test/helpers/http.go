@@ -11,7 +11,6 @@ import (
 	"github.com/Soli0222/flow-sight/backend/internal/logger"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,8 +26,8 @@ func CreateTestLogger() *logger.Logger {
 	return &logger.Logger{Logger: slogger}
 }
 
-// CreateTestContext creates a test context with optional user authentication
-func CreateTestContext(t *testing.T, method, path string, body interface{}, authenticated bool) (*gin.Context, *httptest.ResponseRecorder) {
+// CreateTestContext creates a test context (single-user mode, no auth)
+func CreateTestContext(t *testing.T, method, path string, body interface{}, _ bool) (*gin.Context, *httptest.ResponseRecorder) {
 	gin.SetMode(gin.TestMode)
 
 	var bodyBytes []byte
@@ -49,41 +48,13 @@ func CreateTestContext(t *testing.T, method, path string, body interface{}, auth
 	// Add test logger to context
 	testLogger := CreateTestLogger()
 	c.Set("logger", testLogger)
-
-	// Add authenticated user context if needed
-	if authenticated {
-		userID := uuid.New()
-		c.Set("user_id", userID)
-	}
 
 	return c, w
 }
 
-// CreateTestContextWithUserID creates a test context with a specific user ID
-func CreateTestContextWithUserID(t *testing.T, method, path string, body interface{}, userID uuid.UUID) (*gin.Context, *httptest.ResponseRecorder) {
-	gin.SetMode(gin.TestMode)
-
-	var bodyBytes []byte
-	var err error
-
-	if body != nil {
-		bodyBytes, err = json.Marshal(body)
-		require.NoError(t, err)
-	}
-
-	req := httptest.NewRequest(method, path, bytes.NewBuffer(bodyBytes))
-	req.Header.Set("Content-Type", "application/json")
-
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Request = req
-
-	// Add test logger to context
-	testLogger := CreateTestLogger()
-	c.Set("logger", testLogger)
-	c.Set("user_id", userID)
-
-	return c, w
+// CreateTestContextWithUserID kept for compatibility but ignores userID in single-user mode
+func CreateTestContextWithUserID(t *testing.T, method, path string, body interface{}, _ interface{}) (*gin.Context, *httptest.ResponseRecorder) {
+	return CreateTestContext(t, method, path, body, true)
 }
 
 // ParseJSONResponse parses the response body as JSON
