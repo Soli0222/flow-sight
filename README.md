@@ -1,3 +1,9 @@
+# ⚠️ このリポジトリはアーカイブされました
+
+後継プロジェクトは https://github.com/Soli0222/sui です。
+
+---
+
 # Flow Sight
 
 [![License: Private](https://img.shields.io/badge/License-Private-red.svg)](LICENSE)
